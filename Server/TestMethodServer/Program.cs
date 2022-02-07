@@ -19,6 +19,7 @@ namespace TestMethodServer
     public enum PubSubTopic
     {
         ResumeTopic,
+        DataLogTopic,
         Nil
     }
 
@@ -34,6 +35,7 @@ namespace TestMethodServer
 
         private ConcurrentDictionary<PubSubTopic, Dictionary<string, object>> _clientCollection = new ConcurrentDictionary<PubSubTopic, Dictionary<string, object>>();
         private readonly BufferBlock<ResumeInfo> _resumeTopic = new BufferBlock<ResumeInfo>();
+        private readonly BufferBlock<DataLogInfo> _datalogTopic = new BufferBlock<DataLogInfo>();
 
         public override Task<UploadStatus> UpdateDLL(Chunk request, ServerCallContext context)
         {
@@ -100,13 +102,35 @@ namespace TestMethodServer
             }
             _clientCollection[PubSubTopic.ResumeTopic].Add(request.ClientName, responseStream);
 
-            while (_clientCollection.ContainsKey(PubSubTopic.ResumeTopic)) // This Loop is excuted until there is Subscriber for SS Topic
+            Console.WriteLine("Subscribed to Resume Topic");
+
+            while (_clientCollection.ContainsKey(PubSubTopic.ResumeTopic))
             {
                 var resumeInfo = await _resumeTopic.ReceiveAsync();
 
                 foreach (var client in _clientCollection[PubSubTopic.ResumeTopic])
                 {
                     await ((IServerStreamWriter<ResumeInfo>)client.Value).WriteAsync(resumeInfo);
+                }
+            }
+        }
+
+        public override async Task SubscribeDataLogTopic(SubRequest request, IServerStreamWriter<DataLogInfo> responseStream, ServerCallContext context)
+        {
+            if (!_clientCollection.ContainsKey(PubSubTopic.DataLogTopic))
+            {
+                _clientCollection.TryAdd(PubSubTopic.DataLogTopic, new Dictionary<string, object>());
+            }
+            _clientCollection[PubSubTopic.DataLogTopic].Add(request.ClientName, responseStream);
+
+            Console.WriteLine("Subscribed to DataLog Topic");
+            while (_clientCollection.ContainsKey(PubSubTopic.DataLogTopic))
+            {
+                var datalogInfo = await _datalogTopic.ReceiveAsync();
+
+                foreach (var client in _clientCollection[PubSubTopic.DataLogTopic])
+                {
+                    await ((IServerStreamWriter<DataLogInfo>)client.Value).WriteAsync(datalogInfo);
                 }
             }
         }
@@ -212,7 +236,15 @@ namespace TestMethodServer
 
         private void MessageReceivedFromMessenger(string message)
         {
-            Console.WriteLine("Message From Messenger : " + message);
+            //Console.WriteLine("Message From Messenger : " + message);
+            Console.WriteLine("Sending Message to client");
+            PublishData(PubSubTopic.DataLogTopic, new DataLogInfo()
+            {
+                ServerName = "DummyData",
+                Site = 1,
+                MeasuredValue = "1",
+                TestMethodName = "DummyTestMethod"
+            });
         }
 
         private void PublishData(PubSubTopic PublishTopic, object PublishData)
@@ -220,8 +252,12 @@ namespace TestMethodServer
             switch (PublishTopic)
             {
                 case PubSubTopic.ResumeTopic:
-                    ResumeInfo dsData = PublishData as ResumeInfo;
-                    _resumeTopic.Post(dsData);
+                    ResumeInfo resumeData = PublishData as ResumeInfo;
+                    _resumeTopic.Post(resumeData);
+                    break;
+                case PubSubTopic.DataLogTopic:
+                    DataLogInfo datalogData = PublishData as DataLogInfo;
+                    _datalogTopic.Post(datalogData);
                     break;
             }
         }

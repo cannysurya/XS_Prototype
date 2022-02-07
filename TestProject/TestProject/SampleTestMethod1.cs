@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using TestMethodNS;
 
 namespace TestProject
@@ -11,7 +12,11 @@ namespace TestProject
       int z = 2;
       int y = 3;
       int result = x + y + z;
-      messenger.SendMessageToSubscribers(result.ToString());
+      while (true)
+      {
+        Thread.Sleep(1000);
+        messenger.SendMessageToSubscribers(result.ToString());
+      }
     }
   }
 }

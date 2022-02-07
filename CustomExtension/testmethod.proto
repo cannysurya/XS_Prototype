@@ -10,6 +10,7 @@ service TestMethod {
 	rpc ResumeExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 	rpc StopExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 	rpc SubscribeResumeTopic(SubRequest) returns (stream ResumeInfo);
+	rpc SubscribeDataLogTopic(SubRequest) returns (stream DataLogInfo);
 }
 
 message SubRequest
@@ -20,6 +21,14 @@ message SubRequest
 message ResumeInfo
 {	
 	int32 FlowNodeIndex = 1;
+}
+
+message DataLogInfo
+{	
+	string ServerName = 1;
+	int32 Site = 2;
+	string MeasuredValue = 3;
+	string TestMethodName = 4;
 }
 
 message TestMethodRequest {

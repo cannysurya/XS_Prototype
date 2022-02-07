@@ -52,6 +52,7 @@ const server1 = {
 	gRPCObject: new testMethodPackage.TestMethod('localhost:30051', grpc.credentials.createInsecure()),
 	debugSession: undefined,
 	resumeSubscription: undefined,
+	dataLogSubscription: undefined,
 	isActive: true
 }
 
@@ -283,6 +284,23 @@ var DebugPanel = /** @class */ (function () {
 		});
 		server.resumeSubscription.on("data", (data) => {
 			setHitBreakpoint(data.FlowNodeIndex);
+		})
+		server.resumeSubscription.on("error", (err) => {
+			vscode.window.showErrorMessage(`Error on Resume topic subscription - ${err.message}`);
+		})
+	});
+})();
+
+(function subscribeDataLogTopic() {
+	servers.filter(x => x.isActive).forEach((server) => {
+		server.dataLogSubscription = server.gRPCObject.SubscribeDataLogTopic({
+			ClientName: "TFE"
+		});
+		server.dataLogSubscription.on("data", (data) => {
+			console.log(data);
+		})
+		server.dataLogSubscription.on("error", (err) => {
+			vscode.window.showErrorMessage(`Error on DataLog topic subscription - ${err.message}`);
 		})
 	});
 })();
