@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const { setTFEData } = require('./GlobalState');
 const { TFEPanel } = require('./TFEPanel');
+const { DataLogPanel } = require('./DataLogPanel');
 
 var fs = require('fs');
 var isXSProject = false;
@@ -44,10 +45,16 @@ function activate(context) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('customextension.tfePanel', function () {
 		setTFEData(tfeData);
+		DataLogPanel.createOrShow(context.extensionUri);
 		TFEPanel.createOrShow(context.extensionUri);
 		setTimeout(function () {
 			TFEPanel.loadData();
 		}, 1000)
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('customextension.datalogPanel', function () {
+		setTFEData(tfeData);
+		DataLogPanel.createOrShow(context.extensionUri);
 	}));
 }
 

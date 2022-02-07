@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:customextension.tfePanel"
+		"onCommand:customextension.tfePanel",
+		"onCommand:customextension.datalogPanel"
 	],
 	"main": "./extension.js",
 	"contributes": {
@@ -18,6 +19,10 @@
 			{
 				"command": "customextension.tfePanel",
 				"title": "TFE Panel"
+			},
+			{
+				"command": "customextension.datalogPanel",
+				"title": "DataLog Panel"
 			}
 		],
 		"menus": {

@@ -16,6 +16,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using SemiContextNS;
 using TestMethodServer.Services;
+using TestMethodServer.Enum;
 
 namespace TestMethodServer
 {
@@ -59,7 +60,7 @@ namespace TestMethodServer
 
 		private static void MessageReceivedFromMessenger(DataLogInfo dataLogInfo)
 		{
-			Console.WriteLine("Message From Messenger : " + dataLogInfo);
+			PubSubServiceImpl.PublishData(PubSubTopic.DataLogTopic, dataLogInfo);
 		}
 	}
 }

@@ -20,6 +20,7 @@ var tfeData = {
 }
 
 var servers = [{
+  name: "Server 1",
   debugConfiguration: {
     local: {
       name: ".NET Core Attach",
@@ -52,9 +53,10 @@ var servers = [{
     pubsubService: new testMethodPackage.PubSub('localhost:30051', grpc.credentials.createInsecure())
   },
   subscription: {
-    resumeSubscription: undefined
+    resumeSubscription: undefined,
+    datalogSubscription: undefined
   },
-  sites: ["Site1, Site2, Site3"],
+  sites: ["Site1", "Site2", "Site3"],
   isActive: true
 }]
 

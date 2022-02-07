@@ -169,7 +169,7 @@ var TFEPanel = /** @class */ (function () {
 
 	TFEPanel.prototype._getHtmlForWebview = function (webview) {
 		const scriptUri = webview.asWebviewUri(
-			vscode.Uri.joinPath(this._extensionUri, "media", "index.js")
+			vscode.Uri.joinPath(this._extensionUri, "media", "tfe", "index.js")
 		);
 		const resetUri = webview.asWebviewUri(
 			vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
@@ -178,7 +178,7 @@ var TFEPanel = /** @class */ (function () {
 			vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
 		);
 		const styleUri = webview.asWebviewUri(
-			vscode.Uri.joinPath(this._extensionUri, "media", "index.css")
+			vscode.Uri.joinPath(this._extensionUri, "media", "tfe", "index.css")
 		);
 		return `
             <!DOCTYPE html>

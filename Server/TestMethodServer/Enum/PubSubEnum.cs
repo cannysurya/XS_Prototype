@@ -10,6 +10,6 @@ namespace TestMethodServer.Enum
   public enum PubSubTopic
   {
     ResumeTopic,
-    Nil
+    DataLogTopic
   }
 }

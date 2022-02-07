@@ -13,6 +13,7 @@ service TestMethod {
 
 service PubSub {
 	rpc SubscribeResumeTopic(SubRequest) returns (stream ResumeInfo);
+	rpc SubscribeDataLogTopic(SubRequest) returns (stream DataLogInfo);
 }
 
 service SiteConfiguration {
