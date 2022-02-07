@@ -4,11 +4,18 @@
     <TargetFramework>net5.0</TargetFramework>
     <OutputType>Exe</OutputType>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="..\Messenger\Messenger.csproj" />
+    <ProjectReference Include="..\SemiContext\SemiContext.csproj" />
     <ProjectReference Include="..\TestMethodService\TestMethodService.csproj" />
     <ProjectReference Include="..\TestMethod\TestMethod.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="generate_sort.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

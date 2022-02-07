@@ -25,53 +25,45 @@ var tfeData = {
 }
 
 const server1 = {
-	localDebuggerConfiguration: {
-		name: ".NET Core Attach",
-		type: "coreclr",
-		request: "attach",
-		processName: "TestMethodServer.exe"
-	},
-	remoteDebuggerConfiguration: {
-		"name": "Remote 1",
-		"type": "coreclr",
-		"request": "attach",
-		"processName": "TestMethodServer.exe",
-		"pipeTransport": {
-			"pipeProgram": `${__dirname}/plink.exe`,
-			"pipeArgs": [
-				"soliton@192.168.1.19",
-				"-pw",
-				"login@123",
-				"-batch",
-				"-T"
-			],
-			"debuggerPath": "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
-			"quoteArgs": false
+	debugConfiguration: {
+		local: {
+			name: ".NET Core Attach",
+			type: "coreclr",
+			request: "attach",
+			processName: "TestMethodServer.exe"
+		},
+		remote: {
+			"name": "Remote 1",
+			"type": "coreclr",
+			"request": "attach",
+			"processName": "TestMethodServer.exe",
+			"pipeTransport": {
+				"pipeProgram": `${__dirname}/plink.exe`,
+				"pipeArgs": [
+					"soliton@192.168.1.19",
+					"-pw",
+					"login@123",
+					"-batch",
+					"-T"
+				],
+				"debuggerPath": "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
+				"quoteArgs": false
+			}
 		}
 	},
-	gRPCObject: new testMethodPackage.TestMethod('localhost:30051', grpc.credentials.createInsecure()),
-	debugSession: undefined,
-	resumeSubscription: undefined,
+	service: {
+		testMethodService: new testMethodPackage.TestMethod('localhost:30051', grpc.credentials.createInsecure()),
+		siteConfigurationService: new testMethodPackage.SiteConfiguration('localhost:30051', grpc.credentials.createInsecure()),
+		pubsubService: new testMethodPackage.PubSub('localhost:30051', grpc.credentials.createInsecure())
+	},
+	subscription: {
+		resumeSubscription: undefined
+	},
+	sites: ["Site1, Site2, Site3"],
 	isActive: true
 }
 
-const server2 = {
-	localDebuggerConfiguration: {
-		name: ".NET Core Attach",
-		type: "coreclr",
-		request: "attach",
-		processName: "TestMethodServer2.exe"
-	},
-	remoteDebuggerConfiguration: {
-
-	},
-	gRPCObject: new testMethodPackage.TestMethod('localhost:30052', grpc.credentials.createInsecure()),
-	debugSession: undefined,
-	resumeSubscription: undefined,
-	isActive: false
-}
-
-const servers = [server1, server2];
+const servers = [server1];
 const dllInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.dll";
 const pdbInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.pdb";
 const TestProjectSlnLocation = __dirname + "/../TestProject";
@@ -278,13 +270,26 @@ var DebugPanel = /** @class */ (function () {
 
 (function subscribeResumeTopic() {
 	servers.filter(x => x.isActive).forEach((server) => {
-		server.resumeSubscription = server.gRPCObject.SubscribeResumeTopic({
+		server.subscription.resumeSubscription = server.service.pubsubService.SubscribeResumeTopic({
 			ClientName: "TFE"
 		});
-		server.resumeSubscription.on("data", (data) => {
+		server.subscription.resumeSubscription.on("data", (data) => {
 			setHitBreakpoint(data.FlowNodeIndex);
 		})
 	});
+})();
+
+(function updateSiteInfo() {
+	servers.filter(x => x.isActive).forEach((server) => {
+		server.service.siteConfigurationService.UpdateSite({
+			Sites: server.sites
+		}, (err) => {
+			console.log("Receiving gRPC Response from Update Sites");
+			if (err) {
+				console.log(err);
+			}
+		});
+	})
 })();
 
 function handleBreakPoint(index) {
@@ -313,13 +318,13 @@ function setHitBreakpoint(index) {
 	selfWebView.postMessage({ command: 'updateTFEData', tfeData: tfeData });
 }
 
-function registerSessionEvent(server) {
-	vscode.debug.onDidStartDebugSession(session => {
-		if (session.configuration.name === '.NET Core Attach') {
-			server.debugSession = session;
-		}
-	});
-}
+// function registerSessionEvent(server) {
+// 	vscode.debug.onDidStartDebugSession(session => {
+// 		if (session.configuration.name === '.NET Core Attach') {
+// 			server.debugSession = session;
+// 		}
+// 	});
+// }
 
 async function executeTestMethod() {
 	console.log("Executing Test Method");
@@ -357,7 +362,7 @@ async function sendDLLInfo() {
 async function resumeExecution() {
 	resetHitBreakpoint();
 	servers.filter(x => x.isActive).forEach((server) => {
-		server.gRPCObject.ResumeExecution({
+		server.service.testMethodService.ResumeExecution({
 		}, (err) => {
 			console.log("Receiving gRPC Response from Resume Execution");
 			if (err) {
@@ -370,7 +375,7 @@ async function resumeExecution() {
 async function stopExecution() {
 	resetHitBreakpoint();
 	servers.filter(x => x.isActive).forEach((server) => {
-		server.gRPCObject.StopExecution({
+		server.service.testMethodService.StopExecution({
 		}, (err) => {
 			console.log("Receiving gRPC Response from Stop Execution");
 			if (err) {
@@ -438,7 +443,7 @@ function getPDBContent() {
 
 function sendDLLToServer(dLLData, pdbData) {
 	servers.filter(x => x.isActive).forEach((server) => {
-		server.gRPCObject.UpdateDLL({
+		server.service.testMethodService.UpdateDLL({
 			DLLContent: dLLData,
 			PDBContent: pdbData
 		}, (err) => {
@@ -454,7 +459,7 @@ function sendDLLToServer(dLLData, pdbData) {
 
 function executeTestMethodInServer() {
 	servers.filter(x => x.isActive).forEach((server) => {
-		server.gRPCObject.ExecuteTestMethod(tfeData, (err) => {
+		server.service.testMethodService.ExecuteTestMethod(tfeData, (err) => {
 			console.log("Receiving gRPC Response from ExecuteTestMethod");
 			if (err) {
 				console.log(err);
@@ -463,9 +468,9 @@ function executeTestMethodInServer() {
 					resetIsExecutionInProgressAndHitBreakpoint();
 					vscode.window.showInformationMessage("Test Method Executed Successfully...");
 				}
-				if (server.debugSession) {
-					//vscode.debug.stopDebugging(server.debugSession);
-				}
+				//if (server.debugSession) {
+				//vscode.debug.stopDebugging(server.debugSession);
+				//}
 			}
 		});
 	})
@@ -473,16 +478,16 @@ function executeTestMethodInServer() {
 
 function getAttachObj(server) {
 	if (isRemoteServer) {
-		return server.remoteDebuggerConfiguration;
+		return server.debugConfiguration.remote;
 	}
 	else {
-		return server.localDebuggerConfiguration;
+		return server.debugConfiguration.local;
 	}
 }
 
 function attachToServer() {
 	servers.filter(x => x.isActive).forEach(async (server) => {
-		registerSessionEvent(server);
+		// registerSessionEvent(server);
 		await new Promise(r => setTimeout(r, 1000));
 		vscode.debug.startDebugging(undefined, getAttachObj(server), undefined);
 	})

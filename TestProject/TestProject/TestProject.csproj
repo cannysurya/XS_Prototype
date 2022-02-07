@@ -8,6 +8,9 @@
     <Reference Include="Messenger">
       <HintPath>..\DLL\Messenger.dll</HintPath>
     </Reference>
+    <Reference Include="SemiContext">
+      <HintPath>..\DLL\SemiContext.dll</HintPath>
+    </Reference>
     <Reference Include="TestMethod">
       <HintPath>..\DLL\TestMethod.dll</HintPath>
     </Reference>

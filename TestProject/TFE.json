@@ -4,16 +4,11 @@
   "FlowNodes":[
     {
       "Name":"SampleTestMethod1",
-      "HasBreakPoint":true,
+      "HasBreakPoint":false,
       "HitBreakPoint":false
     },
     {
       "Name":"SampleTestMethod2",
-      "HasBreakPoint":true,
-      "HitBreakPoint":false
-    },
-    {
-      "Name":"SampleTestMethod3",
       "HasBreakPoint":false,
       "HitBreakPoint":false
     }

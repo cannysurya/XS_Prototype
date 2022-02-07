@@ -9,7 +9,18 @@ service TestMethod {
 	rpc UpdateDLL(Chunk) returns (UploadStatus) {}
 	rpc ResumeExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 	rpc StopExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
+
+service PubSub {
 	rpc SubscribeResumeTopic(SubRequest) returns (stream ResumeInfo);
+}
+
+service SiteConfiguration {
+	rpc UpdateSite(SiteRequest) returns (google.protobuf.Empty) {}
+}
+
+message SiteRequest {
+	repeated string Sites = 1;
 }
 
 message SubRequest
@@ -45,4 +56,14 @@ message Chunk {
 
 message UploadStatus {
     string Message = 1;
+}
+
+message DataLogInfo {
+	repeated gRPCKeyValuePair keyValuePair = 1;
+}
+
+message gRPCKeyValuePair
+{
+	string Key=1;
+	string Value=2;
 }

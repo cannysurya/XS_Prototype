@@ -1,20 +1,22 @@
 ﻿using System;
 using MessengerNS;
+using SemiContextNS;
 
 namespace TestMethodNS
 {
-    public class BaseTestMethod
+  public class BaseTestMethod
+  {
+    public static Messenger messenger;
+    public static SemiContext semiContext;
+
+    public BaseTestMethod()
     {
-        public Messenger messenger;
-
-        public BaseTestMethod()
-        {
-            messenger = new Messenger();
-        }
-
-        public virtual void Execute()
-        {
-            
-        }
+      
     }
+
+    public virtual void Execute()
+    {
+
+    }
+  }
 }
