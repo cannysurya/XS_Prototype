@@ -10,25 +10,29 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:customextension.debugPanel",
-		"onCommand:customextension.testPanel"
+		"onCommand:customextension.tfePanel",
+		"onCommand:customextension.datalogPanel"
 	],
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "customextension.debugPanel",
-				"title": "Debug Panel"
+				"command": "customextension.tfePanel",
+				"title": "TFE Panel"
 			},
 			{
-				"command": "customextension.testPanel",
-				"title": "Test Panel"
+				"command": "customextension.datalogPanel",
+				"title": "DataLog Panel"
+			},
+			{
+				"command": "customextension.siteConfigurationPanel",
+				"title": "Site Configuration Panel"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
-					"command": "customextension.debugPanel",
+					"command": "customextension.tfePanel",
 					"title": "All panels Side by Side",
 					"group": "title"
 				}

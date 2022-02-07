@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using TestMethodNS;
 
 namespace TestProject
@@ -7,11 +8,11 @@ namespace TestProject
   {
     public override void Execute()
     {
-      int x = 11;
-      int z = 12;
-      int y = 13;
-      int result = x + y + z;
-      messenger.SendMessageToSubscribers(result.ToString());
+      var fileName = "100 Samples.csv";
+      var inputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\input\\{fileName}";
+      var outputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\output\\{fileName}";
+
+      semiContext.SortDataUsingDLLAndSendData(inputDirectory, outputDirectory);
     }
   }
 }
