@@ -23,6 +23,10 @@
 			{
 				"command": "customextension.datalogPanel",
 				"title": "DataLog Panel"
+			},
+			{
+				"command": "customextension.siteConfigurationPanel",
+				"title": "Site Configuration Panel"
 			}
 		],
 		"menus": {

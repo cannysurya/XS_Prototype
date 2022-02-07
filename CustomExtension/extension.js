@@ -2,6 +2,7 @@ const vscode = require('vscode');
 const { setTFEData } = require('./GlobalState');
 const { TFEPanel } = require('./TFEPanel');
 const { DataLogPanel } = require('./DataLogPanel');
+const { SiteConfigurationPanel } = require('./SiteConfigurationPanel');
 
 var fs = require('fs');
 var isXSProject = false;
@@ -45,6 +46,7 @@ function activate(context) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('customextension.tfePanel', function () {
 		setTFEData(tfeData);
+		SiteConfigurationPanel.createOrShow(context.extensionUri);
 		DataLogPanel.createOrShow(context.extensionUri);
 		TFEPanel.createOrShow(context.extensionUri);
 		setTimeout(function () {
@@ -53,8 +55,11 @@ function activate(context) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('customextension.datalogPanel', function () {
-		setTFEData(tfeData);
 		DataLogPanel.createOrShow(context.extensionUri);
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('customextension.siteConfigurationPanel', function () {
+		SiteConfigurationPanel.createOrShow(context.extensionUri);
 	}));
 }
 

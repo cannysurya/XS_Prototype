@@ -33,9 +33,14 @@ namespace SemiContextNS
       var testMethodName = new StackFrame(1, true).GetMethod().DeclaringType.FullName.Split(".")[1];
       Parallel.ForEach(sites, site =>
       {
-        GenerateFile(new StringBuilder(sourcePath), new StringBuilder(destinationPath));
 
-        string[] lines = System.IO.File.ReadAllLines(destinationPath);
+      var destinationPathChunks = destinationPath.Split("\\");
+      destinationPathChunks[destinationPathChunks.Length - 1] = site + "_" + destinationPathChunks[destinationPathChunks.Length - 1];
+
+      var newDestinationPath = string.Join("\\", destinationPathChunks);
+        GenerateFile(new StringBuilder(sourcePath), new StringBuilder(newDestinationPath));
+
+        string[] lines = File.ReadAllLines(newDestinationPath);
         foreach (string line in lines)
         {
           string[] values = line.Split(',');

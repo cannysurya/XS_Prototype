@@ -44,11 +44,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DataLogPanel = void 0;
+exports.SiteConfigurationPanel = void 0;
 
-var DataLogPanel = /** @class */ (function () {
+var SiteConfigurationPanel = /** @class */ (function () {
 
-	function DataLogPanel(panel, extensionUri) {
+	function SiteConfigurationPanel(panel, extensionUri) {
 		var _this = this;
 		this._disposables = [];
 		this._panel = panel;
@@ -57,19 +57,19 @@ var DataLogPanel = /** @class */ (function () {
 		this._panel.onDidDispose(function () { return _this.dispose(); }, null, this._disposables);
 	}
 
-	DataLogPanel.createOrShow = function (extensionUri) {
+	SiteConfigurationPanel.createOrShow = function (extensionUri) {
 		var column = vscode.window.activeTextEditor
 			? vscode.window.activeTextEditor.viewColumn
 			: undefined;
 		// If we already have a panel, show it.
-		if (DataLogPanel.currentPanel) {
-			DataLogPanel.currentPanel._panel.reveal(column);
-			DataLogPanel.currentPanel._update();
+		if (SiteConfigurationPanel.currentPanel) {
+			SiteConfigurationPanel.currentPanel._panel.reveal(column);
+			SiteConfigurationPanel.currentPanel._update();
 			return;
 		}
 
 		// Otherwise, create a new panel.
-		var panel = vscode.window.createWebviewPanel(DataLogPanel.viewType, "DataLog Panel", column || vscode.ViewColumn.One, {
+		var panel = vscode.window.createWebviewPanel(SiteConfigurationPanel.viewType, "Site Configuration Panel", column || vscode.ViewColumn.One, {
 			// Enable javascript in the webview
 			enableScripts: true,
 			// And restrict the webview to only loading content from our extension's `media` directory.
@@ -78,21 +78,21 @@ var DataLogPanel = /** @class */ (function () {
 				vscode.Uri.joinPath(extensionUri, "out/compiled"),
 			],
 		});
-		DataLogPanel.currentPanel = new DataLogPanel(panel, extensionUri);
+		SiteConfigurationPanel.currentPanel = new SiteConfigurationPanel(panel, extensionUri);
 	};
 
-	DataLogPanel.kill = function () {
+	SiteConfigurationPanel.kill = function () {
 		var _a;
-		(_a = DataLogPanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
-		DataLogPanel.currentPanel = undefined;
+		(_a = SiteConfigurationPanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
+		SiteConfigurationPanel.currentPanel = undefined;
 	};
 
-	DataLogPanel.revive = function (panel, extensionUri) {
-		DataLogPanel.currentPanel = new DataLogPanel(panel, extensionUri);
+	SiteConfigurationPanel.revive = function (panel, extensionUri) {
+		SiteConfigurationPanel.currentPanel = new SiteConfigurationPanel(panel, extensionUri);
 	};
 
-	DataLogPanel.prototype.dispose = function () {
-		DataLogPanel.currentPanel = undefined;
+	SiteConfigurationPanel.prototype.dispose = function () {
+		SiteConfigurationPanel.currentPanel = undefined;
 		// Clean up our resources
 		this._panel.dispose();
 		while (this._disposables.length) {
@@ -103,7 +103,7 @@ var DataLogPanel = /** @class */ (function () {
 		}
 	};
 
-	DataLogPanel.prototype._update = function () {
+	SiteConfigurationPanel.prototype._update = function () {
 		return __awaiter(this, void 0, void 0, function () {
 			var webview;
 			var _this = this;
@@ -126,9 +126,9 @@ var DataLogPanel = /** @class */ (function () {
 		});
 	};
 
-	DataLogPanel.prototype._getHtmlForWebview = function (webview) {
+	SiteConfigurationPanel.prototype._getHtmlForWebview = function (webview) {
 		const scriptUri = webview.asWebviewUri(
-			vscode.Uri.joinPath(this._extensionUri, "media", "datalog", "index.js")
+			vscode.Uri.joinPath(this._extensionUri, "media", "siteconfiguration", "index.js")
 		);
 		const resetUri = webview.asWebviewUri(
 			vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
@@ -137,7 +137,7 @@ var DataLogPanel = /** @class */ (function () {
 			vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
 		);
 		const styleUri = webview.asWebviewUri(
-			vscode.Uri.joinPath(this._extensionUri, "media", "datalog", "index.css")
+			vscode.Uri.joinPath(this._extensionUri, "media", "siteconfiguration", "index.css")
 		);
 		return `
             <!DOCTYPE html>
@@ -159,23 +159,21 @@ var DataLogPanel = /** @class */ (function () {
         `;
 	};
 
-	DataLogPanel.viewType = "DataLogPanel";
-	return DataLogPanel;
+	SiteConfigurationPanel.viewType = "SiteConfigurationPanel";
+	return SiteConfigurationPanel;
 }());
 
-(function subscribeDataLogTopic() {
+(function updateSiteInfo() {
 	getServers().filter(x => x.isActive).forEach((server) => {
-		server.subscription.datalogSubscription = server.service.pubsubService.SubscribeDataLogTopic({
-			ClientName: "DataLog"
+		server.service.siteConfigurationService.UpdateSite({
+			Sites: server.sites
+		}, (err) => {
+			console.log("Receiving gRPC Response from Update Sites");
+			if (err) {
+				console.log(err);
+			}
 		});
-		server.subscription.datalogSubscription.on("data", (data) => {
-			data.keyValuePair.push({
-				"Key": "Server Name",
-				"Value": server.name
-			})
-			console.log(data);
-		})
-	});
+	})
 })();
 
-exports.DataLogPanel = DataLogPanel;
+exports.SiteConfigurationPanel = SiteConfigurationPanel;

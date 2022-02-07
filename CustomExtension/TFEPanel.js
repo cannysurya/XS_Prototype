@@ -220,19 +220,6 @@ var TFEPanel = /** @class */ (function () {
 	});
 })();
 
-(function updateSiteInfo() {
-	getServers().filter(x => x.isActive).forEach((server) => {
-		server.service.siteConfigurationService.UpdateSite({
-			Sites: server.sites
-		}, (err) => {
-			console.log("Receiving gRPC Response from Update Sites");
-			if (err) {
-				console.log(err);
-			}
-		});
-	})
-})();
-
 function handleBreakPoint(index) {
 	getTFEData().FlowNodes[index].HasBreakPoint =
 		!getTFEData().FlowNodes[index].HasBreakPoint;
