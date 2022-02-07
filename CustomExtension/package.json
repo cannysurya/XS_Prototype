@@ -10,25 +10,20 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:customextension.debugPanel",
-		"onCommand:customextension.testPanel"
+		"onCommand:customextension.tfePanel"
 	],
 	"main": "./extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "customextension.debugPanel",
-				"title": "Debug Panel"
-			},
-			{
-				"command": "customextension.testPanel",
-				"title": "Test Panel"
+				"command": "customextension.tfePanel",
+				"title": "TFE Panel"
 			}
 		],
 		"menus": {
 			"explorer/context": [
 				{
-					"command": "customextension.debugPanel",
+					"command": "customextension.tfePanel",
 					"title": "All panels Side by Side",
 					"group": "title"
 				}

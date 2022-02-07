@@ -1,7 +1,7 @@
-
 const vscode = require('vscode');
-const { DebugPanel } = require('./DebugPanel');
-const { TestPanel } = require('./TestPanel');
+const { setTFEData } = require('./GlobalState');
+const { TFEPanel } = require('./TFEPanel');
+
 var fs = require('fs');
 var isXSProject = false;
 
@@ -27,8 +27,6 @@ if (slnFiles !== []) {
 			}
 		}
 	}
-
-
 }
 else {
 	console.log('sln files not found');
@@ -38,20 +36,18 @@ else {
  * @param {vscode.ExtensionContext} context
  */
 function activate(context) {
+
 	if (isXSProject) {
 		var tfePath = wsPath + "\\TFE.json";
 		var tfeData = JSON.parse(fs.readFileSync(tfePath, { encoding: 'utf8', flag: 'r' }));
 	}
 
-	context.subscriptions.push(vscode.commands.registerCommand('customextension.debugPanel', function () {
-		DebugPanel.createOrShow(context.extensionUri);
+	context.subscriptions.push(vscode.commands.registerCommand('customextension.tfePanel', function () {
+		setTFEData(tfeData);
+		TFEPanel.createOrShow(context.extensionUri);
 		setTimeout(function () {
-			DebugPanel.loadData(tfeData);
+			TFEPanel.loadData();
 		}, 1000)
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('customextension.testPanel', function () {
-		TestPanel.createOrShow(context.extensionUri);
 	}));
 }
 
