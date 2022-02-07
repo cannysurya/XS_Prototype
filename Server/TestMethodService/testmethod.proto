@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package testmethod;
+
+service TestMethod {
+	rpc ExecuteTestMethod (TestMethodRequest) returns (TestMethodReply) {}
+	rpc UpdateDLL(Chunk) returns (UploadStatus) {}
+	rpc ResumeExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+	rpc StopExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+	rpc SubscribeResumeTopic(SubRequest) returns (stream ResumeInfo);
+}
+
+message SubRequest
+{	
+	string ClientName = 1;
+}
+
+message ResumeInfo
+{	
+	int32 FlowNodeIndex = 1;
+}
+
+message TestMethodRequest {
+	bool IsExectionInProgress = 1;
+	string TestFlowName = 2;
+	repeated FlowNode FlowNodes = 3;
+}
+
+message FlowNode {
+	string Name = 1;
+	bool HasBreakPoint = 2;
+	bool HitBreakpoint = 3;
+}
+
+message TestMethodReply {
+	string Message = 1;
+}
+
+message Chunk {
+	bytes DLLContent = 1;
+	bytes PDBContent = 2;
+}
+
+message UploadStatus {
+    string Message = 1;
+}
