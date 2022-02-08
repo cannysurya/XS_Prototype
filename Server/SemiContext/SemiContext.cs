@@ -14,7 +14,7 @@ namespace SemiContextNS
   {
     public static Messenger messenger;
     public List<string> sites = new List<string>();
-    
+
     [DllImport("generate_sort.dll")]
     private static extern void GenerateFile(StringBuilder path, StringBuilder resultfile);
 
@@ -33,11 +33,10 @@ namespace SemiContextNS
       var testMethodName = new StackFrame(1, true).GetMethod().DeclaringType.FullName.Split(".")[1];
       Parallel.ForEach(sites, site =>
       {
+        var destinationPathChunks = destinationPath.Split("\\");
+        destinationPathChunks[destinationPathChunks.Length - 1] = site + "_" + destinationPathChunks[destinationPathChunks.Length - 1];
 
-      var destinationPathChunks = destinationPath.Split("\\");
-      destinationPathChunks[destinationPathChunks.Length - 1] = site + "_" + destinationPathChunks[destinationPathChunks.Length - 1];
-
-      var newDestinationPath = string.Join("\\", destinationPathChunks);
+        var newDestinationPath = string.Join("\\", destinationPathChunks);
         GenerateFile(new StringBuilder(sourcePath), new StringBuilder(newDestinationPath));
 
         string[] lines = File.ReadAllLines(newDestinationPath);
@@ -46,7 +45,7 @@ namespace SemiContextNS
           string[] values = line.Split(',');
           foreach (string value in values)
           {
-            
+
             messenger.Send(GetLogInfo(site, value, testMethodName));
           }
         }
