@@ -16,16 +16,17 @@ body {
 .breakpoint-button {
   background-color: transparent;
   border-radius: 50%;
-  height: 75%;
-  width: 75%;
+  height: 50%;
+  width: 50%;
 }
 
 .breakpoint-button-active {
-  background: var(--vscode-button-background) !important;
+  background: var(--vscode-debugIcon-breakpointForeground) !important;
   opacity: 1;
 }
 
 .breakpoint-button:hover {
+  background: var(--vscode-debugIcon-breakpointForeground) !important;
   opacity: 0.5 !important;
 }
 
@@ -36,9 +37,9 @@ body {
 .breakpoint-column {
   align-items: center;
   display: flex;
-  height: 25px;
+  height: 30px;
   justify-content: center;
-  width: 25px;
+  width: 30px;
 }
 
 .button-1 {
@@ -80,17 +81,21 @@ body {
 }
 
 .node-name {
-  height: 25px;
-  padding: 5px 0px 5px 5px;
+  height: 30px;
+  padding: 5px 0px 5px 10px;
   width: 500px;
 }
 
 .node-name-active {
-  font-weight: bolder;
+  background-color: var(--vscode-peekViewEditor-matchHighlightBackground);
+}
+
+.testflow-name {
+  font-weight: 700;
 }
 
 .testmethod-name {
-  padding-left: 20px;
+  padding-left: 25px;
 }
 
 .visible-hide {
@@ -98,5 +103,11 @@ body {
 }
 
 td {
-  border: 1px solid var(--vscode-input-border);
+  align-items: center;
+  display: flex;
+  border: 1px solid var(--vscode-editorWidget-border);
+}
+
+tr {
+  display: flex;
 }

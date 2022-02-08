@@ -32,13 +32,13 @@ function renderTable() {
   <tr>
     <td class="breakpoint-column">
     </td>
-    <td class="node-name" id="main-program">
+    <td class="node-name testflow-name" id="main-program">
       ${tfeData.TestFlowName}
     </td>
   </tr>`;
   tfeData.FlowNodes.forEach((flowNode, index) => {
     tableElement.innerHTML += `<tr>
-      <td class="breakpoint-column">
+      <td class="breakpoint-column ${flowNode.HitBreakPoint ? 'node-name-active' : ''}">
         <button id="breakpoint-button-${index}" 
           class="breakpoint-button ${flowNode.HasBreakPoint ? 'breakpoint-button-active' : ''}" 
           onclick="handleBreakPoint(this)"></button>
