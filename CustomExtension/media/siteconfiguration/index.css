@@ -24,17 +24,24 @@ body {
 .function-buttons {
   display: flex;
   justify-content: flex-end;
-  width: 250px;
+  width: 505px;
 }
 
-.table {
+.table,
+td {
   width: 250px;
-  padding: 5px;
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 10px;
+}
+.table-header {
+  background-color: var(--vscode-editor-background);
+  font-weight: bolder;
 }
 
 .server-list {
-  background-color: var(--vscode-editor-background);
-  color: var(--vscode-foreground);
-  width: fit-content;
-  padding: 0px 24px 0px 0px;
+  padding: 3px;
+  background-color: rgb(60, 60, 60);
+  color: rgb(240, 240, 240);
+  border-color: rgb(60, 60, 60);
 }

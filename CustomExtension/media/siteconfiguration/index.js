@@ -21,7 +21,7 @@ siteTable.innerHTML = `<table id="table"></table>`;
 let tableElement = document.getElementById("table");
 
 tableElement.innerHTML = `
-<tr>
+<tr class = "table-header">
     <td class="site-column">
     Site Number
     </td>
@@ -32,7 +32,7 @@ tableElement.innerHTML = `
 siteTableData.forEach((site, index) => {
     tableElement.innerHTML += `<tr>
     <td class="site-column">
-        Site${index+1}
+        Site ${index+1}
     </td>
     <td class="server-name">
         <select class="server-list" id="server-list-${index}" onchange="updateServerNumber(this)">
