@@ -2,6 +2,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -56,6 +57,19 @@ namespace TestMethodServer.Services
 			{
 				ExecuteTestFlow(request);
 			}
+
+			//double totalTime = 0;
+			//if (canExecuteTestFlow)
+			//{
+			//	for (var i = 0; i < 1000; i++)
+			//     {
+			//		Stopwatch stopwatch = Stopwatch.StartNew();
+			//		ExecuteTestFlow(request);
+			//		stopwatch.Stop();
+			//		totalTime += stopwatch.Elapsed.TotalMilliseconds;
+			//	}
+			//	Console.WriteLine("Time taken for execution " + totalTime / 1000 + "ms");
+			//}
 
 			Console.WriteLine($"After Execution - All load contexts : {string.Join(", ", AssemblyLoadContext.All.Select(x => x.Name))}");
 			Console.WriteLine();
