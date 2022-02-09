@@ -183,31 +183,30 @@ var DataLogPanel = /** @class */ (function () {
 })();
 
 function refreshDatalogData() {
-	var refreshTimer = 1000;
-	var dataCount = 100000;
+	var refreshRate = getDatalogConfig().refreshRate;
 
 	try {
 		if (getDatalogData().length > 0) {
 			fs.readFile(logFilePath, 'utf8', function (err, data) {
 				if (err) {
 					if (!fs.statSync(logFileDirectory).isDirectory()) {
-						setTimeout(refreshDatalogData, refreshTimer);
+						setTimeout(refreshDatalogData, refreshRate);
 						return;
 					}
 				}
-				writeToDatalogFile(refreshTimer, data, dataCount);
+				writeToDatalogFile(refreshRate, data);
 			});
 		}
 		else {
-			updateDatalogPanel(refreshTimer);
+			updateDatalogPanel(refreshRate);
 		}
 	} catch (e) {
 		console.log("Error on Datalog operation " + e);
-		setTimeout(refreshDatalogData, refreshTimer);
+		setTimeout(refreshDatalogData, refreshRate);
 	}
 }
 
-function writeToDatalogFile(refreshTimer, data, dataCount) {
+function writeToDatalogFile(refreshRate, data) {
 	try {
 		if (data == null) {
 			data = []
@@ -215,25 +214,25 @@ function writeToDatalogFile(refreshTimer, data, dataCount) {
 			data = JSON.parse(data)
 		}
 
-		var newRecords = getDatalogData().splice(0, dataCount).reverse();
+		var newRecords = getDatalogData().splice(0, 100000).reverse();
 		var combinedData = [...newRecords, ...data];
 
 		fs.writeFile(logFilePath, JSON.stringify(combinedData), function (err) {
 			if (err) {
 				getDatalogData().unshift(...newRecords);
 			}
-			updateDatalogPanel(refreshTimer);
+			updateDatalogPanel(refreshRate);
 		});
 	} catch (e) {
 		throw e;
 	}
 }
 
-function updateDatalogPanel(refreshTimer) {
+function updateDatalogPanel(refreshRate) {
 	try {
 		fs.readFile(logFilePath, 'utf8', function (err, data) {
 			if (err) {
-				setTimeout(refreshDatalogData, refreshTimer);
+				setTimeout(refreshDatalogData, refreshRate);
 				return;
 			}
 			var parsedData = JSON.parse(data);
@@ -245,7 +244,7 @@ function updateDatalogPanel(refreshTimer) {
 			var datalogData = parsedData.slice(recordStart, recordEnd);
 
 			selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
-			setTimeout(refreshDatalogData, refreshTimer);
+			setTimeout(refreshDatalogData, refreshRate);
 		});
 	} catch (e) {
 		throw e;

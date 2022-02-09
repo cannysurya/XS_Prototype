@@ -23,7 +23,8 @@ var datalogData = []
 var datalogConfig = {
   recordsPerPage: 10,
   currentPageNumber: 1,
-  maxPageNumber: 1
+  maxPageNumber: 1,
+  refreshRate: 2000
 }
 
 var servers = [{
