@@ -214,14 +214,19 @@ function updateChangedServer(changedServer){
 
 function updateServerSites(){
 
+	//get the sites which are mapped to server-1 and server-2
 	var server1Sites = getSiteData().filter(function(el){
 		return el.serverNumber == 1;
 	});
 	var server2Sites = getSiteData().filter(function(el){
 		return el.serverNumber == 2;
 	});
+
+	//empty the previoues site details in the servers global to avoid duplicates
 	getServers()[0].sites = [];
 	getServers()[1].sites = [];
+
+	//add the mapped sites to the servers global one by one
 	server1Sites.forEach(site => {
 		getServers()[0].sites.push(`Site ${site.siteNumber}`);
 	})
