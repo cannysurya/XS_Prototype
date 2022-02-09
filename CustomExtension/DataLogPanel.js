@@ -1,7 +1,11 @@
 "use strict";
 
 const vscode = require("vscode");
-const { getServers } = require('./GlobalState');
+const { getServers, getDatalogData } = require('./GlobalState');
+const fs = require('fs');
+
+const logFileDirectory = __dirname + "/logs/";
+const logFilePath = logFileDirectory + "logs.txt";
 
 var selfWebView = undefined;
 
@@ -173,9 +177,41 @@ var DataLogPanel = /** @class */ (function () {
 				"Key": "Server Name",
 				"Value": server.name
 			})
-			console.log(data);
+			getDatalogData().push(data);
 		})
 	});
 })();
+
+function refreshData() {
+	var refreshTimer = 1000;
+	var dataCount = 100000;
+
+	if (getDatalogData().length > 0) {
+		fs.readFile(logFilePath, function (err, data) {
+			if (err) {
+				if (!fs.statSync(logFileDirectory).isDirectory()) {
+					return;
+				}
+			}
+
+			var newRecords = getDatalogData().splice(0, dataCount);
+
+			fs.writeFile(logFilePath,
+				data != null ? data + JSON.stringify(newRecords) : JSON.stringify(newRecords),
+				function (err) {
+					if (err) {
+						getDatalogData().unshift(...newRecords);
+					}
+					setTimeout(refreshData, refreshTimer);
+				});
+
+		});
+	}
+	else {
+		setTimeout(refreshData, refreshTimer);
+	}
+}
+
+refreshData();
 
 exports.DataLogPanel = DataLogPanel;

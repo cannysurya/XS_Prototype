@@ -29,3 +29,5 @@ yarn-error.log*
 
 /Server/TestProjectDLL/*
 /Server/Test Files/output/*
+/CustomExtension/logs/*
+!/CustomExtension/logs/readme.txt

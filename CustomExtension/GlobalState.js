@@ -19,6 +19,8 @@ var tfeData = {
 
 }
 
+var datalogData = []
+
 var servers = [{
   name: "Server 1",
   debugConfiguration: {
@@ -61,5 +63,6 @@ var servers = [{
 }]
 
 exports.getTFEData = () => tfeData;
+exports.getDatalogData = () => datalogData;
 exports.setTFEData = (newTFEData) => tfeData = newTFEData;
 exports.getServers = () => servers;

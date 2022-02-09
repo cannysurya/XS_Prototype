@@ -11,7 +11,7 @@ const pdbInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/T
 const TestProjectSlnLocation = __dirname + "/../TestProject";
 
 var selfWebView = undefined;
-var skipServerAttach = false;
+var skipServerAttach = true;
 var isRemoteServer = false;
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
