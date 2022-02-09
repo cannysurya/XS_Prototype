@@ -20,6 +20,10 @@ var tfeData = {
 }
 
 var datalogData = []
+var datalogConfig = {
+  recordsPerRow: 10,
+  pageNumber: 1
+}
 
 var servers = [{
   name: "Server 1",
@@ -58,11 +62,12 @@ var servers = [{
     resumeSubscription: undefined,
     datalogSubscription: undefined
   },
-  sites: ["Site1", "Site2", "Site3"],
+  sites: ["Site1"],
   isActive: true
 }]
 
 exports.getTFEData = () => tfeData;
 exports.getDatalogData = () => datalogData;
+exports.getDatalogConfig = () => datalogConfig;
 exports.setTFEData = (newTFEData) => tfeData = newTFEData;
 exports.getServers = () => servers;

@@ -1,7 +1,7 @@
 "use strict";
 
 const vscode = require("vscode");
-const { getServers, getDatalogData } = require('./GlobalState');
+const { getServers, getDatalogData, getDatalogConfig } = require('./GlobalState');
 const fs = require('fs');
 
 const logFileDirectory = __dirname + "/logs/";
@@ -182,7 +182,23 @@ var DataLogPanel = /** @class */ (function () {
 	});
 })();
 
-function refreshData() {
+function refreshDatalogPanel() {
+	var refreshTimer = 1000;
+	fs.readFile(logFilePath, 'utf8', function (err, data) {
+		if (err) {
+			setTimeout(refreshDatalogPanel, refreshTimer);
+			return;
+		}
+		var configData = getDatalogConfig();
+		var recordStart = (configData.pageNumber - 1) * configData.recordsPerRow;
+		var recordEnd = recordStart + configData.recordsPerRow;
+		var datalogData = JSON.parse(data).slice(recordStart, recordEnd);
+		selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
+		setTimeout(refreshDatalogPanel, refreshTimer);
+	});
+}
+
+function refreshDatalogFile() {
 	var refreshTimer = 1000;
 	var dataCount = 100000;
 
@@ -190,28 +206,32 @@ function refreshData() {
 		fs.readFile(logFilePath, function (err, data) {
 			if (err) {
 				if (!fs.statSync(logFileDirectory).isDirectory()) {
+					setTimeout(refreshDatalogFile, refreshTimer);
 					return;
 				}
 			}
 
-			var newRecords = getDatalogData().splice(0, dataCount);
+			var newRecords = getDatalogData().splice(0, dataCount).reverse();
 
 			fs.writeFile(logFilePath,
-				data != null ? data + JSON.stringify(newRecords) : JSON.stringify(newRecords),
+				data != null ? JSON.stringify(newRecords) + data : JSON.stringify(newRecords),
 				function (err) {
 					if (err) {
 						getDatalogData().unshift(...newRecords);
 					}
-					setTimeout(refreshData, refreshTimer);
+					setTimeout(refreshDatalogFile, refreshTimer);
 				});
 
 		});
 	}
 	else {
-		setTimeout(refreshData, refreshTimer);
+		setTimeout(refreshDatalogFile, refreshTimer);
 	}
 }
 
-refreshData();
+fs.unlinkSync(logFilePath);
+
+refreshDatalogFile();
+refreshDatalogPanel();
 
 exports.DataLogPanel = DataLogPanel;
