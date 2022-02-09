@@ -182,56 +182,80 @@ var DataLogPanel = /** @class */ (function () {
 	});
 })();
 
-function refreshDatalogPanel() {
-	var refreshTimer = 1000;
-	fs.readFile(logFilePath, 'utf8', function (err, data) {
-		if (err) {
-			setTimeout(refreshDatalogPanel, refreshTimer);
-			return;
-		}
-		var configData = getDatalogConfig();
-		var recordStart = (configData.pageNumber - 1) * configData.recordsPerRow;
-		var recordEnd = recordStart + configData.recordsPerRow;
-		var datalogData = JSON.parse(data).slice(recordStart, recordEnd);
-		selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
-		setTimeout(refreshDatalogPanel, refreshTimer);
-	});
-}
-
-function refreshDatalogFile() {
+function refreshDatalogData() {
 	var refreshTimer = 1000;
 	var dataCount = 100000;
 
-	if (getDatalogData().length > 0) {
-		fs.readFile(logFilePath, function (err, data) {
-			if (err) {
-				if (!fs.statSync(logFileDirectory).isDirectory()) {
-					setTimeout(refreshDatalogFile, refreshTimer);
-					return;
-				}
-			}
-
-			var newRecords = getDatalogData().splice(0, dataCount).reverse();
-
-			fs.writeFile(logFilePath,
-				data != null ? JSON.stringify(newRecords) + data : JSON.stringify(newRecords),
-				function (err) {
-					if (err) {
-						getDatalogData().unshift(...newRecords);
+	try {
+		if (getDatalogData().length > 0) {
+			fs.readFile(logFilePath, 'utf8', function (err, data) {
+				if (err) {
+					if (!fs.statSync(logFileDirectory).isDirectory()) {
+						setTimeout(refreshDatalogData, refreshTimer);
+						return;
 					}
-					setTimeout(refreshDatalogFile, refreshTimer);
-				});
-
-		});
-	}
-	else {
-		setTimeout(refreshDatalogFile, refreshTimer);
+				}
+				writeToDatalogFile(refreshTimer, data, dataCount);
+			});
+		}
+		else {
+			updateDatalogPanel(refreshTimer);
+		}
+	} catch (e) {
+		console.log("Error on Datalog operation " + e);
+		setTimeout(refreshDatalogData, refreshTimer);
 	}
 }
 
-fs.unlinkSync(logFilePath);
+function writeToDatalogFile(refreshTimer, data, dataCount) {
+	try {
+		if (data == null) {
+			data = []
+		} else {
+			data = JSON.parse(data)
+		}
 
-refreshDatalogFile();
-refreshDatalogPanel();
+		var newRecords = getDatalogData().splice(0, dataCount).reverse();
+		var combinedData = [...newRecords, ...data];
+
+		fs.writeFile(logFilePath, JSON.stringify(combinedData), function (err) {
+			if (err) {
+				getDatalogData().unshift(...newRecords);
+			}
+			updateDatalogPanel(refreshTimer);
+		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+function updateDatalogPanel(refreshTimer) {
+	try {
+		fs.readFile(logFilePath, 'utf8', function (err, data) {
+			if (err) {
+				setTimeout(refreshDatalogData, refreshTimer);
+				return;
+			}
+			var parsedData = JSON.parse(data);
+			var configData = getDatalogConfig();
+			console.log(configData);
+			getDatalogConfig().maxPageNumber = Math.ceil(parsedData.length / configData.recordsPerPage);
+			var recordStart = (configData.currentPageNumber - 1) * configData.recordsPerPage;
+			var recordEnd = recordStart + configData.recordsPerPage;
+			var datalogData = parsedData.slice(recordStart, recordEnd);
+
+			selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
+			setTimeout(refreshDatalogData, refreshTimer);
+		});
+	} catch (e) {
+		throw e;
+	}
+}
+
+if (fs.existsSync(logFilePath)) {
+	fs.unlinkSync(logFilePath);
+}
+
+refreshDatalogData();
 
 exports.DataLogPanel = DataLogPanel;

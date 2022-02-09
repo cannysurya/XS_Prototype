@@ -21,8 +21,9 @@ var tfeData = {
 
 var datalogData = []
 var datalogConfig = {
-  recordsPerRow: 10,
-  pageNumber: 1
+  recordsPerPage: 10,
+  currentPageNumber: 1,
+  maxPageNumber: 1
 }
 
 var servers = [{
