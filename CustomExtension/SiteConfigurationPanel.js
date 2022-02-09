@@ -1,7 +1,7 @@
 "use strict";
 
 const vscode = require("vscode");
-const { getServers } = require('./GlobalState');
+const { getServers, getSiteData } = require('./GlobalState');
 
 var selfWebView = undefined;
 
@@ -115,7 +115,22 @@ var SiteConfigurationPanel = /** @class */ (function () {
 					return __awaiter(_this, void 0, void 0, function () {
 						return __generator(this, function (_a) {
 							switch (data.command) {
-
+								case "syncSiteData": {
+									selfWebView.postMessage({ command: 'updateSiteData', siteData: getSiteData() });
+									break;
+								}
+								case "addSite": {
+									addSite();
+									break;
+								}
+								case "deleteSite": {
+									deleteSite();
+									break;
+								}
+								case "updateChangedServer": {
+									updateChangedServer(data.value);
+								}
+							
 							}
 							return [2 /*return*/];
 						});
@@ -150,9 +165,12 @@ var SiteConfigurationPanel = /** @class */ (function () {
                     <link href="${styleUri}" rel="stylesheet">
                 </head>
                 <body>
-									<div class="function-buttons">
-										<p> View is loaded </p>
-									</div>
+					<div class="function-buttons">
+						<button class="button-1" id="deleteSite">Delete</button>
+						<button class="button-1" id="addSite">Add +</button>
+					</div>
+					<div id="siteTable">
+					</div>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
@@ -162,6 +180,60 @@ var SiteConfigurationPanel = /** @class */ (function () {
 	SiteConfigurationPanel.viewType = "SiteConfigurationPanel";
 	return SiteConfigurationPanel;
 }());
+
+function addSite(){
+	let siteConfigTemp = { siteNumber:getSiteData().length+1, serverNumber: "1" };
+	getSiteData().push(siteConfigTemp);
+	selfWebView.postMessage({ command: 'updateSiteData', siteData: getSiteData() });
+	updateServerSites();
+}
+
+function deleteSite(){
+	getSiteData().pop();
+	selfWebView.postMessage({ command: 'updateSiteData', siteData: getSiteData() });
+	updateServerSites();
+}
+
+function updateChangedServer(changedServer){
+	
+	getSiteData()[changedServer.selectedId].serverNumber = changedServer.selectedServer;
+	// getServers().forEach((serverInfo, index) => {
+	// 	var matchedIndex = serverInfo.sites.find(function(el){
+	// 		return el == `Site ${changedServer.selectedId}`;
+	// 	});
+	// 	if(matchedIndex>0){
+	// 		getServers()[index].sites.splice(matchedIndex,1);
+	// 	console.log(serverInfo.sites);
+
+	// 	}
+	// })
+	// 
+	updateServerSites();
+	
+}
+
+function updateServerSites(){
+
+	var server1Sites = getSiteData().filter(function(el){
+		return el.serverNumber == 1;
+	});
+	var server2Sites = getSiteData().filter(function(el){
+		return el.serverNumber == 2;
+	});
+	getServers()[0].sites = [];
+	getServers()[1].sites = [];
+	server1Sites.forEach(site => {
+		getServers()[0].sites.push(`Site ${site.siteNumber}`);
+	})
+
+	server2Sites.forEach(site => {
+		getServers()[1].sites.push(`Site ${site.siteNumber}`);
+	})
+	
+
+	console.log(getServers()[0]);
+	console.log(getServers()[1]);
+}
 
 (function updateSiteInfo() {
 	getServers().filter(x => x.isActive).forEach((server) => {
