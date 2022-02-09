@@ -26,3 +26,6 @@ yarn-error.log*
 **/obj
 **/bin
 **/.vs
+
+/Server/TestProjectDLL/*
+/Server/Test Files/output/*
