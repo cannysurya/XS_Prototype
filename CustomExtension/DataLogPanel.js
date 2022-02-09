@@ -3,9 +3,24 @@
 const vscode = require("vscode");
 const { getServers, getDatalogData, getDatalogConfig } = require('./GlobalState');
 const fs = require('fs');
+const readline = require('readline');
+const stream = require('stream');
 
 const logFileDirectory = __dirname + "/logs/";
 const logFilePath = logFileDirectory + "logs.txt";
+const templogFilePath = logFileDirectory + "temp.txt";
+
+if (fs.existsSync(logFilePath)) {
+	fs.unlinkSync(logFilePath);
+}
+
+if (fs.existsSync(templogFilePath)) {
+	fs.unlinkSync(templogFilePath);
+}
+
+fs.open(logFilePath, 'w', function (err) {
+	if (err) throw err;
+});
 
 var selfWebView = undefined;
 
@@ -167,7 +182,7 @@ var DataLogPanel = /** @class */ (function () {
 	return DataLogPanel;
 }());
 
-(function subscribeDataLogTopic() {
+function subscribeDataLogTopic() {
 	getServers().filter(x => x.isActive).forEach((server) => {
 		server.subscription.datalogSubscription = server.service.pubsubService.SubscribeDataLogTopic({
 			ClientName: "DataLog"
@@ -180,81 +195,104 @@ var DataLogPanel = /** @class */ (function () {
 			getDatalogData().push(data);
 		})
 	});
-})();
+};
 
 function refreshDatalogData() {
-	var refreshRate = getDatalogConfig().refreshRate;
+	var datalogConfig = getDatalogConfig();
 
 	try {
 		if (getDatalogData().length > 0) {
-			fs.readFile(logFilePath, 'utf8', function (err, data) {
-				if (err) {
-					if (!fs.statSync(logFileDirectory).isDirectory()) {
-						setTimeout(refreshDatalogData, refreshRate);
-						return;
-					}
-				}
-				writeToDatalogFile(refreshRate, data);
-			});
+			var newData = getNewData();
+			generateLogFileWithAllData(newData, datalogConfig, updateDatalogPanel);
 		}
 		else {
-			updateDatalogPanel(refreshRate);
+			updateDatalogPanel(datalogConfig);
 		}
 	} catch (e) {
 		console.log("Error on Datalog operation " + e);
-		setTimeout(refreshDatalogData, refreshRate);
+		setTimeout(refreshDatalogData, datalogConfig.refreshRate);
 	}
 }
 
-function writeToDatalogFile(refreshRate, data) {
-	try {
-		if (data == null) {
-			data = []
-		} else {
-			data = JSON.parse(data)
-		}
+function getNewData() {
+	return getDatalogData().splice(0, 100000).reverse();
+}
 
-		var newRecords = getDatalogData().splice(0, 100000).reverse();
-		var combinedData = [...newRecords, ...data];
+function generateLogFileWithAllData(newData, datalogConfig, callbackFn) {
+	var writerStream = fs.createWriteStream(templogFilePath, { flags: 'a' });
+	var readerStream = fs.createReadStream(logFilePath);
+	var localCounter = 0;
 
-		fs.writeFile(logFilePath, JSON.stringify(combinedData), function (err) {
-			if (err) {
-				getDatalogData().unshift(...newRecords);
+	writerStream.on('close', function () {
+		fs.copyFile(templogFilePath, logFilePath, fs.constants.COPYFILE_FICLONE, (err) => {
+			fs.unlink(templogFilePath, () => { });
+			callbackFn(datalogConfig);
+		})
+	});
+
+	writerStream.on('err', function (err) {
+		console.log("Error" + err);
+	});
+
+	writerStream.on("finish", () => {
+		readerStream.pipe(writerStream);
+	});
+
+
+	newData.forEach(data => {
+		writerStream.write(`${JSON.stringify(data)}\r\n`, () => {
+			localCounter++;
+			if (localCounter == newData.length) {
+				writerStream.end();
 			}
-			updateDatalogPanel(refreshRate);
 		});
-	} catch (e) {
-		throw e;
-	}
+	})
 }
 
-function updateDatalogPanel(refreshRate) {
-	try {
-		fs.readFile(logFilePath, 'utf8', function (err, data) {
-			if (err) {
-				setTimeout(refreshDatalogData, refreshRate);
-				return;
-			}
-			var parsedData = JSON.parse(data);
-			var configData = getDatalogConfig();
-			console.log(configData);
-			getDatalogConfig().maxPageNumber = Math.ceil(parsedData.length / configData.recordsPerPage);
-			var recordStart = (configData.currentPageNumber - 1) * configData.recordsPerPage;
-			var recordEnd = recordStart + configData.recordsPerPage;
-			var datalogData = parsedData.slice(recordStart, recordEnd);
+function updateDatalogPanel(datalogConfig) {
+	if (selfWebView == null) {
+		setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
+		return;
+	}
 
+	try {
+		var datalogData = [];
+		var startIndex = ((datalogConfig.currentPageNumber - 1) * datalogConfig.recordsPerPage) + 1;
+		var stopIndex = startIndex + datalogConfig.recordsPerPage - 1;
+		var counter = 0;
+
+		var instream = fs.createReadStream(logFilePath);
+		var outstream = new stream();
+		var rl = readline.createInterface(instream, outstream);
+		var count = 0;
+
+		rl.on("line", (data) => {
+			counter++;
+			if (startIndex <= counter && counter <= stopIndex) {
+				try {
+					datalogData.push(JSON.parse(data));
+				} catch (e) {
+					console.log("Err ", e);
+				}
+			}
+		})
+
+		rl.on("error", (err) => {
+			console.log("Error" + err);
+			// setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
+		})
+
+		rl.on("close", () => {
+			getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
 			selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
-			setTimeout(refreshDatalogData, refreshRate);
-		});
+			setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
+		})
 	} catch (e) {
 		throw e;
 	}
 }
 
-if (fs.existsSync(logFilePath)) {
-	fs.unlinkSync(logFilePath);
-}
-
+subscribeDataLogTopic();
 refreshDatalogData();
 
 exports.DataLogPanel = DataLogPanel;
