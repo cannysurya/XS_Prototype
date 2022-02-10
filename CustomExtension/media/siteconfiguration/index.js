@@ -5,6 +5,7 @@ var activeServers = [];
 
 var deleteSiteButtonElement = document.getElementById("deleteSite");
 var addSiteButtonElement = document.getElementById("addSite");
+var selectedSiteNumber = -1;
 
 function renderTable() {
   let tableContainer = document.getElementById("siteTableContainer");
@@ -12,7 +13,7 @@ function renderTable() {
   let tableElement = document.getElementById("table");
 
   tableElement.innerHTML = `
-    <tr class = "table-header">
+    <tr class = "table-head">
         <td class="site-column">
           Site Number
         </td>
@@ -21,12 +22,12 @@ function renderTable() {
         </td>
     </tr>`;
   siteTableData.forEach((site) => {
-    tableElement.innerHTML += `<tr>
+    tableElement.innerHTML += `<tr onclick="triggerSelection(this)" id="siterow_${site.siteNumber}" class="${isRowActive(site.siteNumber)}">
         <td class="site-column">
           ${site.siteNumber}
         </td>
         <td class="server-name">
-          <select class="server-list" id="${site.siteNumber}" onchange="updateServerNumber(this)">
+          <select class="server-list" id="${site.siteNumber}" onchange="updateServerNumber(this)" onclick="event.stopPropagation()">
           </select>
         </td>
       </tr>`
@@ -47,10 +48,22 @@ function renderTable() {
   })
 }
 
+function isRowActive(siteNumber) {
+  return siteNumber === selectedSiteNumber ? 'active' : 'inactive';
+}
+
 function updateSiteData(siteData, activeServers) {
   siteTableData = siteData;
   this.activeServers = activeServers;
   renderTable();
+}
+
+function triggerSelection(selectedRow) {
+  var selectedRow = document.getElementById(selectedRow.id);
+  if (selectedRow != null && selectedRow.firstElementChild != null && selectedRow.firstElementChild.innerText != null) {
+    this.selectedSiteNumber = selectedRow.firstElementChild.innerText.trim();
+    renderTable();
+  }
 }
 
 function updateServerNumber(selectObj) {
@@ -65,8 +78,10 @@ function updateServerNumber(selectObj) {
 function subsribeToButton() {
   deleteSiteButtonElement.addEventListener("click", function () {
     vscode.postMessage({
-      command: 'deleteSite'
+      command: 'deleteSite',
+      value: selectedSiteNumber
     })
+    selectedSiteNumber = -1;
   });
 
   addSiteButtonElement.addEventListener("click", function () {
@@ -77,7 +92,6 @@ function subsribeToButton() {
 };
 
 window.addEventListener('message', event => {
-  console.log("Test");
   switch (event.data.command) {
     case 'updateSiteData':
       updateSiteData(event.data.siteData, event.data.activeServers);

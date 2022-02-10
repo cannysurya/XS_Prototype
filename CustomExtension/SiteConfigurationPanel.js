@@ -124,7 +124,7 @@ var SiteConfigurationPanel = /** @class */ (function () {
 									break;
 								}
 								case "deleteSite": {
-									deleteSite();
+									deleteSite(data.value);
 									break;
 								}
 								case "updateChangedServer": {
@@ -165,8 +165,8 @@ var SiteConfigurationPanel = /** @class */ (function () {
                 </head>
                 <body>
 									<div class="function-buttons">
+										<button class="button-1" id="addSite">Add</button>
 										<button class="button-1" id="deleteSite">Delete</button>
-										<button class="button-1" id="addSite">Add +</button>
 									</div>
 									<div id="siteTableContainer">
 									</div>
@@ -193,14 +193,8 @@ function addSite() {
 	updateSiteInfo();
 }
 
-function deleteSite() {
+function deleteSite(siteToBeDeleted) {
 	var servers = getServers().filter(x => x.isActive);
-	var totalSites = [];
-	servers.forEach(server => {
-		totalSites.push(...server.sites)
-	})
-
-	var siteToBeDeleted = totalSites[totalSites.length - 1];
 	servers.forEach(server => {
 		if (server.sites.indexOf(siteToBeDeleted) != -1) {
 			server.sites.splice(server.sites.indexOf(siteToBeDeleted), 1);

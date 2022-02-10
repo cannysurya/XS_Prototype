@@ -23,25 +23,35 @@ body {
 
 .function-buttons {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: 505px;
 }
 
-.table,
-td {
-  width: 250px;
-  border: 1px solid black;
-  border-collapse: collapse;
-  padding: 10px;
-}
-.table-header {
+.table-head {
   background-color: var(--vscode-editor-background);
   font-weight: bolder;
 }
 
 .server-list {
-  padding: 3px;
-  background-color: rgb(60, 60, 60);
-  color: rgb(240, 240, 240);
-  border-color: rgb(60, 60, 60);
+  background: transparent;
+  border-color: var(--vscode-foreground);
+  color: var(--vscode-foreground);
+}
+
+.active {
+  background-color: var(--vscode-inputValidation-infoBackground);
+}
+
+td {
+  align-items: center;
+  border: 1px solid var(--vscode-editorWidget-border);
+  border-collapse: collapse;
+  display: flex;
+  justify-content: center;
+  padding: 5px 0px 5px 10px;
+  width: 180px;
+}
+
+tr {
+  display: flex;
 }
