@@ -2,6 +2,7 @@
 
 const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
+const { performance } = require('perf_hooks');
 
 const PROTO_PATH = __dirname + '/testmethod.proto';
 const packageDefinition = protoLoader.loadSync(
@@ -14,6 +15,8 @@ const packageDefinition = protoLoader.loadSync(
 });
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const testMethodPackage = protoDescriptor.testmethod;
+
+var startTime = undefined;
 
 var tfeData = {
 
@@ -117,3 +120,9 @@ exports.setDatalogData = (newDatalogData) => datalogData = newDatalogData;
 exports.getDatalogConfig = () => datalogConfig;
 exports.setTFEData = (newTFEData) => tfeData = newTFEData;
 exports.getServers = () => servers;
+exports.startTimer = (() => {
+  startTime = performance.now();
+});
+exports.endTimer = (() => {
+  return performance.now() - startTime;
+});

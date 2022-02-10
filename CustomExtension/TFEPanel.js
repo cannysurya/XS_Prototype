@@ -4,7 +4,7 @@ const fs = require('fs');
 const vscode = require("vscode");
 const exec = require('child_process').exec;
 
-const { getServers, getTFEData } = require('./GlobalState');
+const { getServers, getTFEData, startTimer } = require('./GlobalState');
 
 const dllInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.dll";
 const pdbInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.pdb";
@@ -125,6 +125,7 @@ var TFEPanel = /** @class */ (function () {
 						return __generator(this, function (_a) {
 							switch (data.command) {
 								case "executeTestMethod": {
+									//startTimer();
 									vscode.window.showInformationMessage("Executing Test Method...");
 									getTFEData().IsExectionInProgress = true;
 									selfWebView.postMessage({ command: 'updateTFEData', tfeData: getTFEData() });

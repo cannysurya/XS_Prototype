@@ -1,9 +1,10 @@
 "use strict";
 
 const vscode = require("vscode");
-const { getServers, getDatalogData, getDatalogConfig, setDatalogData } = require('./GlobalState');
+const { getServers, getDatalogData, getDatalogConfig, setDatalogData, endTimer } = require('./GlobalState');
 const fs = require('fs');
 var lineReader = require('reverse-line-reader');
+const alert = require("alert-node");
 
 const logFileDirectory = __dirname + "/logs/";
 const logFilePath = logFileDirectory + "logs.txt";
@@ -206,7 +207,11 @@ function subscribeDataLogTopic() {
 			ClientName: "DataLog"
 		});
 		server.subscription.datalogSubscription.on("data", (data) => {
-			// console.log(++counter);
+			// ++counter;
+			// if (counter === 100) {
+			// 	var timeTaken = endTimer();
+			// 	alert(`Total Time Taken - ${timeTaken}ms`);
+			// }
 			data.keyValuePair.push({
 				"Key": "Server Name",
 				"Value": server.name
