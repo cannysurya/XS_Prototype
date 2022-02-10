@@ -3,22 +3,16 @@
 const vscode = require("vscode");
 const { getServers, getDatalogData, getDatalogConfig } = require('./GlobalState');
 const fs = require('fs');
-const readline = require('readline');
-const stream = require('stream');
+var lineReader = require('reverse-line-reader');
 
 const logFileDirectory = __dirname + "/logs/";
 const logFilePath = logFileDirectory + "logs.txt";
-const templogFilePath = logFileDirectory + "temp.txt";
 
 if (fs.existsSync(logFilePath)) {
 	fs.unlinkSync(logFilePath);
 }
 
-if (fs.existsSync(templogFilePath)) {
-	fs.unlinkSync(templogFilePath);
-}
-
-fs.open(logFilePath, 'w', function (err) {
+fs.writeFile(logFilePath, '\r\n', function (err) {
 	if (err) throw err;
 });
 
@@ -198,12 +192,12 @@ function subscribeDataLogTopic() {
 };
 
 function refreshDatalogData() {
+	console.log("Data Length - ", getDatalogData().length);
 	var datalogConfig = getDatalogConfig();
-
 	try {
 		if (getDatalogData().length > 0) {
-			var newData = getNewData();
-			generateLogFileWithAllData(newData, datalogConfig, updateDatalogPanel);
+			var newDataAsString = getNewDataAsString();
+			updateLogFileWithNewData(newDataAsString, datalogConfig, updateDatalogPanel);
 		}
 		else {
 			updateDatalogPanel(datalogConfig);
@@ -214,39 +208,26 @@ function refreshDatalogData() {
 	}
 }
 
-function getNewData() {
-	return getDatalogData().splice(0, 100000).reverse();
+function getNewDataAsString() {
+	var newData = getDatalogData().splice(0, 1000000).reverse();
+	var newDataAsString = "";
+	newData.forEach(data => {
+		data.keyValuePair.forEach(keyValuePair => {
+			newDataAsString += keyValuePair.Value + "|";
+		})
+		newDataAsString += "\r\n";
+	})
+	return newDataAsString;
 }
 
-function generateLogFileWithAllData(newData, datalogConfig, callbackFn) {
-	var writerStream = fs.createWriteStream(templogFilePath, { flags: 'a' });
-	var readerStream = fs.createReadStream(logFilePath);
-	var localCounter = 0;
-
-	writerStream.on('close', function () {
-		fs.copyFile(templogFilePath, logFilePath, fs.constants.COPYFILE_FICLONE, (err) => {
-			fs.unlink(templogFilePath, () => { });
-			callbackFn(datalogConfig);
-		})
+function updateLogFileWithNewData(newDataAsString, datalogConfig, callbackFn) {
+	console.log("Writing to a file");
+	fs.appendFile(logFilePath, newDataAsString, {
+		flags: 'a'
+	}, (err) => {
+		console.log("Written to a file");
+		callbackFn(datalogConfig);
 	});
-
-	writerStream.on('err', function (err) {
-		console.log("Error" + err);
-	});
-
-	writerStream.on("finish", () => {
-		readerStream.pipe(writerStream);
-	});
-
-
-	newData.forEach(data => {
-		writerStream.write(`${JSON.stringify(data)}\r\n`, () => {
-			localCounter++;
-			if (localCounter == newData.length) {
-				writerStream.end();
-			}
-		});
-	})
 }
 
 function updateDatalogPanel(datalogConfig) {
@@ -261,31 +242,37 @@ function updateDatalogPanel(datalogConfig) {
 		var stopIndex = startIndex + datalogConfig.recordsPerPage - 1;
 		var counter = 0;
 
-		var instream = fs.createReadStream(logFilePath);
-		var outstream = new stream();
-		var rl = readline.createInterface(instream, outstream);
-		var count = 0;
+		console.log("Reading from a file using line Reader");
+		lineReader.eachLine(logFilePath, (data, last) => {
+			if (last) {
+				console.log(counter);
+				getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
+				selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
+				setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
+				console.log("Read everything");
+				return false;
+			}
 
-		rl.on("line", (data) => {
-			counter++;
-			if (startIndex <= counter && counter <= stopIndex) {
-				try {
-					datalogData.push(JSON.parse(data));
-				} catch (e) {
-					console.log("Err ", e);
+			if (data.indexOf("|") !== -1) {
+				counter++;
+				if (startIndex <= counter && counter <= stopIndex) {
+					var values = data.split("|");
+					datalogData.push([{
+						"Key": "Site",
+						"Value": values[0]
+					}, {
+						"Key": "Measured Value",
+						"Value": values[1]
+					}, {
+						"Key": "Test Method Name",
+						"Value": values[2]
+					}, {
+						"Key": "Server Name",
+						"Value": values[3]
+					}])
 				}
 			}
-		})
-
-		rl.on("error", (err) => {
-			console.log("Error" + err);
-			// setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
-		})
-
-		rl.on("close", () => {
-			getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
-			selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
-			setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
+			return true;
 		})
 	} catch (e) {
 		throw e;
