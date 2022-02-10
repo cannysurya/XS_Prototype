@@ -24,7 +24,7 @@ var datalogConfig = {
   recordsPerPage: 10,
   currentPageNumber: 1,
   maxPageNumber: 1,
-  refreshRate: 2000
+  refreshRate: 100
 }
 
 var servers = [{
