@@ -135,7 +135,6 @@ var DataLogPanel = /** @class */ (function () {
 							switch (data.command) {
 								case 'updateDatalogConfig':
 									getDatalogConfig().recordsPerPage = data.newConfigData.recordsPerPage;
-									getDatalogConfig().refreshRate = data.newConfigData.refreshRate;
 									getDatalogConfig().currentPageNumber = data.newConfigData.currentPageNumber;
 									break;
 								case 'syncDatalogConfigData':
@@ -176,10 +175,38 @@ var DataLogPanel = /** @class */ (function () {
                 </head>
                 <body>
 									<div id="config">
-										<div><h4 id="records">Records per page: </h4><input id="recordsInput" type="number" min="0" value="${getDatalogConfig().recordsPerPage}"></div>
-										<div><h4 id="current">Current page: </h4><input id="currentPageInput" type="number" min="0" value="${getDatalogConfig().currentPageNumber}"></div>
-										<div><h4 id="max">Max page number: ${getDatalogConfig().maxPageNumber} </h4></div>
-										<div><h4 id="refresh">Refresh rate: </h4><input id="refreshInput" type="number" min="0" value="${getDatalogConfig().refreshRate}"></div>
+										<div class="config-set">
+											<div class="config-set-1">
+												Records per page:
+											</div>
+											<div class="config-set-2">
+												<input id="recordsInput" type="number" min="1" value="${getDatalogConfig().recordsPerPage}">
+											</div>
+										</div>
+										<div class="config-set">
+											<div class="config-set-1">
+												Current page:
+											</div>
+											<div class="config-set-2">
+												<input id="currentPageInput" type="number" min="0" value="${getDatalogConfig().currentPageNumber}">
+											</div>
+										</div>
+										<div class="config-set">
+											<div class="config-set-1">
+												Total Pages:
+											</div>
+											<div class="config-set-2 pad-6-4" id="maxPageNumber">
+												${getDatalogConfig().maxPageNumber}
+											</div>
+										</div>
+										<div class="config-set">
+											<div class="config-set-1">
+												Refresh rate:
+											</div>
+											<div class="config-set-2 pad-6-4">
+												${getDatalogConfig().refreshRate}ms
+											</div>
+										</div>
 									</div>
 									<div class="tableComponent2" id="tableComponent2">
 										<table id="table2">

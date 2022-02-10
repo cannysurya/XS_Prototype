@@ -2,31 +2,24 @@ const vscode = acquireVsCodeApi();
 
 let recordsInputElement = document.getElementById("recordsInput");
 let currentPageInputElement = document.getElementById("currentPageInput");
-let refreshInputElement = document.getElementById("refreshInput");
-let maxPageNumberElement = document.getElementById("max");
+let maxPageNumberElement = document.getElementById("maxPageNumber");
 
 recordsInputElement.addEventListener('change', updateRecords);
 currentPageInputElement.addEventListener('change', updateCurrentPageNumber);
-refreshInputElement.addEventListener('change', updateRefreshRate);
 
 function updateRecords(e) {
   updateMaxPageNumber()
-  updateConfig(parseInt(e.target.value), parseInt(currentPageInputElement.value), parseInt(refreshInputElement.value));
+  updateConfig(parseInt(e.target.value), parseInt(currentPageInputElement.value));
 }
 
 function updateCurrentPageNumber(e) {
-  updateConfig(parseInt(recordsInputElement.value), parseInt(e.target.value), parseInt(refreshInputElement.value));
+  updateConfig(parseInt(recordsInputElement.value), parseInt(e.target.value));
 }
 
-function updateRefreshRate(e) {
-  updateConfig(parseInt(recordsInputElement.value), parseInt(currentPageInputElement.value), parseInt(e.target.value));
-}
-
-function updateConfig(recordsPerPage, currentPageNumber, refreshRate) {
+function updateConfig(recordsPerPage, currentPageNumber) {
   let newConfigData = {
     recordsPerPage: recordsPerPage,
-    currentPageNumber: currentPageNumber,
-    refreshRate: refreshRate
+    currentPageNumber: currentPageNumber
   }
   vscode.postMessage({
     command: 'updateDatalogConfig', newConfigData: newConfigData
@@ -38,7 +31,7 @@ function updateTableData(tableData) {
   table.innerHTML = ``;
   table.innerHTML = `<tr class="table-head">
         <td>Server Name</td>
-        <td>Site</td>
+        <td>Site Number</td>
         <td>Measured Value</td>
         <td>Test Method Name</td>
     </tr>`;
@@ -58,12 +51,15 @@ function updateTableData(tableData) {
 function updateDatalogConfig(data) {
   recordsInputElement.value = data.recordsPerPage;
   currentPageInputElement.value = data.currentPageNumber;
-  maxPageNumberElement.innerHTML = `Max Page Number: ${Math.max(data.maxPageNumber, 1)}`;
-  refreshInputElement.value = data.refreshRate;
+  if (!isNaN(data.maxPageNumber)) {
+    maxPageNumberElement.innerHTML = `${Math.max(data.maxPageNumber, 1)}`;
+  }
 }
 
 function updateMaxPageNumber(maxPageNumber) {
-  maxPageNumberElement.innerHTML = `Max Page Number: ${Math.max(maxPageNumber, 1)}`;
+  if (!isNaN(maxPageNumber)) {
+    maxPageNumberElement.innerHTML = `${Math.max(maxPageNumber, 1)}`;
+  }
 }
 
 window.addEventListener('message', event => {

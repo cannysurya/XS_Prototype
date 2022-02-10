@@ -1,27 +1,55 @@
+body {
+  margin: 25px;
+}
+
 .table-head {
   background-color: var(--vscode-editor-background);
   font-weight: bolder;
 }
 #table2 td,
 #table2 {
-  border: 1px solid black;
   border-collapse: collapse;
-  padding: 10px;
+  justify-content: center;
+  padding: 5px 0px 5px 10px;
+  width: 180px;
 }
 
 #config {
   display: flex;
+  margin: 12px 0;
+  width: 720px;
 }
 
-#config div {
+.config-set {
+  align-items: center;
   display: flex;
-  margin-right: 14px;
+  width: 180px;
+}
+
+.config-set-1 {
+}
+
+.config-set-2 {
+}
+
+.pad-6-4 {
+  padding: 6px 4px;
 }
 
 input {
   height: 20px;
-  width: 55px !important;
+  width: 50px !important;
   position: relative;
   top: 0px;
   left: 5px;
+}
+
+td {
+  align-items: center;
+  display: flex;
+  border: 1px solid var(--vscode-editorWidget-border);
+}
+
+tr {
+  display: flex;
 }
