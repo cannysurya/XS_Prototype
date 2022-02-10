@@ -115,7 +115,21 @@ var SiteConfigurationPanel = /** @class */ (function () {
 					return __awaiter(_this, void 0, void 0, function () {
 						return __generator(this, function (_a) {
 							switch (data.command) {
-
+								case "syncSiteData": {
+									selfWebView.postMessage({ command: 'updateSiteData', siteData: getSiteData(), activeServers: getActiveServers() });
+									break;
+								}
+								case "addSite": {
+									addSite();
+									break;
+								}
+								case "deleteSite": {
+									deleteSite();
+									break;
+								}
+								case "updateChangedServer": {
+									updateChangedServer(data.value);
+								}
 							}
 							return [2 /*return*/];
 						});
@@ -151,7 +165,10 @@ var SiteConfigurationPanel = /** @class */ (function () {
                 </head>
                 <body>
 									<div class="function-buttons">
-										<p> View is loaded </p>
+										<button class="button-1" id="deleteSite">Delete</button>
+										<button class="button-1" id="addSite">Add +</button>
+									</div>
+									<div id="siteTableContainer">
 									</div>
                 </body>
                 <script src="${scriptUri}"></script>
@@ -163,7 +180,71 @@ var SiteConfigurationPanel = /** @class */ (function () {
 	return SiteConfigurationPanel;
 }());
 
-(function updateSiteInfo() {
+function addSite() {
+	var servers = getServers().filter(x => x.isActive);
+	var totalSites = [];
+	servers.forEach(server => {
+		totalSites.push(...server.sites)
+	})
+
+	servers[0].sites.push(`Site ${totalSites.length + 1}`);
+
+	selfWebView.postMessage({ command: 'updateSiteData', siteData: getSiteData(), activeServers: getActiveServers() });
+	updateSiteInfo();
+}
+
+function deleteSite() {
+	var servers = getServers().filter(x => x.isActive);
+	var totalSites = [];
+	servers.forEach(server => {
+		totalSites.push(...server.sites)
+	})
+
+	var siteToBeDeleted = totalSites[totalSites.length - 1];
+	servers.forEach(server => {
+		if (server.sites.indexOf(siteToBeDeleted) != -1) {
+			server.sites.splice(server.sites.indexOf(siteToBeDeleted), 1);
+		}
+	})
+	selfWebView.postMessage({ command: 'updateSiteData', siteData: getSiteData(), activeServers: getActiveServers() });
+	updateSiteInfo();
+}
+
+function updateChangedServer(value) {
+	getServers().filter(x => x.isActive).forEach(server => {
+		if (server.name === value.serverName && server.sites.indexOf(value.siteNumber) === -1) {
+			server.sites.push(value.siteNumber);
+		}
+		if (server.name !== value.serverName && server.sites.indexOf(value.siteNumber) !== -1) {
+			server.sites.splice(server.sites.indexOf(value.siteNumber), 1);
+		}
+	})
+	updateSiteInfo();
+}
+
+function getSiteData() {
+	var siteData = [];
+	getServers().filter(x => x.isActive).forEach(server => {
+		server.sites.forEach(site => {
+			siteData.push({
+				siteNumber: site,
+				serverName: server.name
+			})
+		})
+	});
+	siteData.sort((x, y) => {
+		return parseInt(x.siteNumber.split(" ")[1]) - parseInt(y.siteNumber.split(" ")[1]);
+	})
+	return siteData;
+}
+
+function getActiveServers() {
+	var activeServers = [];
+	getServers().filter(x => x.isActive).forEach(server => activeServers.push(server.name));
+	return activeServers;
+}
+
+function updateSiteInfo() {
 	getServers().filter(x => x.isActive).forEach((server) => {
 		server.service.siteConfigurationService.UpdateSite({
 			Sites: server.sites
@@ -174,6 +255,8 @@ var SiteConfigurationPanel = /** @class */ (function () {
 			}
 		});
 	})
-})();
+};
+
+updateSiteInfo();
 
 exports.SiteConfigurationPanel = SiteConfigurationPanel;
