@@ -268,7 +268,7 @@ function updateDatalogPanel(datalogConfig) {
 				console.log(counter);
 				getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
 				//selfWebView.postMessage({ command: 'updateDatalogConfig', datalogConfig: getDatalogConfig() });
-				selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
+				selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData.reverse() });
 				setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
 				console.log("Read everything");
 				return false;

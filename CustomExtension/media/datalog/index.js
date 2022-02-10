@@ -51,7 +51,6 @@ function updateTableData(tableData) {
         <td>Measured Value</td>
         <td>Test Method Name</td>
     </tr>`;
-  tableData.reverse();
   tableData.forEach(data => {
     var x = table.insertRow(1);
     var a = x.insertCell(0);
