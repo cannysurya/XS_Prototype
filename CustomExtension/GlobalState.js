@@ -114,5 +114,6 @@ var servers = [server1, server2]
 exports.getTFEData = () => tfeData;
 exports.getDatalogData = () => datalogData;
 exports.getDatalogConfig = () => datalogConfig;
+exports.setDatalogConfig = (newData) => datalogConfig = newData;
 exports.setTFEData = (newTFEData) => tfeData = newTFEData;
 exports.getServers = () => servers;

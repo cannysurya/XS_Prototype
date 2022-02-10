@@ -1,0 +1,27 @@
+.table-head {
+  background-color: var(--vscode-editor-background);
+  font-weight: bolder;
+}
+#table2 td,
+#table2 {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 10px;
+}
+
+#config {
+  display: flex;
+}
+
+#config div {
+  display: flex;
+  margin-right: 14px;
+}
+
+input {
+  height: 20px;
+  width: 55px !important;
+  position: relative;
+  top: 0px;
+  left: 5px;
+}
