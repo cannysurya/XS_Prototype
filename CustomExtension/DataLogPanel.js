@@ -128,7 +128,14 @@ var DataLogPanel = /** @class */ (function () {
 					return __awaiter(_this, void 0, void 0, function () {
 						return __generator(this, function (_a) {
 							switch (data.command) {
-
+								case 'updateDatalogConfig':
+									getDatalogConfig().recordsPerPage = data.newConfigData.recordsPerPage;
+									getDatalogConfig().refreshRate = data.newConfigData.refreshRate;
+									getDatalogConfig().currentPageNumber = data.newConfigData.currentPageNumber;
+									break;
+								case 'syncDatalogConfigData':
+									selfWebView.postMessage({ command: 'updateDatalogConfig', datalogConfig: getDatalogConfig() });
+									break;
 							}
 							return [2 /*return*/];
 						});
@@ -163,8 +170,21 @@ var DataLogPanel = /** @class */ (function () {
                     <link href="${styleUri}" rel="stylesheet">
                 </head>
                 <body>
-									<div class="function-buttons">
-										<p> View is loaded </p>
+									<div id="config">
+										<div><h4 id="records">Records per page: </h4><input id="recordsInput" type="number" min="0" value="${getDatalogConfig().recordsPerPage}"></div>
+										<div><h4 id="current">Current page: </h4><input id="currentPageInput" type="number" min="0" value="${getDatalogConfig().currentPageNumber}"></div>
+										<div><h4 id="max">Max page number: ${getDatalogConfig().maxPageNumber} </h4></div>
+										<div><h4 id="refresh">Refresh rate: </h4><input id="refreshInput" type="number" min="0" value="${getDatalogConfig().refreshRate}"></div>
+									</div>
+									<div class="tableComponent2" id="tableComponent2">
+										<table id="table2">
+											<tr class="table-head">
+												<td>Server Name</td>
+												<td>Site</td>
+												<td>Measured Value</td>
+												<td>Test Method Name</td>
+											</tr>
+										</table>
 									</div>
                 </body>
                 <script src="${scriptUri}"></script>
@@ -209,7 +229,7 @@ function refreshDatalogData() {
 }
 
 function getNewDataAsString() {
-	var newData = getDatalogData().splice(0, 1000000).reverse();
+	var newData = getDatalogData().splice(0, 1000000);
 	var newDataAsString = "";
 	newData.forEach(data => {
 		data.keyValuePair.forEach(keyValuePair => {
@@ -247,6 +267,7 @@ function updateDatalogPanel(datalogConfig) {
 			if (last) {
 				console.log(counter);
 				getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
+				//selfWebView.postMessage({ command: 'updateDatalogConfig', datalogConfig: getDatalogConfig() });
 				selfWebView.postMessage({ command: 'updateDatalogData', datalogData: datalogData });
 				setTimeout(refreshDatalogData, getDatalogConfig().refreshRate);
 				console.log("Read everything");

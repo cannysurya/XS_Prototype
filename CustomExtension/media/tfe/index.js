@@ -1,9 +1,5 @@
 const vscode = acquireVsCodeApi();
 
-vscode.postMessage({
-  command: 'syncTFEData'
-})
-
 var executeButtonElement = document.getElementById("executeButton");
 var resumeExecuteButtonElement = document.getElementById("resumeExecutionButton");
 var stopExecuteButtonElement = document.getElementById("stopExecutionButton");
@@ -116,3 +112,7 @@ window.addEventListener('message', event => {
 });
 
 subsribeToButton();
+
+vscode.postMessage({
+  command: 'syncTFEData'
+})
