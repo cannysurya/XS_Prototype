@@ -101,7 +101,7 @@ var server2 = {
     datalogSubscription: undefined
   },
   sites: [],
-  isActive: false
+  isActive: true
 }
 
 var servers = [server1, server2]

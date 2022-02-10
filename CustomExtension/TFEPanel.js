@@ -11,7 +11,7 @@ const pdbInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/T
 const TestProjectSlnLocation = __dirname + "/../TestProject";
 
 var selfWebView = undefined;
-var skipServerAttach = true;
+var skipServerAttach = false;
 var isRemoteServer = true;
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -393,23 +393,21 @@ function sendDLLToServer(dLLData, pdbData) {
 }
 
 function executeTestMethodInServer() {
-	getServers().filter(x => x.isActive).forEach((server) => {
-		if (server.sites.length > 0) {
-			server.service.testMethodService.ExecuteTestMethod(getTFEData(), (err) => {
-				console.log("Receiving gRPC Response from ExecuteTestMethod");
-				if (err) {
-					console.log(err);
-				} else {
-					if (selfWebView) {
-						resetIsExecutionInProgressAndHitBreakpoint();
-						vscode.window.showInformationMessage("Test Method Executed Successfully...");
-					}
-					//if (server.debugSession) {
-					//vscode.debug.stopDebugging(server.debugSession);
-					//}
+	getServers().filter(x => x.isActive).filter(y => y.sites.length != 0).forEach((server) => {
+		server.service.testMethodService.ExecuteTestMethod(getTFEData(), (err) => {
+			console.log("Receiving gRPC Response from ExecuteTestMethod");
+			if (err) {
+				console.log(err);
+			} else {
+				if (selfWebView) {
+					resetIsExecutionInProgressAndHitBreakpoint();
+					vscode.window.showInformationMessage("Test Method Executed Successfully...");
 				}
-			});
-		}
+				//if (server.debugSession) {
+				//vscode.debug.stopDebugging(server.debugSession);
+				//}
+			}
+		});
 	})
 }
 
@@ -423,7 +421,7 @@ function getAttachObj(server) {
 }
 
 function attachToServer() {
-	getServers().filter(x => x.isActive).forEach(async (server) => {
+	getServers().filter(x => x.isActive).filter(y => y.sites.length != 0).forEach(async (server) => {
 		// registerSessionEvent(server);
 		await new Promise(r => setTimeout(r, 1000));
 		vscode.debug.startDebugging(undefined, getAttachObj(server), undefined);
