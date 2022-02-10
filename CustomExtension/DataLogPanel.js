@@ -235,9 +235,10 @@ function subscribeDataLogTopic() {
 		});
 		server.subscription.datalogSubscription.on("data", (data) => {
 			// ++counter;
-			// if (counter === 100) {
+			// if (counter === 20002) {
 			// 	var timeTaken = endTimer();
 			// 	alert(`Total Time Taken - ${timeTaken}ms`);
+			// 	counter = 0;
 			// }
 			data.keyValuePair.push({
 				"Key": "Server Name",

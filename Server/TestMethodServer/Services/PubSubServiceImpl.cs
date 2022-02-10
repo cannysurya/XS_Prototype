@@ -33,6 +33,7 @@ namespace TestMethodServer.Services
 
 				foreach (var client in _clientCollection[PubSubTopic.ResumeTopic])
 				{
+					Console.WriteLine("Sending PubSub response to " + resumeInfo.FlowNodeIndex);
 					await ((IServerStreamWriter<ResumeInfo>)client.Value).WriteAsync(resumeInfo);
 				}
 			}

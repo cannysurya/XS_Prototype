@@ -84,6 +84,7 @@ namespace TestMethodServer.Services
 			{
 				currentFlowNode.HasBreakPoint = false;
 			}
+			Console.WriteLine("Releiving " + currentFlowNode.Name);
 			return Task.FromResult(new Empty());
 		}
 
@@ -111,7 +112,8 @@ namespace TestMethodServer.Services
 
 					while (flowNode.HasBreakPoint)
 					{
-
+						Thread.Sleep(1000);
+						Console.WriteLine("Waiting..." + flowNode.Name);
 					}
 					currentFlowNode = null;
 				}

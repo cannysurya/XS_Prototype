@@ -45,13 +45,9 @@ var server1 = {
       "request": "attach",
       "processName": "TestMethodServer.exe",
       "pipeTransport": {
-        "pipeProgram": `${__dirname}/plink.exe`,
+        "pipeProgram": "ssh",
         "pipeArgs": [
-          "soliton@192.168.1.19",
-          "-pw",
-          "login@123",
-          "-batch",
-          "-T"
+          "soliton@192.168.1.19"
         ],
         "debuggerPath": "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
         "quoteArgs": false
@@ -59,15 +55,15 @@ var server1 = {
     }
   },
   service: {
-    testMethodService: new testMethodPackage.TestMethod('localhost:30051', grpc.credentials.createInsecure()),
-    siteConfigurationService: new testMethodPackage.SiteConfiguration('localhost:30051', grpc.credentials.createInsecure()),
-    pubsubService: new testMethodPackage.PubSub('localhost:30051', grpc.credentials.createInsecure())
+    testMethodService: new testMethodPackage.TestMethod('192.168.1.19:30051', grpc.credentials.createInsecure()),
+    siteConfigurationService: new testMethodPackage.SiteConfiguration('192.168.1.19:30051', grpc.credentials.createInsecure()),
+    pubsubService: new testMethodPackage.PubSub('192.168.1.19:30051', grpc.credentials.createInsecure())
   },
   subscription: {
     resumeSubscription: undefined,
     datalogSubscription: undefined
   },
-  sites: ["Site 1"],
+  sites: [],
   isActive: true
 }
 
@@ -81,18 +77,14 @@ var server2 = {
       processName: "TestMethodServer.exe"
     },
     remote: {
-      "name": "Remote 1",
+      "name": "Remote 2",
       "type": "coreclr",
       "request": "attach",
       "processName": "TestMethodServer.exe",
       "pipeTransport": {
-        "pipeProgram": `${__dirname}/plink.exe`,
+        "pipeProgram": "ssh",
         "pipeArgs": [
-          "soliton@192.168.1.19",
-          "-pw",
-          "login@123",
-          "-batch",
-          "-T"
+          "soliton@192.168.1.20"
         ],
         "debuggerPath": "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
         "quoteArgs": false
@@ -100,15 +92,15 @@ var server2 = {
     }
   },
   service: {
-    testMethodService: new testMethodPackage.TestMethod('localhost:30051', grpc.credentials.createInsecure()),
-    siteConfigurationService: new testMethodPackage.SiteConfiguration('localhost:30051', grpc.credentials.createInsecure()),
-    pubsubService: new testMethodPackage.PubSub('localhost:30051', grpc.credentials.createInsecure())
+    testMethodService: new testMethodPackage.TestMethod('192.168.1.20:30051', grpc.credentials.createInsecure()),
+    siteConfigurationService: new testMethodPackage.SiteConfiguration('192.168.1.20:30051', grpc.credentials.createInsecure()),
+    pubsubService: new testMethodPackage.PubSub('192.168.1.20:30051', grpc.credentials.createInsecure())
   },
   subscription: {
     resumeSubscription: undefined,
     datalogSubscription: undefined
   },
-  sites: ["Site 2"],
+  sites: [],
   isActive: false
 }
 

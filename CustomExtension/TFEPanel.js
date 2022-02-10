@@ -12,7 +12,7 @@ const TestProjectSlnLocation = __dirname + "/../TestProject";
 
 var selfWebView = undefined;
 var skipServerAttach = true;
-var isRemoteServer = false;
+var isRemoteServer = true;
 
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
 	function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -125,11 +125,15 @@ var TFEPanel = /** @class */ (function () {
 						return __generator(this, function (_a) {
 							switch (data.command) {
 								case "executeTestMethod": {
-									//startTimer();
-									vscode.window.showInformationMessage("Executing Test Method...");
-									getTFEData().IsExectionInProgress = true;
-									selfWebView.postMessage({ command: 'updateTFEData', tfeData: getTFEData() });
-									executeTestMethod();
+									if (getServers().filter(x => x.isActive).filter(y => y.sites.length != 0).length === 0) {
+										vscode.window.showInformationMessage("Please configure atleast one site");
+									} else {
+										//startTimer();
+										vscode.window.showInformationMessage("Executing Test Method...");
+										getTFEData().IsExectionInProgress = true;
+										selfWebView.postMessage({ command: 'updateTFEData', tfeData: getTFEData() });
+										executeTestMethod();
+									}
 									break;
 								}
 								case "rebuildProject": {
@@ -216,6 +220,7 @@ var TFEPanel = /** @class */ (function () {
 			ClientName: "TFE"
 		});
 		server.subscription.resumeSubscription.on("data", (data) => {
+			console.log("Triggering the breakpoint " + data.FlowNodeIndex);
 			setHitBreakpoint(data.FlowNodeIndex);
 		})
 	});
@@ -389,20 +394,22 @@ function sendDLLToServer(dLLData, pdbData) {
 
 function executeTestMethodInServer() {
 	getServers().filter(x => x.isActive).forEach((server) => {
-		server.service.testMethodService.ExecuteTestMethod(getTFEData(), (err) => {
-			console.log("Receiving gRPC Response from ExecuteTestMethod");
-			if (err) {
-				console.log(err);
-			} else {
-				if (selfWebView) {
-					resetIsExecutionInProgressAndHitBreakpoint();
-					vscode.window.showInformationMessage("Test Method Executed Successfully...");
+		if (server.sites.length > 0) {
+			server.service.testMethodService.ExecuteTestMethod(getTFEData(), (err) => {
+				console.log("Receiving gRPC Response from ExecuteTestMethod");
+				if (err) {
+					console.log(err);
+				} else {
+					if (selfWebView) {
+						resetIsExecutionInProgressAndHitBreakpoint();
+						vscode.window.showInformationMessage("Test Method Executed Successfully...");
+					}
+					//if (server.debugSession) {
+					//vscode.debug.stopDebugging(server.debugSession);
+					//}
 				}
-				//if (server.debugSession) {
-				//vscode.debug.stopDebugging(server.debugSession);
-				//}
-			}
-		});
+			});
+		}
 	})
 }
 
