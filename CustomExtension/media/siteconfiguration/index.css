@@ -1,0 +1,47 @@
+body {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  font-family: sans-serif !important;
+  height: 100%;
+  justify-content: center;
+  margin: 25px;
+  width: 100%;
+}
+
+.button-1 {
+  margin: 5px;
+  outline: none !important;
+  padding: 5px 5px;
+  transition: 0.1s;
+  width: 67px;
+}
+
+.button-1:active {
+  transform: scale(0.95);
+}
+
+.function-buttons {
+  display: flex;
+  justify-content: flex-end;
+  width: 505px;
+}
+
+.table,
+td {
+  width: 250px;
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 10px;
+}
+.table-header {
+  background-color: var(--vscode-editor-background);
+  font-weight: bolder;
+}
+
+.server-list {
+  padding: 3px;
+  background-color: rgb(60, 60, 60);
+  color: rgb(240, 240, 240);
+  border-color: rgb(60, 60, 60);
+}
