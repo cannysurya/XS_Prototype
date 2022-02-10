@@ -8,11 +8,13 @@ namespace TestProject
   {
     public override void Execute()
     {
-      var fileName = "1K Samples.csv";
-      var inputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\input\\{fileName}";
-      var outputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\output\\{fileName}";
+      //var fileName = "1K Sample";
+      //var inputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\input\\{fileName}";
+      //var outputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\output\\{fileName}";
 
-      semiContext.SortDataUsingDLLAndSendData(inputDirectory, outputDirectory);
+      //semiContext.SortDataUsingDLLAndSendData(inputDirectory, outputDirectory);
+
+      semiContext.IterateOverAllSites(100);
     }
   }
 }

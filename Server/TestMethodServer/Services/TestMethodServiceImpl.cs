@@ -53,25 +53,25 @@ namespace TestMethodServer.Services
 
 			var canExecuteTestFlow = LoadContext();
 
-			if (canExecuteTestFlow)
-			{
-				ExecuteTestFlow(request);
-			}
+      if (canExecuteTestFlow)
+      {
+        ExecuteTestFlow(request);
+      }
 
-			//double totalTime = 0;
-			//if (canExecuteTestFlow)
-			//{
-			//	for (var i = 0; i < 1000; i++)
-			//     {
-			//		Stopwatch stopwatch = Stopwatch.StartNew();
-			//		ExecuteTestFlow(request);
-			//		stopwatch.Stop();
-			//		totalTime += stopwatch.Elapsed.TotalMilliseconds;
-			//	}
-			//	Console.WriteLine("Time taken for execution " + totalTime / 1000 + "ms");
-			//}
+      //double totalTime = 0;
+      //if (canExecuteTestFlow)
+      //{
+      //  for (var i = 0; i < 100; i++)
+      //  {
+      //    Stopwatch stopwatch = Stopwatch.StartNew();
+      //    ExecuteTestFlow(request);
+      //    stopwatch.Stop();
+      //    totalTime += stopwatch.Elapsed.TotalMilliseconds;
+      //  }
+      //  Console.WriteLine("Time taken for execution " + totalTime / 100 + "ms");
+      //}
 
-			Console.WriteLine($"After Execution - All load contexts : {string.Join(", ", AssemblyLoadContext.All.Select(x => x.Name))}");
+      Console.WriteLine($"After Execution - All load contexts : {string.Join(", ", AssemblyLoadContext.All.Select(x => x.Name))}");
 			Console.WriteLine();
 			Console.WriteLine();
 

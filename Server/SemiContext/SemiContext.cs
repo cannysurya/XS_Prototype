@@ -45,14 +45,25 @@ namespace SemiContextNS
           string[] values = line.Split(',');
           foreach (string value in values)
           {
-
             messenger.Send(GetLogInfo(site, value, testMethodName));
           }
         }
       });
     }
 
-    private DataLogInfo GetLogInfo(string site, string measuredValue, string testMethodName)
+    public void IterateOverAllSites(double iterationCount)
+    {
+      var testMethodName = new StackFrame(1, true).GetMethod().DeclaringType.FullName.Split(".")[1];
+      Parallel.ForEach(sites, site =>
+      {
+        for (double i = 0; i < iterationCount; i++)
+        {
+          messenger.Send(GetLogInfo(site, i.ToString(), testMethodName));
+        }
+      });
+    }
+
+      private DataLogInfo GetLogInfo(string site, string measuredValue, string testMethodName)
     {
       var datalogInfo = new DataLogInfo();
       datalogInfo.KeyValuePair.Add(new gRPCKeyValuePair() { Key = "Site", Value = site });

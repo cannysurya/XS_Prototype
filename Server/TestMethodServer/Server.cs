@@ -45,14 +45,6 @@ namespace TestMethodServer
 			Console.WriteLine("server listening on port " + Port);
 			Console.WriteLine("Press any key to stop the server...");
 
-			//var fileName = "100 Samples.csv";
-			//var inputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\input\\{fileName}";
-			//var outputDirectory = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent + $"\\Test Files\\output\\{fileName}";
-
-			//BaseTestMethod.semiContext.sites = new List<string> { "Site1" };
-			//BaseTestMethod.semiContext.SortDataUsingDLLAndSendData(inputDirectory, outputDirectory);
-
-
 			Console.ReadKey();
 
 			server.ShutdownAsync().Wait();
