@@ -3,6 +3,8 @@ const { setTFEData } = require("./GlobalState");
 const { TFEPanel } = require("./TFEPanel");
 const { DataLogPanel } = require("./DataLogPanel");
 const { SiteConfigurationPanel } = require("./SiteConfigurationPanel");
+const { BitMapToolPanel } = require("./BitMapToolPanel");
+const { DigitalScopePanel } = require("./DigitalScopePanel");
 
 var fs = require("fs");
 var isXSProject = false;
@@ -70,6 +72,24 @@ function activate(context) {
       "customextension.siteConfigurationPanel",
       function () {
         SiteConfigurationPanel.createOrShow(context.extensionUri);
+      }
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "customextension.bitmaptoolPanel",
+      function () {
+        BitMapToolPanel.createOrShow(context.extensionUri);
+      }
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      "customextension.digitalscopePanel",
+      function () {
+        DigitalScopePanel.createOrShow(context.extensionUri);
       }
     )
   );

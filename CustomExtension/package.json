@@ -27,6 +27,14 @@
 			{
 				"command": "customextension.siteConfigurationPanel",
 				"title": "Site Configuration Panel"
+			},
+			{
+				"command": "customextension.bitmaptoolPanel",
+				"title": "Bit Map Tool Panel"
+			},
+			{
+				"command": "customextension.digitalscopePanel",
+				"title": "Digital Scope Panel"
 			}
 		],
 		"menus": {
@@ -59,8 +67,6 @@
 		"@grpc/grpc-js": "^1.5.0",
 		"@grpc/proto-loader": "^0.6.9",
 		"alert": "^5.0.10",
-		"event-stream": "^4.0.1",
-		"fs-backwards-stream": "^1.0.0",
 		"google-protobuf": "^3.19.3",
 		"perf_hooks": "0.0.1",
 		"requirejs": "^2.3.6",
