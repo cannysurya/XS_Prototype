@@ -13,8 +13,8 @@ const pdbInputPath =
 const TestProjectSlnLocation = __dirname + "/../TestProject";
 
 var selfWebView = undefined;
-var skipServerAttach = true;
-var isRemoteServer = false;
+var skipServerAttach = false;
+var isRemoteServer = true;
 
 var __awaiter =
   (this && this.__awaiter) ||
