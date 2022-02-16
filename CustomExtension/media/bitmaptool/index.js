@@ -23,10 +23,12 @@ var patternType = 0;
 var skipCursorGraph = false;
 
 function updateCursorGraphData(cursorGraphData) {
+  var cursorGraphDataLength = cursorGraphData.length;
   var rowReferenceOfSample = Math.ceil(mainGraphRowCount / cursorGraphRowScale);
   var columnReferenceOfSample = Math.ceil(mainGraphColumnCount / cursorGraphColumnScale);
-  for (let rowNumber = 0; rowNumber < cursorGraphData.length; rowNumber++) {
-    for (let columnNumber = 0; columnNumber < cursorGraphData[rowNumber].length; columnNumber++) {
+  for (let rowNumber = 0; rowNumber < cursorGraphDataLength; rowNumber++) {
+    var cursorGraphDataRowLength = cursorGraphData[rowNumber].length;
+    for (let columnNumber = 0; columnNumber < cursorGraphDataRowLength; columnNumber++) {
       cursorGraphDataPoints[cursorGraphRowReference * rowReferenceOfSample + rowNumber][cursorGraphColumnReference * columnReferenceOfSample + columnNumber] = cursorGraphData[rowNumber][columnNumber];
     }
   }
@@ -140,9 +142,11 @@ function addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, r
 
 function getCursorGraphPatternFromCollection(cursorGraphPatternCollection) {
   var returnValue = [];
-  for (let rowNumber = 0; rowNumber < cursorGraphPatternCollection.length; rowNumber++) {
+  var cursorGraphPatternCollectionLength = cursorGraphPatternCollection.length;
+  for (let rowNumber = 0; rowNumber < cursorGraphPatternCollectionLength; rowNumber++) {
     let newArray = [];
-    for (let columnNumber = 0; columnNumber < cursorGraphPatternCollection[rowNumber].length; columnNumber++) {
+    var cursorGraphPatternCollectionRowLength = cursorGraphPatternCollection[rowNumber].length;
+    for (let columnNumber = 0; columnNumber < cursorGraphPatternCollectionRowLength; columnNumber++) {
       var patternInfo = cursorGraphPatternCollection[rowNumber][columnNumber];
       newArray.push(patternInfo.sum >= patternInfo.length * 0.5 ? 1 : 0);
     }
