@@ -8,3 +8,20 @@ body {
   margin: 25px;
   width: 100%;
 }
+
+.graph-container {
+  display: flex;
+  height: auto;
+  overflow: auto;
+  width: 1200px;
+}
+
+#main-graph {
+  height: 600px;
+  width: 800px;
+}
+
+#cursor-graph {
+  height: 600px;
+  width: 200px;
+}

@@ -44,25 +44,15 @@ var server1 = {
       pipeTransport: {
         pipeProgram: "ssh",
         pipeArgs: ["soliton@192.168.1.19"],
-        debuggerPath:
-          "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
+        debuggerPath: "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
         quoteArgs: false,
       },
     },
   },
   service: {
-    testMethodService: new testMethodPackage.TestMethod(
-      "localhost:30051",
-      grpc.credentials.createInsecure()
-    ),
-    siteConfigurationService: new testMethodPackage.SiteConfiguration(
-      "localhost:30051",
-      grpc.credentials.createInsecure()
-    ),
-    pubsubService: new testMethodPackage.PubSub(
-      "localhost:30051",
-      grpc.credentials.createInsecure()
-    ),
+    testMethodService: new testMethodPackage.TestMethod("localhost:30051", grpc.credentials.createInsecure()),
+    siteConfigurationService: new testMethodPackage.SiteConfiguration("localhost:30051", grpc.credentials.createInsecure()),
+    pubsubService: new testMethodPackage.PubSub("localhost:30051", grpc.credentials.createInsecure()),
   },
   subscription: {
     resumeSubscription: undefined,
@@ -89,25 +79,15 @@ var server2 = {
       pipeTransport: {
         pipeProgram: "ssh",
         pipeArgs: ["soliton@192.168.1.20"],
-        debuggerPath:
-          "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
+        debuggerPath: "C:/Users/Soliton/.vscode/extensions/ms-dotnettools.csharp-1.24.0/.debugger/vsdbg.exe",
         quoteArgs: false,
       },
     },
   },
   service: {
-    testMethodService: new testMethodPackage.TestMethod(
-      "192.168.1.20:30051",
-      grpc.credentials.createInsecure()
-    ),
-    siteConfigurationService: new testMethodPackage.SiteConfiguration(
-      "192.168.1.20:30051",
-      grpc.credentials.createInsecure()
-    ),
-    pubsubService: new testMethodPackage.PubSub(
-      "192.168.1.20:30051",
-      grpc.credentials.createInsecure()
-    ),
+    testMethodService: new testMethodPackage.TestMethod("192.168.1.20:30051", grpc.credentials.createInsecure()),
+    siteConfigurationService: new testMethodPackage.SiteConfiguration("192.168.1.20:30051", grpc.credentials.createInsecure()),
+    pubsubService: new testMethodPackage.PubSub("192.168.1.20:30051", grpc.credentials.createInsecure()),
   },
   subscription: {
     resumeSubscription: undefined,

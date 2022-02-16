@@ -31,9 +31,7 @@ var __awaiter =
         }
       }
       function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
       }
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
@@ -72,18 +70,7 @@ var __generator =
       if (f) throw new TypeError("Generator is already executing.");
       while (_)
         try {
-          if (
-            ((f = 1),
-            y &&
-              (t =
-                op[0] & 2
-                  ? y["return"]
-                  : op[0]
-                  ? y["throw"] || ((t = y["return"]) && t.call(y), 0)
-                  : y.next) &&
-              !(t = t.call(y, op[1])).done)
-          )
-            return t;
+          if (((f = 1), y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)) return t;
           if (((y = 0), t)) op = [op[0] & 2, t.value];
           switch (op[0]) {
             case 0:
@@ -103,10 +90,7 @@ var __generator =
               _.trys.pop();
               continue;
             default:
-              if (
-                !((t = _.trys), (t = t.length > 0 && t[t.length - 1])) &&
-                (op[0] === 6 || op[0] === 2)
-              ) {
+              if (!((t = _.trys), (t = t.length > 0 && t[t.length - 1])) && (op[0] === 6 || op[0] === 2)) {
                 _ = 0;
                 continue;
               }
@@ -160,9 +144,7 @@ var BitMapToolPanel = /** @class */ (function () {
   }
 
   BitMapToolPanel.createOrShow = function (extensionUri) {
-    var column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    var column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
     // If we already have a panel, show it.
     if (BitMapToolPanel.currentPanel) {
       BitMapToolPanel.currentPanel._panel.reveal(column);
@@ -171,28 +153,18 @@ var BitMapToolPanel = /** @class */ (function () {
     }
 
     // Otherwise, create a new panel.
-    var panel = vscode.window.createWebviewPanel(
-      BitMapToolPanel.viewType,
-      "BitMap Tool",
-      column || vscode.ViewColumn.One,
-      {
-        // Enable javascript in the webview
-        enableScripts: true,
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, "media"),
-          vscode.Uri.joinPath(extensionUri, "out/compiled"),
-        ],
-      }
-    );
+    var panel = vscode.window.createWebviewPanel(BitMapToolPanel.viewType, "BitMap Tool", column || vscode.ViewColumn.One, {
+      // Enable javascript in the webview
+      enableScripts: true,
+      // And restrict the webview to only loading content from our extension's `media` directory.
+      localResourceRoots: [vscode.Uri.joinPath(extensionUri, "media"), vscode.Uri.joinPath(extensionUri, "out/compiled")],
+    });
     BitMapToolPanel.currentPanel = new BitMapToolPanel(panel, extensionUri);
   };
 
   BitMapToolPanel.kill = function () {
     var _a;
-    (_a = BitMapToolPanel.currentPanel) === null || _a === void 0
-      ? void 0
-      : _a.dispose();
+    (_a = BitMapToolPanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
     BitMapToolPanel.currentPanel = undefined;
   };
 
@@ -235,26 +207,11 @@ var BitMapToolPanel = /** @class */ (function () {
   };
 
   BitMapToolPanel.prototype._getHtmlForWebview = function (webview) {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "bitmaptool", "index.js")
-    );
-    const resetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
-    const vscodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "bitmaptool",
-        "index.css"
-      )
-    );
-    const plotlyUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "plotly", "plotly.js")
-    );
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "bitmaptool", "index.js"));
+    const resetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+    const vscodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "bitmaptool", "index.css"));
+    const plotlyUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "plotly", "plotly.js"));
     return `
             <!DOCTYPE html>
                 <html lang="en">
@@ -267,8 +224,10 @@ var BitMapToolPanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-									BitMap Tool
-                  <div id="myDiv"></div>
+                  <div class="graph-container">
+                    <div id="main-graph"></div>
+                    <div id="cursor-graph"></div>
+                  </div>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
