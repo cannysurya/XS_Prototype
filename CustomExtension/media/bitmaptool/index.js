@@ -7,8 +7,8 @@ var mainGraphDataPoints = [];
 
 var cursorGraphRowSamples = 100;
 var cursorGraphColumnSamples = 2;
-var cursorGraphRowScale = 100;
-var cursorGraphColumnScale = 100;
+var cursorGraphRowScale = 500;
+var cursorGraphColumnScale = 500;
 var cursorGraphRowRange = Math.ceil(mainGraphRowCount / cursorGraphRowScale) * cursorGraphRowSamples;
 var cursorGraphColumnRange = Math.ceil(mainGraphColumnCount / cursorGraphColumnScale) * cursorGraphColumnSamples;
 
@@ -56,7 +56,7 @@ function updateMainGraphData(mainGraphData) {
 function initiateGraphSimulation() {
   var pattern = {};
   var stopSimulation = false;
-  switch (Math.floor(Math.random() * 10) % 4) {
+  switch (Math.floor(Math.random() * 10) % 6) {
     case 0:
       pattern = getCheckerPattern();
       break;
@@ -68,6 +68,12 @@ function initiateGraphSimulation() {
       break;
     case 3:
       pattern = getDominantFailPattern();
+      break;
+    case 4:
+      pattern = getHalfRowPassPattern();
+      break;
+    case 5:
+      pattern = getHalfColumnPassPattern();
       break;
   }
 
@@ -314,6 +320,110 @@ function getDominantFailPattern() {
     var newArray = [];
     for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
       var data = Math.round(Math.random() * 10) < 8 ? 0 : 1;
+      newArray.push(data);
+    }
+    mainGraphPattern.push(newArray);
+  }
+
+  if (!skipCursorGraph) {
+    let processedEndRowNumber = 0;
+    let processedEndColumnNumber = 0;
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+          processedEndRowNumber = rowNumber;
+          processedEndColumnNumber = columnNumber;
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+        }
+      }
+    }
+
+    if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+      for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+        if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+      scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+    }
+  }
+  return {
+    mainGraphPattern: mainGraphPattern,
+    cursorGraphPattern: cursorGraphPattern,
+  };
+}
+
+function getHalfRowPassPattern() {
+  var mainGraphPattern = [];
+  var cursorGraphPattern = [];
+
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+    var newArray = [];
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+      var data = rowNumber > mainGraphRowCount / 2 ? 1 : 0;
+      newArray.push(data);
+    }
+    mainGraphPattern.push(newArray);
+  }
+
+  if (!skipCursorGraph) {
+    let processedEndRowNumber = 0;
+    let processedEndColumnNumber = 0;
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+          processedEndRowNumber = rowNumber;
+          processedEndColumnNumber = columnNumber;
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+        }
+      }
+    }
+
+    if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+      for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+        if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+      scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+    }
+  }
+  return {
+    mainGraphPattern: mainGraphPattern,
+    cursorGraphPattern: cursorGraphPattern,
+  };
+}
+
+function getHalfColumnPassPattern() {
+  var mainGraphPattern = [];
+  var cursorGraphPattern = [];
+
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+    var newArray = [];
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+      var data = columnNumber > mainGraphColumnCount / 2 ? 1 : 0;
       newArray.push(data);
     }
     mainGraphPattern.push(newArray);
