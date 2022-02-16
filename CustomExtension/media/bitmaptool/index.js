@@ -7,8 +7,8 @@ var mainGraphDataPoints = [];
 
 var cursorGraphRowSamples = 100;
 var cursorGraphColumnSamples = 2;
-var cursorGraphRowScale = 1000;
-var cursorGraphColumnScale = 1000;
+var cursorGraphRowScale = 100;
+var cursorGraphColumnScale = 100;
 var cursorGraphRowRange = Math.ceil(mainGraphRowCount / cursorGraphRowScale) * cursorGraphRowSamples;
 var cursorGraphColumnRange = Math.ceil(mainGraphColumnCount / cursorGraphColumnScale) * cursorGraphColumnSamples;
 
@@ -19,8 +19,9 @@ var cursorGraphRowPoints = [];
 var cursorGraphColumnPoints = [];
 var cursorGraphDataPoints = [];
 
-var patternType = 0;
 var skipCursorGraph = false;
+
+var renderTimeout = 100;
 
 function updateCursorGraphData(cursorGraphData) {
   var cursorGraphDataLength = cursorGraphData.length;
@@ -55,7 +56,7 @@ function updateMainGraphData(mainGraphData) {
 function initiateGraphSimulation() {
   var pattern = {};
   var stopSimulation = false;
-  switch (patternType) {
+  switch (Math.floor(Math.random() * 10) % 4) {
     case 0:
       pattern = getCheckerPattern();
       break;
@@ -75,8 +76,7 @@ function initiateGraphSimulation() {
   updateMainGraphData(pattern.mainGraphPattern);
   plotGraphs();
   if (!stopSimulation) {
-    patternType = (patternType + 1) % 4;
-    setTimeout(initiateGraphSimulation, 1000);
+    setTimeout(initiateGraphSimulation, renderTimeout);
   }
 }
 
