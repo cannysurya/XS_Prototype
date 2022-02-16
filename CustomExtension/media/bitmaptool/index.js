@@ -20,6 +20,7 @@ var cursorGraphColumnPoints = [];
 var cursorGraphDataPoints = [];
 
 var patternType = 0;
+var skipCursorGraph = false;
 
 function updateCursorGraphData(cursorGraphData) {
   var rowReferenceOfSample = Math.ceil(mainGraphRowCount / cursorGraphRowScale);
@@ -51,6 +52,7 @@ function updateMainGraphData(mainGraphData) {
 
 function initiateGraphSimulation() {
   var pattern = {};
+  var stopSimulation = false;
   switch (patternType) {
     case 0:
       pattern = getCheckerPattern();
@@ -66,12 +68,13 @@ function initiateGraphSimulation() {
       break;
   }
 
-  var stopSimulation = updateCursorGraphData(pattern.cursorGraphPattern);
+  stopSimulation = updateCursorGraphData(pattern.cursorGraphPattern);
+
   updateMainGraphData(pattern.mainGraphPattern);
   plotGraphs();
   if (!stopSimulation) {
     patternType = (patternType + 1) % 4;
-    setTimeout(initiateGraphSimulation, 0);
+    setTimeout(initiateGraphSimulation, 1000);
   }
 }
 
@@ -151,6 +154,8 @@ function getCursorGraphPatternFromCollection(cursorGraphPatternCollection) {
 function getCheckerPattern() {
   var mainGraphPattern = [];
   var cursorGraphPatternCollection = [];
+  var cursorGraphPattern = [];
+
   var counter = 1;
   var initialcounter = 1;
   for (let i = 0; i < mainGraphRowCount; i++) {
@@ -159,14 +164,18 @@ function getCheckerPattern() {
     for (let j = 0; j < mainGraphColumnCount; j++) {
       var data = counter++;
       newArray.push(data);
-      addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      if (!skipCursorGraph) {
+        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      }
       counter %= 2;
     }
     initialcounter++;
     initialcounter %= 2;
     mainGraphPattern.push(newArray);
   }
-  var cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  if (!skipCursorGraph) {
+    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  }
   return {
     mainGraphPattern: mainGraphPattern,
     cursorGraphPattern: cursorGraphPattern,
@@ -176,16 +185,22 @@ function getCheckerPattern() {
 function getRandomPattern() {
   var mainGraphPattern = [];
   var cursorGraphPatternCollection = [];
+  var cursorGraphPattern = [];
+
   for (let i = 0; i < mainGraphRowCount; i++) {
     var newArray = [];
     for (let j = 0; j < mainGraphColumnCount; j++) {
       var data = Math.round(Math.random() * 10) % 2;
       newArray.push(data);
-      addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      if (!skipCursorGraph) {
+        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      }
     }
     mainGraphPattern.push(newArray);
   }
-  var cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  if (!skipCursorGraph) {
+    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  }
   return {
     mainGraphPattern: mainGraphPattern,
     cursorGraphPattern: cursorGraphPattern,
@@ -195,16 +210,22 @@ function getRandomPattern() {
 function getDominantPassPattern() {
   var mainGraphPattern = [];
   var cursorGraphPatternCollection = [];
+  var cursorGraphPattern = [];
+
   for (let i = 0; i < mainGraphRowCount; i++) {
     var newArray = [];
     for (let j = 0; j < mainGraphColumnCount; j++) {
       var data = Math.round(Math.random() * 10) < 8 ? 1 : 0;
       newArray.push(data);
-      addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      if (!skipCursorGraph) {
+        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      }
     }
     mainGraphPattern.push(newArray);
   }
-  var cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  if (!skipCursorGraph) {
+    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  }
   return {
     mainGraphPattern: mainGraphPattern,
     cursorGraphPattern: cursorGraphPattern,
@@ -214,16 +235,22 @@ function getDominantPassPattern() {
 function getDominantFailPattern() {
   var mainGraphPattern = [];
   var cursorGraphPatternCollection = [];
+  var cursorGraphPattern = [];
+
   for (let i = 0; i < mainGraphRowCount; i++) {
     var newArray = [];
     for (let j = 0; j < mainGraphColumnCount; j++) {
       var data = Math.round(Math.random() * 10) < 8 ? 0 : 1;
       newArray.push(data);
-      addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      if (!skipCursorGraph) {
+        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
+      }
     }
     mainGraphPattern.push(newArray);
   }
-  var cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  if (!skipCursorGraph) {
+    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+  }
   return {
     mainGraphPattern: mainGraphPattern,
     cursorGraphPattern: cursorGraphPattern,
