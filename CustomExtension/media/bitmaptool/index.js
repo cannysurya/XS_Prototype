@@ -21,7 +21,7 @@ var cursorGraphDataPoints = [];
 
 var skipCursorGraph = false;
 
-var renderTimeout = 100;
+var renderTimeout = 10;
 
 function updateCursorGraphData(cursorGraphData) {
   var cursorGraphDataLength = cursorGraphData.length;
@@ -123,62 +123,78 @@ function plotGraphs() {
   );
 }
 
-function addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, rowNumber, columnNumber) {
-  var collectionRowNumber = Math.floor([rowNumber / cursorGraphRowScale]);
-  var collectionColumnNumber = Math.floor([columnNumber / cursorGraphColumnScale]);
+function scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, startRowNumber, startColumnNumber, endRowNumber, endColumnNumber) {
+  var collectionRowNumber = Math.floor([endRowNumber / cursorGraphRowScale]);
+  var collectionColumnNumber = Math.floor([endColumnNumber / cursorGraphColumnScale]);
+  let count = 0;
+  let sum = 0;
 
-  if (cursorGraphPatternCollection[collectionRowNumber] === undefined) {
-    cursorGraphPatternCollection[collectionRowNumber] = [];
-  }
-  if (cursorGraphPatternCollection[collectionRowNumber][collectionColumnNumber] === undefined) {
-    cursorGraphPatternCollection[collectionRowNumber][collectionColumnNumber] = {
-      length: 0,
-      sum: 0,
-    };
-  }
-  cursorGraphPatternCollection[collectionRowNumber][collectionColumnNumber].sum += data;
-  cursorGraphPatternCollection[collectionRowNumber][collectionColumnNumber].length++;
-}
-
-function getCursorGraphPatternFromCollection(cursorGraphPatternCollection) {
-  var returnValue = [];
-  var cursorGraphPatternCollectionLength = cursorGraphPatternCollection.length;
-  for (let rowNumber = 0; rowNumber < cursorGraphPatternCollectionLength; rowNumber++) {
-    let newArray = [];
-    var cursorGraphPatternCollectionRowLength = cursorGraphPatternCollection[rowNumber].length;
-    for (let columnNumber = 0; columnNumber < cursorGraphPatternCollectionRowLength; columnNumber++) {
-      var patternInfo = cursorGraphPatternCollection[rowNumber][columnNumber];
-      newArray.push(patternInfo.sum >= patternInfo.length * 0.5 ? 1 : 0);
+  for (let rowNumber = startRowNumber; rowNumber <= endRowNumber; rowNumber++) {
+    for (let columnNumber = startColumnNumber; columnNumber <= endColumnNumber; columnNumber++) {
+      count++;
+      sum += mainGraphPattern[rowNumber][columnNumber];
     }
-    returnValue.push(newArray);
   }
-  return returnValue;
+
+  if (cursorGraphPattern[collectionRowNumber] === undefined) {
+    cursorGraphPattern[collectionRowNumber] = [];
+  }
+
+  cursorGraphPattern[collectionRowNumber][collectionColumnNumber] = sum >= count * 0.5 ? 1 : 0;
 }
 
 function getCheckerPattern() {
   var mainGraphPattern = [];
-  var cursorGraphPatternCollection = [];
   var cursorGraphPattern = [];
 
   var counter = 1;
   var initialcounter = 1;
-  for (let i = 0; i < mainGraphRowCount; i++) {
+
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
     var newArray = [];
     counter = initialcounter;
-    for (let j = 0; j < mainGraphColumnCount; j++) {
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
       var data = counter++;
       newArray.push(data);
-      if (!skipCursorGraph) {
-        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
-      }
       counter %= 2;
     }
     initialcounter++;
     initialcounter %= 2;
     mainGraphPattern.push(newArray);
   }
+
   if (!skipCursorGraph) {
-    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+    let processedEndRowNumber = 0;
+    let processedEndColumnNumber = 0;
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+          processedEndRowNumber = rowNumber;
+          processedEndColumnNumber = columnNumber;
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+        }
+      }
+    }
+
+    if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+      for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+        if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+      scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+    }
   }
   return {
     mainGraphPattern: mainGraphPattern,
@@ -188,22 +204,49 @@ function getCheckerPattern() {
 
 function getRandomPattern() {
   var mainGraphPattern = [];
-  var cursorGraphPatternCollection = [];
   var cursorGraphPattern = [];
 
-  for (let i = 0; i < mainGraphRowCount; i++) {
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
     var newArray = [];
-    for (let j = 0; j < mainGraphColumnCount; j++) {
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
       var data = Math.round(Math.random() * 10) % 2;
       newArray.push(data);
-      if (!skipCursorGraph) {
-        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
-      }
     }
     mainGraphPattern.push(newArray);
   }
+
   if (!skipCursorGraph) {
-    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+    let processedEndRowNumber = 0;
+    let processedEndColumnNumber = 0;
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+          processedEndRowNumber = rowNumber;
+          processedEndColumnNumber = columnNumber;
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+        }
+      }
+    }
+
+    if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+      for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+        if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+      scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+    }
   }
   return {
     mainGraphPattern: mainGraphPattern,
@@ -213,22 +256,49 @@ function getRandomPattern() {
 
 function getDominantPassPattern() {
   var mainGraphPattern = [];
-  var cursorGraphPatternCollection = [];
   var cursorGraphPattern = [];
 
-  for (let i = 0; i < mainGraphRowCount; i++) {
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
     var newArray = [];
-    for (let j = 0; j < mainGraphColumnCount; j++) {
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
       var data = Math.round(Math.random() * 10) < 8 ? 1 : 0;
       newArray.push(data);
-      if (!skipCursorGraph) {
-        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
-      }
     }
     mainGraphPattern.push(newArray);
   }
+
   if (!skipCursorGraph) {
-    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+    let processedEndRowNumber = 0;
+    let processedEndColumnNumber = 0;
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+          processedEndRowNumber = rowNumber;
+          processedEndColumnNumber = columnNumber;
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+        }
+      }
+    }
+
+    if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+      for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+        if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+      scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+    }
   }
   return {
     mainGraphPattern: mainGraphPattern,
@@ -238,22 +308,49 @@ function getDominantPassPattern() {
 
 function getDominantFailPattern() {
   var mainGraphPattern = [];
-  var cursorGraphPatternCollection = [];
   var cursorGraphPattern = [];
 
-  for (let i = 0; i < mainGraphRowCount; i++) {
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
     var newArray = [];
-    for (let j = 0; j < mainGraphColumnCount; j++) {
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
       var data = Math.round(Math.random() * 10) < 8 ? 0 : 1;
       newArray.push(data);
-      if (!skipCursorGraph) {
-        addToCursorGraphPatternCollection(cursorGraphPatternCollection, data, i, j);
-      }
     }
     mainGraphPattern.push(newArray);
   }
+
   if (!skipCursorGraph) {
-    cursorGraphPattern = getCursorGraphPatternFromCollection(cursorGraphPatternCollection);
+    let processedEndRowNumber = 0;
+    let processedEndColumnNumber = 0;
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+          processedEndRowNumber = rowNumber;
+          processedEndColumnNumber = columnNumber;
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1) {
+      for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+        if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+        }
+      }
+    }
+
+    if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+      for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+        if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+          scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+        }
+      }
+    }
+
+    if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+      scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+    }
   }
   return {
     mainGraphPattern: mainGraphPattern,
