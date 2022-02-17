@@ -3,7 +3,10 @@
 const fs = require("fs");
 const vscode = require("vscode");
 const { getServers } = require("./GlobalState");
+const graphDirectory = __dirname + "/graphdata/";
+let graphFileCounter = 1;
 
+let receivingFileData = "";
 var selfWebView = undefined;
 
 var __awaiter =
@@ -260,7 +263,6 @@ function execute() {
     });
 }
 
-var counter = 0;
 (function subscribeBitMapToolGraph() {
   getServers()
     .filter((x) => x.isActive)
@@ -269,10 +271,27 @@ var counter = 0;
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        counter++;
-        if (counter === 2160) {
-          counter = 0;
-          console.timeEnd("test");
+        receivingFileData += data.Data.toString() + "\r\n";
+        if (data.IsLastRecord) {
+          try {
+            fs.appendFile(
+              `${graphDirectory}${graphFileCounter++}.txt`,
+              receivingFileData,
+              {
+                flags: "a",
+              },
+              (err) => {
+                if (err) {
+                  console.error(err);
+                  return;
+                }
+              }
+            );
+            receivingFileData = "";
+            console.timeEnd("test");
+          } catch (e) {
+            debugger;
+          }
         }
       });
     });

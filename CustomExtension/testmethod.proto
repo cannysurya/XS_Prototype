@@ -66,8 +66,8 @@ message DataLogInfo {
 }
 
 message BitMapInfo {
-	repeated int32 data = 1;
-	bool isLastRecord = 2;
+	repeated int32 Data = 1;
+	bool IsLastRecord = 2;
 }
 
 message gRPCKeyValuePair
