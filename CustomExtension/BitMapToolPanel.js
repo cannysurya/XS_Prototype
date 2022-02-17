@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
+const { getServers } = require("./GlobalState");
 
 var selfWebView = undefined;
 
@@ -196,6 +197,9 @@ var BitMapToolPanel = /** @class */ (function () {
           return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
               switch (data.command) {
+                case "execute":
+                  execute();
+                  break;
               }
               return [2 /*return*/];
             });
@@ -224,6 +228,7 @@ var BitMapToolPanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
+                  <div onclick="execute()">Execute</div>
                   <div class="graph-container">
                     <div id="main-graph"></div>
                     <div id="cursor-graph"></div>
@@ -236,6 +241,35 @@ var BitMapToolPanel = /** @class */ (function () {
 
   BitMapToolPanel.viewType = "BitMapToolPanel";
   return BitMapToolPanel;
+})();
+
+function execute() {
+  getServers()
+    .filter((x) => x.isActive)
+    .filter((y) => y.sites.length != 0)
+    .forEach((server) => {
+      server.service.testMethodService.ExecuteTestMethodForBitmapToolGraph({}, (err) => {
+        console.log("Receiving gRPC Response from ExecuteTestMethodForBitmapToolGraph");
+        if (err) {
+          console.log(err);
+        } else {
+          vscode.window.showInformationMessage("Test Method Executed Successfully...");
+        }
+      });
+    });
+}
+
+(function subscribeBitMapToolGraph() {
+  getServers()
+    .filter((x) => x.isActive)
+    .forEach((server) => {
+      server.subscription.bitmaptoolSubscription = server.service.pubsubService.SubscribeBitmapToolTopic({
+        ClientName: "BitMapTool",
+      });
+      server.subscription.bitmaptoolSubscription.on("data", (data) => {
+        console.log("Bit Map Data " + data);
+      });
+    });
 })();
 
 exports.BitMapToolPanel = BitMapToolPanel;

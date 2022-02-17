@@ -1,3 +1,5 @@
+const vscode = acquireVsCodeApi();
+
 var mainGraphRowCount = 2160;
 var mainGraphColumnCount = 3840;
 
@@ -486,5 +488,16 @@ function initializeArray() {
   }
 }
 
+function execute() {
+  vscode.postMessage({
+    command: "execute",
+  });
+}
+
+window.addEventListener("message", (event) => {
+  switch (event.data.command) {
+  }
+});
+
 initializeArray();
-initiateGraphSimulation();
+// initiateGraphSimulation();

@@ -63,7 +63,30 @@ namespace SemiContextNS
       });
     }
 
-      private DataLogInfo GetLogInfo(string site, string measuredValue, string testMethodName)
+    public void GenerateCheckerBoardPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+      var bitmapInfo = new BitMapInfo();
+
+      var counter = 1;
+      var initialcounter = 1;
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var data = "";
+        counter = initialcounter;
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          data += counter.ToString();
+          counter = (counter + 1) % 2;
+        }
+        initialcounter = (initialcounter + 1) % 2;
+        bitmapInfo.GraphPlot = data;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
+    private DataLogInfo GetLogInfo(string site, string measuredValue, string testMethodName)
     {
       var datalogInfo = new DataLogInfo();
       datalogInfo.KeyValuePair.Add(new gRPCKeyValuePair() { Key = "Site", Value = site });

@@ -57,6 +57,7 @@ var server1 = {
   subscription: {
     resumeSubscription: undefined,
     datalogSubscription: undefined,
+    bitmaptoolSubscription: undefined,
   },
   sites: [],
   isActive: true,
@@ -94,7 +95,7 @@ var server2 = {
     datalogSubscription: undefined,
   },
   sites: [],
-  isActive: true,
+  isActive: false,
 };
 
 var servers = [server1, server2];

@@ -26,7 +26,7 @@ namespace TestMethodServer
 
 		public static void Main(string[] args)
 		{
-      Grpc.Core.Server server = new Grpc.Core.Server
+			Grpc.Core.Server server = new Grpc.Core.Server
 			{
 				Services = { TestMethod.BindService(new TestMethodServiceImpl()),
 											PubSub.BindService(new PubSubServiceImpl()),
@@ -50,9 +50,9 @@ namespace TestMethodServer
 			server.ShutdownAsync().Wait();
 		}
 
-		private static void MessageReceivedFromMessenger(DataLogInfo dataLogInfo)
+		private static void MessageReceivedFromMessenger(object dataLogInfo)
 		{
-			PubSubServiceImpl.PublishData(PubSubTopic.DataLogTopic, dataLogInfo);
+			PubSubServiceImpl.PublishData(dataLogInfo);
 		}
 	}
 }

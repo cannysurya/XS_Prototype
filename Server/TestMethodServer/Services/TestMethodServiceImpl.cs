@@ -43,6 +43,16 @@ namespace TestMethodServer.Services
 			return Task.FromResult(new UploadStatus { Message = "DLL Loaded Successfully!!!" });
 		}
 
+		public override Task<Empty> ExecuteTestMethodForBitmapToolGraph(Empty request, ServerCallContext context)
+		{
+			var canExecuteTestFlow = LoadContext();
+			if (canExecuteTestFlow)
+			{
+				ExecuteTestFlowForBitmapTool();
+			}
+			return Task.FromResult(new Empty { });
+		}
+
 		public override Task<TestMethodReply> ExecuteTestMethod(TestMethodRequest request, ServerCallContext context)
 		{
 			terminateExecution = false;
@@ -53,25 +63,25 @@ namespace TestMethodServer.Services
 
 			var canExecuteTestFlow = LoadContext();
 
-      if (canExecuteTestFlow)
-      {
-        ExecuteTestFlow(request);
-      }
+			if (canExecuteTestFlow)
+			{
+				ExecuteTestFlow(request);
+			}
 
-      //double totalTime = 0;
-      //if (canExecuteTestFlow)
-      //{
-      //  for (var i = 0; i < 100; i++)
-      //  {
-      //    Stopwatch stopwatch = Stopwatch.StartNew();
-      //    ExecuteTestFlow(request);
-      //    stopwatch.Stop();
-      //    totalTime += stopwatch.Elapsed.TotalMilliseconds;
-      //  }
-      //  Console.WriteLine("Time taken for execution " + totalTime / 100 + "ms");
-      //}
+			//double totalTime = 0;
+			//if (canExecuteTestFlow)
+			//{
+			//  for (var i = 0; i < 100; i++)
+			//  {
+			//    Stopwatch stopwatch = Stopwatch.StartNew();
+			//    ExecuteTestFlow(request);
+			//    stopwatch.Stop();
+			//    totalTime += stopwatch.Elapsed.TotalMilliseconds;
+			//  }
+			//  Console.WriteLine("Time taken for execution " + totalTime / 100 + "ms");
+			//}
 
-      Console.WriteLine($"After Execution - All load contexts : {string.Join(", ", AssemblyLoadContext.All.Select(x => x.Name))}");
+			Console.WriteLine($"After Execution - All load contexts : {string.Join(", ", AssemblyLoadContext.All.Select(x => x.Name))}");
 			Console.WriteLine();
 			Console.WriteLine();
 
@@ -98,6 +108,13 @@ namespace TestMethodServer.Services
 			return Task.FromResult(new Empty());
 		}
 
+		private void ExecuteTestFlowForBitmapTool()
+		{
+			var testMethodType = assembly.GetType($"TestProject.SampleBitMapTestMethod");
+			var myObj = (BaseTestMethod)Activator.CreateInstance(testMethodType);
+			myObj.Execute();
+		}
+
 		private void ExecuteTestFlow(TestMethodRequest request)
 		{
 			foreach (var flowNode in request.FlowNodes)
@@ -105,7 +122,7 @@ namespace TestMethodServer.Services
 				if (flowNode.HasBreakPoint)
 				{
 					currentFlowNode = flowNode;
-					PubSubServiceImpl.PublishData(PubSubTopic.ResumeTopic, new ResumeInfo()
+					PubSubServiceImpl.PublishData(new ResumeInfo()
 					{
 						FlowNodeIndex = request.FlowNodes.IndexOf(flowNode)
 					});

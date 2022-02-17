@@ -9,11 +9,13 @@ service TestMethod {
 	rpc UpdateDLL(Chunk) returns (UploadStatus) {}
 	rpc ResumeExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 	rpc StopExecution(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+	rpc ExecuteTestMethodForBitmapToolGraph(google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }
 
 service PubSub {
 	rpc SubscribeResumeTopic(SubRequest) returns (stream ResumeInfo);
 	rpc SubscribeDataLogTopic(SubRequest) returns (stream DataLogInfo);
+	rpc SubscribeBitmapToolTopic(SubRequest) returns (stream BitMapInfo);
 }
 
 service SiteConfiguration {
@@ -61,6 +63,10 @@ message UploadStatus {
 
 message DataLogInfo {
 	repeated gRPCKeyValuePair keyValuePair = 1;
+}
+
+message BitMapInfo {
+	string graphPlot = 1;
 }
 
 message gRPCKeyValuePair
