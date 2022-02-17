@@ -4,12 +4,10 @@ const fs = require("fs");
 const vscode = require("vscode");
 const exec = require("child_process").exec;
 
-const { getServers, getTFEData, startTimer } = require("./GlobalState");
+const { getServers, getTFEData } = require("./GlobalState");
 
-const dllInputPath =
-  __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.dll";
-const pdbInputPath =
-  __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.pdb";
+const dllInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.dll";
+const pdbInputPath = __dirname + "/../TestProject/TestProject/bin/Debug/net5.0/TestProject.pdb";
 const TestProjectSlnLocation = __dirname + "/../TestProject";
 
 var selfWebView = undefined;
@@ -42,9 +40,7 @@ var __awaiter =
         }
       }
       function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
       }
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
@@ -83,18 +79,7 @@ var __generator =
       if (f) throw new TypeError("Generator is already executing.");
       while (_)
         try {
-          if (
-            ((f = 1),
-            y &&
-              (t =
-                op[0] & 2
-                  ? y["return"]
-                  : op[0]
-                  ? y["throw"] || ((t = y["return"]) && t.call(y), 0)
-                  : y.next) &&
-              !(t = t.call(y, op[1])).done)
-          )
-            return t;
+          if (((f = 1), y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)) return t;
           if (((y = 0), t)) op = [op[0] & 2, t.value];
           switch (op[0]) {
             case 0:
@@ -114,10 +99,7 @@ var __generator =
               _.trys.pop();
               continue;
             default:
-              if (
-                !((t = _.trys), (t = t.length > 0 && t[t.length - 1])) &&
-                (op[0] === 6 || op[0] === 2)
-              ) {
+              if (!((t = _.trys), (t = t.length > 0 && t[t.length - 1])) && (op[0] === 6 || op[0] === 2)) {
                 _ = 0;
                 continue;
               }
@@ -171,9 +153,7 @@ var TFEPanel = /** @class */ (function () {
   }
 
   TFEPanel.createOrShow = function (extensionUri) {
-    var column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    var column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
     // If we already have a panel, show it.
     if (TFEPanel.currentPanel) {
       TFEPanel.currentPanel._panel.reveal(column);
@@ -182,28 +162,18 @@ var TFEPanel = /** @class */ (function () {
     }
 
     // Otherwise, create a new panel.
-    var panel = vscode.window.createWebviewPanel(
-      TFEPanel.viewType,
-      "TFE Panel",
-      column || vscode.ViewColumn.One,
-      {
-        // Enable javascript in the webview
-        enableScripts: true,
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, "media"),
-          vscode.Uri.joinPath(extensionUri, "out/compiled"),
-        ],
-      }
-    );
+    var panel = vscode.window.createWebviewPanel(TFEPanel.viewType, "TFE Panel", column || vscode.ViewColumn.One, {
+      // Enable javascript in the webview
+      enableScripts: true,
+      // And restrict the webview to only loading content from our extension's `media` directory.
+      localResourceRoots: [vscode.Uri.joinPath(extensionUri, "media"), vscode.Uri.joinPath(extensionUri, "out/compiled")],
+    });
     TFEPanel.currentPanel = new TFEPanel(panel, extensionUri);
   };
 
   TFEPanel.kill = function () {
     var _a;
-    (_a = TFEPanel.currentPanel) === null || _a === void 0
-      ? void 0
-      : _a.dispose();
+    (_a = TFEPanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
     TFEPanel.currentPanel = undefined;
   };
 
@@ -241,14 +211,10 @@ var TFEPanel = /** @class */ (function () {
                       .filter((x) => x.isActive)
                       .filter((y) => y.sites.length != 0).length === 0
                   ) {
-                    vscode.window.showInformationMessage(
-                      "Please configure atleast one site"
-                    );
+                    vscode.window.showInformationMessage("Please configure atleast one site");
                   } else {
                     //startTimer();
-                    vscode.window.showInformationMessage(
-                      "Executing Test Method..."
-                    );
+                    vscode.window.showInformationMessage("Executing Test Method...");
                     getTFEData().IsExectionInProgress = true;
                     selfWebView.postMessage({
                       command: "updateTFEData",
@@ -259,9 +225,7 @@ var TFEPanel = /** @class */ (function () {
                   break;
                 }
                 case "rebuildProject": {
-                  vscode.window.showInformationMessage(
-                    "Rebuilding Test Project..."
-                  );
+                  vscode.window.showInformationMessage("Rebuilding Test Project...");
                   sendDLLInfo();
                   break;
                 }
@@ -302,18 +266,10 @@ var TFEPanel = /** @class */ (function () {
   };
 
   TFEPanel.prototype._getHtmlForWebview = function (webview) {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "tfe", "index.js")
-    );
-    const resetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
-    const vscodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "tfe", "index.css")
-    );
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "tfe", "index.js"));
+    const resetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+    const vscodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "tfe", "index.css"));
     return `
             <!DOCTYPE html>
                 <html lang="en">
@@ -347,10 +303,9 @@ var TFEPanel = /** @class */ (function () {
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {
-      server.subscription.resumeSubscription =
-        server.service.pubsubService.SubscribeResumeTopic({
-          ClientName: "TFE",
-        });
+      server.subscription.resumeSubscription = server.service.pubsubService.SubscribeResumeTopic({
+        ClientName: "TFE",
+      });
       server.subscription.resumeSubscription.on("data", (data) => {
         console.log("Triggering the breakpoint " + data.FlowNodeIndex);
         setHitBreakpoint(data.FlowNodeIndex);
@@ -359,8 +314,7 @@ var TFEPanel = /** @class */ (function () {
 })();
 
 function handleBreakPoint(index) {
-  getTFEData().FlowNodes[index].HasBreakPoint =
-    !getTFEData().FlowNodes[index].HasBreakPoint;
+  getTFEData().FlowNodes[index].HasBreakPoint = !getTFEData().FlowNodes[index].HasBreakPoint;
   selfWebView.postMessage({ command: "updateTFEData", tfeData: getTFEData() });
 }
 
@@ -409,24 +363,21 @@ async function sendDLLInfo() {
   let commandTwo = `cd ${TestProjectSlnLocation}`;
   let commandThree = "dotnet build";
 
-  exec(
-    `${commandOne} && ${commandTwo} && ${commandThree}`,
-    async (error, stdout, stderr) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-      }
-      if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-      }
-      console.log("Getting the DLL Data");
-      var dLLContent = await getDLLContent();
-      var pdbContent = await getPDBContent();
-      console.log("Sending gRPC Request to Update the DLL");
-      sendDLLToServer(dLLContent, pdbContent);
+  exec(`${commandOne} && ${commandTwo} && ${commandThree}`, async (error, stdout, stderr) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
     }
-  );
+    if (stderr) {
+      console.log(`stderr: ${stderr}`);
+      return;
+    }
+    console.log("Getting the DLL Data");
+    var dLLContent = await getDLLContent();
+    var pdbContent = await getPDBContent();
+    console.log("Sending gRPC Request to Update the DLL");
+    sendDLLToServer(dLLContent, pdbContent);
+  });
 }
 
 async function resumeExecution() {
@@ -525,9 +476,7 @@ function sendDLLToServer(dLLData, pdbData) {
           if (err) {
             console.log(err);
           } else {
-            vscode.window.showInformationMessage(
-              "Rebuild Test Project Successfully..."
-            );
+            vscode.window.showInformationMessage("Rebuild Test Project Successfully...");
           }
         }
       );
@@ -539,25 +488,20 @@ function executeTestMethodInServer() {
     .filter((x) => x.isActive)
     .filter((y) => y.sites.length != 0)
     .forEach((server) => {
-      server.service.testMethodService.ExecuteTestMethod(
-        getTFEData(),
-        (err) => {
-          console.log("Receiving gRPC Response from ExecuteTestMethod");
-          if (err) {
-            console.log(err);
-          } else {
-            if (selfWebView) {
-              resetIsExecutionInProgressAndHitBreakpoint();
-              vscode.window.showInformationMessage(
-                "Test Method Executed Successfully..."
-              );
-            }
-            //if (server.debugSession) {
-            //vscode.debug.stopDebugging(server.debugSession);
-            //}
+      server.service.testMethodService.ExecuteTestMethod(getTFEData(), (err) => {
+        console.log("Receiving gRPC Response from ExecuteTestMethod");
+        if (err) {
+          console.log(err);
+        } else {
+          if (selfWebView) {
+            resetIsExecutionInProgressAndHitBreakpoint();
+            vscode.window.showInformationMessage("Test Method Executed Successfully...");
           }
+          //if (server.debugSession) {
+          //vscode.debug.stopDebugging(server.debugSession);
+          //}
         }
-      );
+      });
     });
 }
 

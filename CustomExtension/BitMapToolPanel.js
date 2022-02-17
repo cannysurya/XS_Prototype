@@ -2,12 +2,17 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
-const { getServers } = require("./GlobalState");
+const { getServers, getBitMapToolGraphData } = require("./GlobalState");
 const graphDirectory = __dirname + "/graphdata/";
 let graphFileCounter = 1;
-
-let receivingFileData = "";
+let receivedData = [];
+let receivedDataInStringFormat = "";
 var selfWebView = undefined;
+
+if (fs.existsSync(graphDirectory)) {
+  fs.rmdirSync(graphDirectory, { recursive: true });
+  fs.mkdirSync(graphDirectory);
+}
 
 var __awaiter =
   (this && this.__awaiter) ||
@@ -203,6 +208,12 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "execute":
                   execute();
                   break;
+                case "syncData":
+                  selfWebView.postMessage({
+                    command: "updateGraphs",
+                    bitMapToolGraphData: getBitMapToolGraphData(),
+                  });
+                  break;
               }
               return [2 /*return*/];
             });
@@ -247,6 +258,11 @@ var BitMapToolPanel = /** @class */ (function () {
 })();
 
 function execute() {
+  if (fs.existsSync(graphDirectory)) {
+    fs.rmdirSync(graphDirectory, { recursive: true });
+    fs.mkdirSync(graphDirectory);
+  }
+  console.time("test");
   getServers()
     .filter((x) => x.isActive)
     .filter((y) => y.sites.length != 0)
@@ -263,6 +279,7 @@ function execute() {
 }
 
 (function subscribeBitMapToolGraph() {
+  let isDefaultSet = false;
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {
@@ -270,12 +287,25 @@ function execute() {
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        receivingFileData += data.Data.toString() + "\r\n";
+        // if (data.IsLastRecord) {
+        //   console.log(graphFileCounter++);
+        //   console.timeEnd("test");
+        //   console.time("test");
+        // }
+        // return;
+        receivedData.push(data.Data);
+        receivedDataInStringFormat += data.Data.toString() + "\r\n";
         if (data.IsLastRecord) {
           try {
+            updateCursorGraphPattern(receivedData);
+            if (!isDefaultSet) {
+              isDefaultSet = true;
+              getBitMapToolGraphData().updateMainGraphData(receivedData);
+              selfWebView.postMessage({ command: "plotMainGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+            }
             fs.appendFile(
               `${graphDirectory}${graphFileCounter++}.txt`,
-              receivingFileData,
+              receivedDataInStringFormat,
               {
                 flags: "a",
               },
@@ -286,7 +316,8 @@ function execute() {
                 }
               }
             );
-            receivingFileData = "";
+            receivedDataInStringFormat = "";
+            receivedData = [];
           } catch (e) {
             debugger;
           }
@@ -294,5 +325,70 @@ function execute() {
       });
     });
 })();
+
+function updateCursorGraphPattern(mainGraphPattern) {
+  var cursorGraphPattern = [];
+  let processedEndRowNumber = 0;
+  let processedEndColumnNumber = 0;
+  let mainGraphRowCount = getBitMapToolGraphData().mainGraphRowCount;
+  let mainGraphColumnCount = getBitMapToolGraphData().mainGraphColumnCount;
+  let cursorGraphRowScale = getBitMapToolGraphData().cursorGraphRowScale;
+  let cursorGraphColumnScale = getBitMapToolGraphData().cursorGraphColumnScale;
+
+  for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+      if (rowNumber != 0 && columnNumber != 0 && (rowNumber + 1) % cursorGraphRowScale == 0 && (columnNumber + 1) % cursorGraphColumnScale == 0) {
+        scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), columnNumber - (cursorGraphColumnScale - 1), rowNumber, columnNumber);
+        processedEndRowNumber = rowNumber;
+        processedEndColumnNumber = columnNumber;
+      }
+    }
+  }
+
+  if (processedEndRowNumber < mainGraphRowCount - 1) {
+    for (let columnNumber = 0; columnNumber < mainGraphColumnCount; columnNumber++) {
+      if ((columnNumber + 1) % cursorGraphColumnScale == 0) {
+        scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, columnNumber - (cursorGraphColumnScale - 1), mainGraphRowCount - 1, columnNumber);
+      }
+    }
+  }
+
+  if (processedEndColumnNumber < mainGraphColumnCount - 1) {
+    for (let rowNumber = 0; rowNumber < mainGraphRowCount; rowNumber++) {
+      if ((rowNumber + 1) % cursorGraphRowScale == 0) {
+        scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, rowNumber - (cursorGraphRowScale - 1), processedEndColumnNumber + 1, rowNumber, mainGraphColumnCount - 1);
+      }
+    }
+  }
+
+  if (processedEndRowNumber < mainGraphRowCount - 1 && processedEndColumnNumber < mainGraphColumnCount - 1) {
+    scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, processedEndRowNumber + 1, processedEndColumnNumber + 1, mainGraphRowCount - 1, mainGraphColumnCount - 1);
+  }
+
+  getBitMapToolGraphData().updateCursorGraphData(cursorGraphPattern);
+  selfWebView.postMessage({ command: "plotCursorGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+}
+
+function scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, startRowNumber, startColumnNumber, endRowNumber, endColumnNumber) {
+  let cursorGraphRowScale = getBitMapToolGraphData().cursorGraphRowScale;
+  let cursorGraphColumnScale = getBitMapToolGraphData().cursorGraphColumnScale;
+  var collectionRowNumber = Math.floor([endRowNumber / cursorGraphRowScale]);
+  var collectionColumnNumber = Math.floor([endColumnNumber / cursorGraphColumnScale]);
+  let count = 0;
+  let sum = 0;
+
+  for (let rowNumber = startRowNumber; rowNumber <= endRowNumber; rowNumber++) {
+    for (let columnNumber = startColumnNumber; columnNumber <= endColumnNumber; columnNumber++) {
+      count++;
+      sum += mainGraphPattern[rowNumber][columnNumber];
+    }
+  }
+
+  if (cursorGraphPattern[collectionRowNumber] === undefined) {
+    cursorGraphPattern[collectionRowNumber] = [];
+  }
+
+  cursorGraphPattern[collectionRowNumber][collectionColumnNumber] = sum >= count * 0.5 ? 1 : 0;
+}
 
 exports.BitMapToolPanel = BitMapToolPanel;

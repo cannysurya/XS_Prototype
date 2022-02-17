@@ -50,6 +50,7 @@ namespace TestMethodServer.Services
 			{
 				ExecuteTestFlowForBitmapTool();
 			}
+			Console.WriteLine("Test Method Executed Successfully...");
 			return Task.FromResult(new Empty { });
 		}
 
@@ -80,7 +81,7 @@ namespace TestMethodServer.Services
 			//  }
 			//  Console.WriteLine("Time taken for execution " + totalTime / 100 + "ms");
 			//}
-
+			Console.WriteLine("Test Method Executed Successfully...");
 			Console.WriteLine($"After Execution - All load contexts : {string.Join(", ", AssemblyLoadContext.All.Select(x => x.Name))}");
 			Console.WriteLine();
 			Console.WriteLine();
