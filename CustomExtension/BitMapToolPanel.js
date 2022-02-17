@@ -251,7 +251,6 @@ function execute() {
     .filter((x) => x.isActive)
     .filter((y) => y.sites.length != 0)
     .forEach((server) => {
-      console.time("test");
       server.service.testMethodService.ExecuteTestMethodForBitmapToolGraph({}, (err) => {
         console.log("Receiving gRPC Response from ExecuteTestMethodForBitmapToolGraph");
         if (err) {
@@ -288,7 +287,6 @@ function execute() {
               }
             );
             receivingFileData = "";
-            console.timeEnd("test");
           } catch (e) {
             debugger;
           }

@@ -85,6 +85,96 @@ namespace SemiContextNS
       }
     }
 
+    public void GenerateRandomPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+      var rand = new Random();
+
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var bitmapInfo = new BitMapInfo();
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          bitmapInfo.Data.Add(rand.Next(0, 2));
+        }
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
+    public void GenerateDominantPassPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+      var rand = new Random();
+
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var bitmapInfo = new BitMapInfo();
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          var randomValue = rand.Next(0, 10);
+          bitmapInfo.Data.Add(randomValue > 7 ? 1 : 0);
+        }
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
+    public void GenerateDominantFailPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+      var rand = new Random();
+
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var bitmapInfo = new BitMapInfo();
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          var randomValue = rand.Next(0, 10);
+          bitmapInfo.Data.Add(randomValue > 7 ? 0 : 1);
+        }
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
+    public void GenerateHalfRowPassPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var bitmapInfo = new BitMapInfo();
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          bitmapInfo.Data.Add(rowNumber <= (rowSize / 2) ? 1 : 0);
+        }
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
+    public void GenerateHalfColumnPassPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var bitmapInfo = new BitMapInfo();
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          bitmapInfo.Data.Add(columnNumber <= (columnSize / 2) ? 1 : 0);
+        }
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
     private DataLogInfo GetLogInfo(string site, string measuredValue, string testMethodName)
     {
       var datalogInfo = new DataLogInfo();
