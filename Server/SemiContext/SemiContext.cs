@@ -67,21 +67,20 @@ namespace SemiContextNS
     {
       var rowSize = 2160;
       var columnSize = 3840;
-      var bitmapInfo = new BitMapInfo();
 
       var counter = 1;
       var initialcounter = 1;
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var data = "";
+        var bitmapInfo = new BitMapInfo();
         counter = initialcounter;
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
-          data += counter.ToString();
+          bitmapInfo.Data.Add(counter);
           counter = (counter + 1) % 2;
         }
         initialcounter = (initialcounter + 1) % 2;
-        bitmapInfo.GraphPlot = data;
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
         messenger.Send(bitmapInfo);
       }
     }

@@ -248,6 +248,7 @@ function execute() {
     .filter((x) => x.isActive)
     .filter((y) => y.sites.length != 0)
     .forEach((server) => {
+      console.time("test");
       server.service.testMethodService.ExecuteTestMethodForBitmapToolGraph({}, (err) => {
         console.log("Receiving gRPC Response from ExecuteTestMethodForBitmapToolGraph");
         if (err) {
@@ -259,6 +260,7 @@ function execute() {
     });
 }
 
+var counter = 0;
 (function subscribeBitMapToolGraph() {
   getServers()
     .filter((x) => x.isActive)
@@ -267,7 +269,11 @@ function execute() {
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        console.log("Bit Map Data " + data);
+        counter++;
+        if (counter === 2160) {
+          counter = 0;
+          console.timeEnd("test");
+        }
       });
     });
 })();
