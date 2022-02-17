@@ -47,7 +47,11 @@ function plotCursorGraph(bitMapToolGraphData) {
 
   var myPlot = document.getElementById("cursor-graph");
   myPlot.on("plotly_click", function (data) {
-    debugger;
+    vscode.postMessage({
+      command: "loadMainGraphData",
+      x: data.points[0].x,
+      y: data.points[0].y,
+    });
   });
 }
 

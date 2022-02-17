@@ -2,6 +2,7 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
+const lineReader = require("line-reader");
 const { getServers, getBitMapToolGraphData } = require("./GlobalState");
 const graphDirectory = __dirname + "/graphdata/";
 let graphFileCounter = 1;
@@ -214,6 +215,9 @@ var BitMapToolPanel = /** @class */ (function () {
                     bitMapToolGraphData: getBitMapToolGraphData(),
                   });
                   break;
+                case "loadMainGraphData":
+                  loadMainGraphData(data.x, data.y);
+                  break;
               }
               return [2 /*return*/];
             });
@@ -276,6 +280,30 @@ function execute() {
         }
       });
     });
+}
+
+function loadMainGraphData(x, y) {
+  var bitMapToolGraphData = getBitMapToolGraphData();
+  var cursorGraphRowRange = bitMapToolGraphData.cursorGraphRowRange;
+  var cursorGraphColumnRange = bitMapToolGraphData.cursorGraphColumnRange;
+  var cursorGraphRowSamples = bitMapToolGraphData.cursorGraphRowSamples;
+  var cursorGraphColumnSamples = bitMapToolGraphData.cursorGraphColumnSamples;
+  var columnValue = Math.ceil(x / (cursorGraphColumnRange / cursorGraphColumnSamples));
+  var rowValue = Math.ceil(y / (cursorGraphRowRange / cursorGraphRowSamples));
+  var fileName = (rowValue - 1) * cursorGraphColumnSamples + columnValue;
+
+  var actualFileName = `${graphDirectory}${fileName}.txt`;
+
+  if (fs.existsSync(actualFileName)) {
+    var mainGraphData = [];
+    lineReader.eachLine(actualFileName, function (line, last) {
+      mainGraphData.push(line.split(","));
+      if (last) {
+        getBitMapToolGraphData().updateMainGraphData(mainGraphData);
+        selfWebView.postMessage({ command: "plotMainGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+      }
+    });
+  }
 }
 
 (function subscribeBitMapToolGraph() {
