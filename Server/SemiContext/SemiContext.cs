@@ -85,6 +85,28 @@ namespace SemiContextNS
       }
     }
 
+    public void GenerateInverseCheckerBoardPattern()
+    {
+      var rowSize = 2160;
+      var columnSize = 3840;
+
+      var counter = 0;
+      var initialcounter = 0;
+      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      {
+        var bitmapInfo = new BitMapInfo();
+        counter = initialcounter;
+        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        {
+          bitmapInfo.Data.Add(counter);
+          counter = (counter + 1) % 2;
+        }
+        initialcounter = (initialcounter + 1) % 2;
+        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
+        messenger.Send(bitmapInfo);
+      }
+    }
+
     public void GenerateRandomPattern()
     {
       var rowSize = 2160;

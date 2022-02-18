@@ -9,26 +9,29 @@ namespace TestProject
     public override void Execute()
     {
       var rand = new Random();
-      for (var i = 0; i < 1; i++)
+      for (var i = 0; i < 500; i++)
       {
-        switch (rand.Next(0, 6))
+        switch (rand.Next(0, 5))
         {
           case 0:
             semiContext.GenerateCheckerBoardPattern();
             break;
           case 1:
-            semiContext.GenerateRandomPattern();
+            semiContext.GenerateInverseCheckerBoardPattern();
             break;
           case 2:
-            semiContext.GenerateDominantPassPattern();
+            semiContext.GenerateRandomPattern();
             break;
           case 3:
-            semiContext.GenerateDominantFailPattern();
+            semiContext.GenerateDominantPassPattern();
             break;
           case 4:
-            semiContext.GenerateHalfRowPassPattern();
+            semiContext.GenerateDominantFailPattern();
             break;
           case 5:
+            semiContext.GenerateHalfRowPassPattern();
+            break;
+          case 6:
             semiContext.GenerateHalfColumnPassPattern();
             break;
         }
