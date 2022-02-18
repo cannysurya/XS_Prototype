@@ -2,7 +2,6 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
-const lineReader = require("line-reader");
 const { getServers, getBitMapToolGraphData } = require("./GlobalState");
 const graphDirectory = __dirname + "/graphdata/";
 let graphFileCounter = 1;
@@ -301,22 +300,38 @@ function loadMainGraphData(x, y) {
   var actualFileName = `${graphDirectory}${fileName}.txt`;
 
   if (fs.existsSync(actualFileName)) {
-    var mainGraphData = [];
-    lineReader.eachLine(actualFileName, function (line, last) {
-      mainGraphData.push(line.split(","));
-      if (last) {
-        getBitMapToolGraphData().updateMainGraphData(mainGraphData);
-        plotMainGraph();
-        isMainGraphRenderInProgress = false;
+    fs.readFile(actualFileName, "utf8", (err, data) => {
+      if (err) {
+        console.log(err);
+        return;
       }
+      updateMainGraphDataWithString(data);
+      plotMainGraphWithStringData(data);
+      isMainGraphRenderInProgress = false;
     });
   } else {
     isMainGraphRenderInProgress = false;
   }
 }
 
+function updateMainGraphDataWithString(stringData) {
+  let rowLines = stringData.split("\n");
+  let mainGraphData = [];
+  rowLines.forEach((row, index) => {
+    if (row.trim() === "") {
+      return;
+    }
+    mainGraphData[index] = row.split(",");
+  });
+  getBitMapToolGraphData().updateMainGraphData(mainGraphData);
+}
+
 function plotMainGraph() {
   selfWebView.postMessage({ command: "plotMainGraph", mainGraphDataPoints: getBitMapToolGraphData().mainGraphDataPoints });
+}
+
+function plotMainGraphWithStringData(data) {
+  selfWebView.postMessage({ command: "plotMainGraphWithStringData", mainGraphDataPointsInString: data });
 }
 
 function plotCursorGraph() {
@@ -324,7 +339,7 @@ function plotCursorGraph() {
 }
 
 (function subscribeBitMapToolGraph() {
-  let isDefaultSet = false;
+  let isFirstSample = true;
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {
@@ -337,10 +352,10 @@ function plotCursorGraph() {
         if (data.IsLastRecord) {
           try {
             updateCursorGraphPattern(receivedData);
-            if (!isDefaultSet) {
-              isDefaultSet = true;
+            if (isFirstSample) {
+              isFirstSample = false;
               getBitMapToolGraphData().updateMainGraphData(receivedData);
-              plotMainGraph();
+              plotMainGraphWithStringData(receivedDataInStringFormat);
             }
             fs.appendFile(
               `${graphDirectory}${graphFileCounter++}.txt`,

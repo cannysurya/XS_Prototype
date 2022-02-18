@@ -118,6 +118,16 @@ function plotCursorGraph(bitMapToolGraphData) {
   });
 }
 
+function updateMainGraphDataWithString(stringData) {
+  var rowLines = stringData.split("\n");
+  rowLines.forEach((row, index) => {
+    if (row.trim() === "") {
+      return;
+    }
+    mainGraphDataPoints[index] = row.split(",");
+  });
+}
+
 function execute() {
   vscode.postMessage({
     command: "execute",
@@ -134,6 +144,10 @@ window.addEventListener("message", (event) => {
       break;
     case "plotMainGraph":
       mainGraphDataPoints = event.data.mainGraphDataPoints;
+      plotMainGraph();
+      break;
+    case "plotMainGraphWithStringData":
+      updateMainGraphDataWithString(event.data.mainGraphDataPointsInString);
       plotMainGraph();
       break;
     case "updateCursorGraphRowPoints":
@@ -155,6 +169,12 @@ window.addEventListener("message", (event) => {
       cursorGraphDataPoints = event.data.cursorGraphDataPoints;
       plotCursorGraph();
       plotMainGraph();
+    case "stringData":
+      let stringData = event.data.receivedData;
+      console.log(stringData);
+      break;
+    case "arrayData":
+      break;
   }
 });
 
