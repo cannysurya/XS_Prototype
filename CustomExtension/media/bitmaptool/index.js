@@ -32,20 +32,20 @@ function plotMainGraph() {
       title: "",
       showlegend: false,
       margin: {
-        l: 0,
+        l: 40,
         r: 10,
         t: 0,
-        b: 0,
+        b: 40,
       },
       xaxis: {
         showgrid: false,
         zeroline: false,
-        visible: false,
+        visible: true,
       },
       yaxis: {
         showgrid: false,
         zeroline: false,
-        visible: false,
+        visible: true,
       },
     }
   );
@@ -75,10 +75,10 @@ function plotCursorGraph(bitMapToolGraphData) {
       title: "",
       showlegend: false,
       margin: {
-        l: 0,
-        r: 0,
+        l: 40,
+        r: 10,
         t: 0,
-        b: 0,
+        b: 40,
       },
       xaxis: {
         showgrid: false,
