@@ -262,11 +262,6 @@ var BitMapToolPanel = /** @class */ (function () {
 })();
 
 function execute() {
-  if (fs.existsSync(graphDirectory)) {
-    fs.rmdirSync(graphDirectory, { recursive: true });
-    fs.mkdirSync(graphDirectory);
-  }
-  console.time("test");
   getServers()
     .filter((x) => x.isActive)
     .filter((y) => y.sites.length != 0)
