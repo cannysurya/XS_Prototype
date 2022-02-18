@@ -30,7 +30,7 @@ var bitMapToolGraphData = {
   mainGraphRowPoints: [],
   mainGraphColumnPoints: [],
   mainGraphDataPoints: [],
-  cursorGraphRowSamples: 100,
+  cursorGraphRowSamples: 200,
   cursorGraphColumnSamples: 5,
   cursorGraphRowScale: 999,
   cursorGraphColumnScale: 999,

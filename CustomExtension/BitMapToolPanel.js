@@ -211,9 +211,15 @@ var BitMapToolPanel = /** @class */ (function () {
                   execute();
                   break;
                 case "syncData":
+                  let bitMapToolGraphData = getBitMapToolGraphData();
                   selfWebView.postMessage({
-                    command: "updateGraphs",
-                    bitMapToolGraphData: getBitMapToolGraphData(),
+                    command: "syncData",
+                    mainGraphRowPoints: bitMapToolGraphData.mainGraphRowPoints,
+                    mainGraphColumnPoints: bitMapToolGraphData.mainGraphColumnPoints,
+                    mainGraphDataPoints: bitMapToolGraphData.mainGraphDataPoints,
+                    cursorGraphRowPoints: bitMapToolGraphData.cursorGraphRowPoints,
+                    cursorGraphColumnPoints: bitMapToolGraphData.cursorGraphColumnPoints,
+                    cursorGraphDataPoints: bitMapToolGraphData.cursorGraphDataPoints,
                   });
                   break;
                 case "loadMainGraphData":
@@ -300,13 +306,21 @@ function loadMainGraphData(x, y) {
       mainGraphData.push(line.split(","));
       if (last) {
         getBitMapToolGraphData().updateMainGraphData(mainGraphData);
-        selfWebView.postMessage({ command: "plotMainGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+        plotMainGraph();
         isMainGraphRenderInProgress = false;
       }
     });
   } else {
     isMainGraphRenderInProgress = false;
   }
+}
+
+function plotMainGraph() {
+  selfWebView.postMessage({ command: "plotMainGraph", mainGraphDataPoints: getBitMapToolGraphData().mainGraphDataPoints });
+}
+
+function plotCursorGraph() {
+  selfWebView.postMessage({ command: "plotCursorGraph", cursorGraphDataPoints: getBitMapToolGraphData().cursorGraphDataPoints });
 }
 
 (function subscribeBitMapToolGraph() {
@@ -318,12 +332,6 @@ function loadMainGraphData(x, y) {
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        // if (data.IsLastRecord) {
-        //   console.log(graphFileCounter++);
-        //   console.timeEnd("test");
-        //   console.time("test");
-        // }
-        // return;
         receivedData.push(data.Data);
         receivedDataInStringFormat += data.Data.toString() + "\r\n";
         if (data.IsLastRecord) {
@@ -332,7 +340,7 @@ function loadMainGraphData(x, y) {
             if (!isDefaultSet) {
               isDefaultSet = true;
               getBitMapToolGraphData().updateMainGraphData(receivedData);
-              selfWebView.postMessage({ command: "plotMainGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+              plotMainGraph();
             }
             fs.appendFile(
               `${graphDirectory}${graphFileCounter++}.txt`,
@@ -397,7 +405,7 @@ function updateCursorGraphPattern(mainGraphPattern) {
   }
 
   getBitMapToolGraphData().updateCursorGraphData(cursorGraphPattern);
-  selfWebView.postMessage({ command: "plotCursorGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+  plotCursorGraph();
 }
 
 function scaleCursorGraphData(mainGraphPattern, cursorGraphPattern, startRowNumber, startColumnNumber, endRowNumber, endColumnNumber) {

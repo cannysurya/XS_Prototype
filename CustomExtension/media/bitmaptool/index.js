@@ -1,13 +1,21 @@
 const vscode = acquireVsCodeApi();
 
-function plotMainGraph(bitMapToolGraphData) {
+let mainGraphRowPoints = [];
+let mainGraphColumnPoints = [];
+let mainGraphDataPoints = [];
+
+let cursorGraphRowPoints = [];
+let cursorGraphColumnPoints = [];
+let cursorGraphDataPoints = [];
+
+function plotMainGraph() {
   Plotly.newPlot(
     "main-graph",
     [
       {
-        x: bitMapToolGraphData.mainGraphRowPoints,
-        y: bitMapToolGraphData.mainGraphColumnPoints,
-        z: bitMapToolGraphData.mainGraphDataPoints,
+        x: mainGraphRowPoints,
+        y: mainGraphColumnPoints,
+        z: mainGraphDataPoints,
         colorscale: [
           [0, "#FF0000"],
           [1, "#00FF00"],
@@ -48,9 +56,9 @@ function plotCursorGraph(bitMapToolGraphData) {
     "cursor-graph",
     [
       {
-        x: bitMapToolGraphData.cursorGraphRowPoints,
-        y: bitMapToolGraphData.cursorGraphColumnPoints,
-        z: bitMapToolGraphData.cursorGraphDataPoints,
+        x: cursorGraphRowPoints,
+        y: cursorGraphColumnPoints,
+        z: cursorGraphDataPoints,
         colorscale: [
           [0, "#FF0000"],
           [1, "#00FF00"],
@@ -118,15 +126,35 @@ function execute() {
 
 window.addEventListener("message", (event) => {
   switch (event.data.command) {
-    case "plotCursorGraph":
-      plotCursorGraph(event.data.bitMapToolGraphData);
+    case "updateMainGraphRowPoints":
+      mainGraphRowPoints = event.data.mainGraphRowPoints;
+      break;
+    case "updateMainGraphColumnPoints":
+      mainGraphColumnPoints = event.data.mainGraphColumnPoints;
       break;
     case "plotMainGraph":
-      plotMainGraph(event.data.bitMapToolGraphData);
+      mainGraphDataPoints = event.data.mainGraphDataPoints;
+      plotMainGraph();
       break;
-    case "updateGraphs":
-      plotCursorGraph(event.data.bitMapToolGraphData);
-      plotMainGraph(event.data.bitMapToolGraphData);
+    case "updateCursorGraphRowPoints":
+      cursorGraphRowPoints = event.data.cursorGraphRowPoints;
+      break;
+    case "updateCursorGraphColumnPoints":
+      cursorGraphColumnPoints = event.data.cursorGraphColumnPoints;
+      break;
+    case "plotCursorGraph":
+      cursorGraphDataPoints = event.data.cursorGraphDataPoints;
+      plotCursorGraph();
+      break;
+    case "syncData":
+      mainGraphRowPoints = event.data.mainGraphRowPoints;
+      mainGraphColumnPoints = event.data.mainGraphColumnPoints;
+      mainGraphDataPoints = event.data.mainGraphDataPoints;
+      cursorGraphRowPoints = event.data.cursorGraphRowPoints;
+      cursorGraphColumnPoints = event.data.cursorGraphColumnPoints;
+      cursorGraphDataPoints = event.data.cursorGraphDataPoints;
+      plotCursorGraph();
+      plotMainGraph();
   }
 });
 
