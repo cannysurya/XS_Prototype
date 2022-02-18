@@ -8,6 +8,7 @@ const graphDirectory = __dirname + "/graphdata/";
 let graphFileCounter = 1;
 let receivedData = [];
 let receivedDataInStringFormat = "";
+let isMainGraphRenderInProgress = false;
 var selfWebView = undefined;
 
 if (fs.existsSync(graphDirectory)) {
@@ -246,7 +247,7 @@ var BitMapToolPanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-                  <div onclick="execute()">Execute</div>
+                  <button onclick="execute()" class="button-1" id="executeButton">Execute</button>
                   <div class="graph-container">
                     <div id="main-graph"></div>
                     <div id="cursor-graph"></div>
@@ -278,6 +279,10 @@ function execute() {
 }
 
 function loadMainGraphData(x, y) {
+  if (isMainGraphRenderInProgress) {
+    return;
+  }
+  isMainGraphRenderInProgress = true;
   var bitMapToolGraphData = getBitMapToolGraphData();
   var cursorGraphRowRange = bitMapToolGraphData.cursorGraphRowRange;
   var cursorGraphColumnRange = bitMapToolGraphData.cursorGraphColumnRange;
@@ -296,8 +301,11 @@ function loadMainGraphData(x, y) {
       if (last) {
         getBitMapToolGraphData().updateMainGraphData(mainGraphData);
         selfWebView.postMessage({ command: "plotMainGraph", bitMapToolGraphData: getBitMapToolGraphData() });
+        isMainGraphRenderInProgress = false;
       }
     });
+  } else {
+    isMainGraphRenderInProgress = false;
   }
 }
 

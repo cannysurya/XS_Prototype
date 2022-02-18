@@ -14,11 +14,31 @@ function plotMainGraph(bitMapToolGraphData) {
         ],
         type: "heatmap",
         showscale: false,
+        hoverinfo: "x+y",
       },
     ],
     {
+      autosize: true,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
       title: "",
       showlegend: false,
+      margin: {
+        l: 0,
+        r: 10,
+        t: 0,
+        b: 0,
+      },
+      xaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: false,
+      },
+      yaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: false,
+      },
     }
   );
 }
@@ -37,12 +57,33 @@ function plotCursorGraph(bitMapToolGraphData) {
         ],
         type: "heatmap",
         showscale: false,
+        hoverinfo: "none",
       },
     ],
     {
+      autosize: true,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
       title: "",
       showlegend: false,
-    }
+      margin: {
+        l: 0,
+        r: 0,
+        t: 0,
+        b: 0,
+      },
+      xaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: false,
+      },
+      yaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: false,
+      },
+    },
+    { displayModeBar: false }
   );
 
   var myPlot = document.getElementById("cursor-graph");
@@ -52,6 +93,20 @@ function plotCursorGraph(bitMapToolGraphData) {
       x: data.points[0].x,
       y: data.points[0].y,
     });
+  });
+
+  dragLayer = myPlot.getElementsByClassName("nsewdrag")[0];
+
+  myPlot.on("plotly_hover", function (data) {
+    dragLayer.style.cursor = "pointer";
+  });
+
+  myPlot.on("plotly_unhover", function (data) {
+    dragLayer.style.cursor = "";
+  });
+
+  myPlot.on("plotly_relayout", function (data) {
+    console.log("relayout DATA ", data);
   });
 }
 

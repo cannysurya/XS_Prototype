@@ -9,6 +9,18 @@ body {
   width: 100%;
 }
 
+.button-1 {
+  margin: 15px;
+  outline: none !important;
+  padding: 5px 15px;
+  transition: 0.1s;
+  width: 100px;
+}
+
+.button-1:active {
+  transform: scale(0.95);
+}
+
 .graph-container {
   display: flex;
   height: auto;
