@@ -41,11 +41,15 @@ function plotMainGraph() {
         showgrid: false,
         zeroline: false,
         visible: true,
+        ticks: "",
+        ticksuffix: " ",
       },
       yaxis: {
         showgrid: false,
         zeroline: false,
         visible: true,
+        ticks: "",
+        ticksuffix: " ",
       },
     }
   );
