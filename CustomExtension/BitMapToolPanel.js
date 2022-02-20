@@ -338,6 +338,7 @@ function plotCursorGraph() {
 
 (function subscribeBitMapToolGraph() {
   let isFirstSample = true;
+  let totolSamplesReceived = 0;
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {
@@ -345,8 +346,9 @@ function plotCursorGraph() {
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        console.timeEnd("Time taken to receive data");
-        console.time("Time taken to receive data");
+        // console.timeEnd("Time taken to receive data");
+        // console.log("Total Samples Received - " + ++totolSamplesReceived);
+        // console.time("Time taken to receive data");
         // return;
         let receivedData = getDataInArrayFormat(data.Data);
         let receivedDataInStringFormat = data.Data;

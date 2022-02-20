@@ -178,6 +178,8 @@ namespace SemiContextNS
           }
         }
       }
+      bitmapInfo.Data = stringBuilder.ToString();
+      messenger.Send(bitmapInfo);
     }
 
     public void GenerateDominantFailPattern()
@@ -204,6 +206,8 @@ namespace SemiContextNS
           }
         }
       }
+      bitmapInfo.Data = stringBuilder.ToString();
+      messenger.Send(bitmapInfo);
     }
 
     public void GenerateHalfRowPassPattern()
@@ -228,6 +232,8 @@ namespace SemiContextNS
           }
         }
       }
+      bitmapInfo.Data = stringBuilder.ToString();
+      messenger.Send(bitmapInfo);
     }
 
     public void GenerateHalfColumnPassPattern()
@@ -252,6 +258,8 @@ namespace SemiContextNS
           }
         }
       }
+      bitmapInfo.Data = stringBuilder.ToString();
+      messenger.Send(bitmapInfo);
     }
 
     private DataLogInfo GetLogInfo(string site, string measuredValue, string testMethodName)
