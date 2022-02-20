@@ -70,19 +70,29 @@ namespace SemiContextNS
 
       var counter = 1;
       var initialcounter = 1;
+
+      StringBuilder stringBuilder = new StringBuilder();
+      var bitmapInfo = new BitMapInfo();
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
         counter = initialcounter;
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
-          bitmapInfo.Data.Add(counter);
-          counter = (counter + 1) % 2;
+          stringBuilder.Append(counter);
+          if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
+          {
+            stringBuilder.Append("\r\n");
+          }
+          else if (columnNumber != columnSize - 1)
+          {
+            stringBuilder.Append(",");
+          }
+            counter = (counter + 1) % 2;
         }
         initialcounter = (initialcounter + 1) % 2;
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
       }
+      bitmapInfo.Data = stringBuilder.ToString();
+      messenger.Send(bitmapInfo);
     }
 
     public void GenerateInverseCheckerBoardPattern()
@@ -92,38 +102,57 @@ namespace SemiContextNS
 
       var counter = 0;
       var initialcounter = 0;
+
+      StringBuilder stringBuilder = new StringBuilder();
+      var bitmapInfo = new BitMapInfo();
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
         counter = initialcounter;
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
-          bitmapInfo.Data.Add(counter);
+          stringBuilder.Append(counter);
+          if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
+          {
+            stringBuilder.Append("\r\n");
+          }
+          else if (columnNumber != columnSize - 1)
+          {
+            stringBuilder.Append(",");
+          }
           counter = (counter + 1) % 2;
         }
         initialcounter = (initialcounter + 1) % 2;
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
       }
+      bitmapInfo.Data = stringBuilder.ToString();
+      messenger.Send(bitmapInfo);
     }
 
-    public void GenerateRandomPattern()
+  public void GenerateRandomPattern()
+  {
+    var rowSize = 2160;
+    var columnSize = 3840;
+    var rand = new Random();
+
+    StringBuilder stringBuilder = new StringBuilder();
+    var bitmapInfo = new BitMapInfo();
+    for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
     {
-      var rowSize = 2160;
-      var columnSize = 3840;
-      var rand = new Random();
-
-      for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
+      for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
-        for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
+        stringBuilder.Append(rand.Next(0, 2));
+        if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
         {
-          bitmapInfo.Data.Add(rand.Next(0, 2));
+          stringBuilder.Append("\r\n");
         }
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
+        else if (columnNumber != columnSize - 1)
+        {
+          stringBuilder.Append(",");
+        }
       }
     }
+    bitmapInfo.Data = stringBuilder.ToString();
+    messenger.Send(bitmapInfo);
+  }
 
     public void GenerateDominantPassPattern()
     {
@@ -131,16 +160,23 @@ namespace SemiContextNS
       var columnSize = 3840;
       var rand = new Random();
 
+      StringBuilder stringBuilder = new StringBuilder();
+      var bitmapInfo = new BitMapInfo();
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
           var randomValue = rand.Next(0, 10);
-          bitmapInfo.Data.Add(randomValue > 7 ? 1 : 0);
+          stringBuilder.Append(randomValue > 7 ? 1 : 0);
+          if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
+          {
+            stringBuilder.Append("\r\n");
+          }
+          else if (columnNumber != columnSize - 1)
+          {
+            stringBuilder.Append(",");
+          }
         }
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
       }
     }
 
@@ -150,16 +186,23 @@ namespace SemiContextNS
       var columnSize = 3840;
       var rand = new Random();
 
+      StringBuilder stringBuilder = new StringBuilder();
+      var bitmapInfo = new BitMapInfo();
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
           var randomValue = rand.Next(0, 10);
-          bitmapInfo.Data.Add(randomValue > 7 ? 0 : 1);
+          stringBuilder.Append(randomValue > 7 ? 0 : 1);
+          if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
+          {
+            stringBuilder.Append("\r\n");
+          }
+          else if (columnNumber != columnSize - 1)
+          {
+            stringBuilder.Append(",");
+          }
         }
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
       }
     }
 
@@ -168,15 +211,22 @@ namespace SemiContextNS
       var rowSize = 2160;
       var columnSize = 3840;
 
+      StringBuilder stringBuilder = new StringBuilder();
+      var bitmapInfo = new BitMapInfo();
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
-          bitmapInfo.Data.Add(rowNumber <= (rowSize / 2) ? 1 : 0);
+          stringBuilder.Append(rowNumber <= (rowSize / 2) ? 1 : 0);
+          if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
+          {
+            stringBuilder.Append("\r\n");
+          }
+          else if (columnNumber != columnSize - 1)
+          {
+            stringBuilder.Append(",");
+          }
         }
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
       }
     }
 
@@ -185,15 +235,22 @@ namespace SemiContextNS
       var rowSize = 2160;
       var columnSize = 3840;
 
+      StringBuilder stringBuilder = new StringBuilder();
+      var bitmapInfo = new BitMapInfo();
       for (var rowNumber = 0; rowNumber < rowSize; rowNumber++)
       {
-        var bitmapInfo = new BitMapInfo();
         for (var columnNumber = 0; columnNumber < columnSize; columnNumber++)
         {
-          bitmapInfo.Data.Add(columnNumber <= (columnSize / 2) ? 1 : 0);
+          stringBuilder.Append(rowNumber <= (columnSize / 2) ? 1 : 0);
+          if (rowNumber != rowSize - 1 && columnNumber == columnSize - 1)
+          {
+            stringBuilder.Append("\r\n");
+          }
+          else if (columnNumber != columnSize - 1)
+          {
+            stringBuilder.Append(",");
+          }
         }
-        bitmapInfo.IsLastRecord = rowNumber == rowSize - 1 ? true : false;
-        messenger.Send(bitmapInfo);
       }
     }
 

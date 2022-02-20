@@ -31,16 +31,16 @@ namespace TestMethodServer.Services
 			}
 			_clientCollection[PubSubTopic.BitmapToolTopic].Add(request.ClientName, responseStream);
 
-			Console.WriteLine($"Subscribed {request.ClientName} to Resume Topic");
+			Console.WriteLine($"Subscribed {request.ClientName} to Bit Map Topic");
 			while (_clientCollection.ContainsKey(PubSubTopic.BitmapToolTopic))
 			{
-				var bitmapInfo = await _bitMapToolTopic.ReceiveAsync();
+        var bitmapInfo = await _bitMapToolTopic.ReceiveAsync();
 
-				foreach (var client in _clientCollection[PubSubTopic.BitmapToolTopic])
-				{
-					await ((IServerStreamWriter<BitMapInfo>)client.Value).WriteAsync(bitmapInfo);
-				}
-			}
+        foreach (var client in _clientCollection[PubSubTopic.BitmapToolTopic])
+        {
+          await ((IServerStreamWriter<BitMapInfo>)client.Value).WriteAsync(bitmapInfo);
+        }
+      }
 		}
 		public override async Task SubscribeResumeTopic(SubRequest request, IServerStreamWriter<ResumeInfo> responseStream, ServerCallContext context)
 		{

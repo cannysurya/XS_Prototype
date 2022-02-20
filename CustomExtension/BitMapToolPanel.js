@@ -5,8 +5,6 @@ const vscode = require("vscode");
 const { getServers, getBitMapToolGraphData } = require("./GlobalState");
 const graphDirectory = __dirname + "/graphdata/";
 let graphFileCounter = 1;
-let receivedData = [];
-let receivedDataInStringFormat = "";
 let isMainGraphRenderInProgress = false;
 var selfWebView = undefined;
 
@@ -270,8 +268,8 @@ var BitMapToolPanel = /** @class */ (function () {
 function execute() {
   getServers()
     .filter((x) => x.isActive)
-    .filter((y) => y.sites.length != 0)
     .forEach((server) => {
+      console.time("Time taken to receive data");
       server.service.testMethodService.ExecuteTestMethodForBitmapToolGraph({}, (err) => {
         console.log("Receiving gRPC Response from ExecuteTestMethodForBitmapToolGraph");
         if (err) {
@@ -347,38 +345,46 @@ function plotCursorGraph() {
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        receivedData.push(data.Data);
-        receivedDataInStringFormat += data.Data.toString() + "\r\n";
-        if (data.IsLastRecord) {
-          try {
-            updateCursorGraphPattern(receivedData);
-            if (isFirstSample) {
-              isFirstSample = false;
-              getBitMapToolGraphData().updateMainGraphData(receivedData);
-              plotMainGraphWithStringData(receivedDataInStringFormat);
-            }
-            fs.appendFile(
-              `${graphDirectory}${graphFileCounter++}.txt`,
-              receivedDataInStringFormat,
-              {
-                flags: "a",
-              },
-              (err) => {
-                if (err) {
-                  console.error(err);
-                  return;
-                }
-              }
-            );
-            receivedDataInStringFormat = "";
-            receivedData = [];
-          } catch (e) {
-            debugger;
+        console.timeEnd("Time taken to receive data");
+        console.time("Time taken to receive data");
+        // return;
+        let receivedData = getDataInArrayFormat(data.Data);
+        let receivedDataInStringFormat = data.Data;
+        try {
+          updateCursorGraphPattern(receivedData);
+          if (isFirstSample) {
+            isFirstSample = false;
+            getBitMapToolGraphData().updateMainGraphData(receivedData);
+            plotMainGraphWithStringData(receivedDataInStringFormat);
           }
+          fs.appendFile(
+            `${graphDirectory}${graphFileCounter++}.txt`,
+            receivedDataInStringFormat,
+            {
+              flags: "a",
+            },
+            (err) => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+            }
+          );
+        } catch (e) {
+          debugger;
         }
       });
     });
 })();
+
+function getDataInArrayFormat(data) {
+  let formattedData = [];
+  let rowData = data.split("\n");
+  rowData.forEach((row) => {
+    formattedData.push(row.split(",").map(Number));
+  });
+  return formattedData;
+}
 
 function updateCursorGraphPattern(mainGraphPattern) {
   var cursorGraphPattern = [];

@@ -9,7 +9,7 @@ namespace TestProject
     public override void Execute()
     {
       var rand = new Random();
-      for (var i = 0; i < 500; i++)
+      for (var i = 0; i < 1000; i++)
       {
         switch (rand.Next(0, 5))
         {

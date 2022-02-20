@@ -118,7 +118,7 @@ var server1 = {
   service: {
     testMethodService: new testMethodPackage.TestMethod("localhost:30051", grpc.credentials.createInsecure()),
     siteConfigurationService: new testMethodPackage.SiteConfiguration("localhost:30051", grpc.credentials.createInsecure()),
-    pubsubService: new testMethodPackage.PubSub("localhost:30051", grpc.credentials.createInsecure()),
+    pubsubService: new testMethodPackage.PubSub("localhost:30051", grpc.credentials.createInsecure(), { "grpc.max_receive_message_length": 1024 * 1024 * 1024 }),
   },
   subscription: {
     resumeSubscription: undefined,
