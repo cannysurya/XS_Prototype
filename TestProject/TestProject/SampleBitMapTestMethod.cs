@@ -12,6 +12,7 @@ namespace TestProject
       for (var i = 0; i < 1000; i++)
       {
         switch (rand.Next(0, 5))
+        //switch (2)
         {
           case 0:
             semiContext.GenerateCheckerBoardPattern();
