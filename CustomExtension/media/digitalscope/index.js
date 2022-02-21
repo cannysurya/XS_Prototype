@@ -14,9 +14,9 @@ var trace2 = {
   type: "scatter",
 };
 
-var data = [trace1, trace2];
+var mainGraphData = [trace1, trace2];
 
-Plotly.newPlot("myDiv", data);
+Plotly.newPlot("myDiv", mainGraphData);
 
 window.addEventListener("message", (event) => {
   debugger;

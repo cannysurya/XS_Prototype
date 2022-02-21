@@ -5,10 +5,10 @@ namespace MessengerNS
 {
   public class Messenger
   {
-    public delegate void myDel(DataLogInfo datalogInfo);
+    public delegate void myDel(object datalogInfo);
 
     private event myDel myEvent;
-    public void Send(DataLogInfo datalogInfo)
+    public void Send(object datalogInfo)
     {      
       if (myEvent != null)
       {

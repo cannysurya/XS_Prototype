@@ -1,13 +1,7 @@
 "use strict";
 
 const vscode = require("vscode");
-const {
-  getServers,
-  getDatalogData,
-  getDatalogConfig,
-  setDatalogData,
-  endTimer,
-} = require("./GlobalState");
+const { getServers, getDatalogData, getDatalogConfig, setDatalogData, endTimer } = require("./GlobalState");
 const fs = require("fs");
 var lineReader = require("reverse-line-reader");
 const alert = require("alert");
@@ -55,9 +49,7 @@ var __awaiter =
         }
       }
       function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
       }
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
@@ -96,18 +88,7 @@ var __generator =
       if (f) throw new TypeError("Generator is already executing.");
       while (_)
         try {
-          if (
-            ((f = 1),
-            y &&
-              (t =
-                op[0] & 2
-                  ? y["return"]
-                  : op[0]
-                  ? y["throw"] || ((t = y["return"]) && t.call(y), 0)
-                  : y.next) &&
-              !(t = t.call(y, op[1])).done)
-          )
-            return t;
+          if (((f = 1), y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)) return t;
           if (((y = 0), t)) op = [op[0] & 2, t.value];
           switch (op[0]) {
             case 0:
@@ -127,10 +108,7 @@ var __generator =
               _.trys.pop();
               continue;
             default:
-              if (
-                !((t = _.trys), (t = t.length > 0 && t[t.length - 1])) &&
-                (op[0] === 6 || op[0] === 2)
-              ) {
+              if (!((t = _.trys), (t = t.length > 0 && t[t.length - 1])) && (op[0] === 6 || op[0] === 2)) {
                 _ = 0;
                 continue;
               }
@@ -184,9 +162,7 @@ var DataLogPanel = /** @class */ (function () {
   }
 
   DataLogPanel.createOrShow = function (extensionUri) {
-    var column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    var column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
     // If we already have a panel, show it.
     if (DataLogPanel.currentPanel) {
       DataLogPanel.currentPanel._panel.reveal(column);
@@ -195,28 +171,18 @@ var DataLogPanel = /** @class */ (function () {
     }
 
     // Otherwise, create a new panel.
-    var panel = vscode.window.createWebviewPanel(
-      DataLogPanel.viewType,
-      "DataLog Panel",
-      column || vscode.ViewColumn.One,
-      {
-        // Enable javascript in the webview
-        enableScripts: true,
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, "media"),
-          vscode.Uri.joinPath(extensionUri, "out/compiled"),
-        ],
-      }
-    );
+    var panel = vscode.window.createWebviewPanel(DataLogPanel.viewType, "DataLog Panel", column || vscode.ViewColumn.One, {
+      // Enable javascript in the webview
+      enableScripts: true,
+      // And restrict the webview to only loading content from our extension's `media` directory.
+      localResourceRoots: [vscode.Uri.joinPath(extensionUri, "media"), vscode.Uri.joinPath(extensionUri, "out/compiled")],
+    });
     DataLogPanel.currentPanel = new DataLogPanel(panel, extensionUri);
   };
 
   DataLogPanel.kill = function () {
     var _a;
-    (_a = DataLogPanel.currentPanel) === null || _a === void 0
-      ? void 0
-      : _a.dispose();
+    (_a = DataLogPanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
     DataLogPanel.currentPanel = undefined;
   };
 
@@ -249,10 +215,8 @@ var DataLogPanel = /** @class */ (function () {
             return __generator(this, function (_a) {
               switch (data.command) {
                 case "updateDatalogConfig":
-                  getDatalogConfig().recordsPerPage =
-                    data.newConfigData.recordsPerPage;
-                  getDatalogConfig().currentPageNumber =
-                    data.newConfigData.currentPageNumber;
+                  getDatalogConfig().recordsPerPage = data.newConfigData.recordsPerPage;
+                  getDatalogConfig().currentPageNumber = data.newConfigData.currentPageNumber;
                   break;
                 case "syncDatalogConfigData":
                   selfWebView.postMessage({
@@ -271,18 +235,10 @@ var DataLogPanel = /** @class */ (function () {
   };
 
   DataLogPanel.prototype._getHtmlForWebview = function (webview) {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "datalog", "index.js")
-    );
-    const resetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
-    const vscodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "datalog", "index.css")
-    );
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "datalog", "index.js"));
+    const resetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+    const vscodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "datalog", "index.css"));
     return `
             <!DOCTYPE html>
                 <html lang="en">
@@ -300,9 +256,7 @@ var DataLogPanel = /** @class */ (function () {
 												Records per page:
 											</div>
 											<div class="config-set-2">
-												<input id="recordsInput" type="number" min="1" value="${
-                          getDatalogConfig().recordsPerPage
-                        }">
+												<input id="recordsInput" type="number" min="1" value="${getDatalogConfig().recordsPerPage}">
 											</div>
 										</div>
 										<div class="config-set">
@@ -310,9 +264,7 @@ var DataLogPanel = /** @class */ (function () {
 												Current page:
 											</div>
 											<div class="config-set-2">
-												<input id="currentPageInput" type="number" min="0" value="${
-                          getDatalogConfig().currentPageNumber
-                        }">
+												<input id="currentPageInput" type="number" min="0" value="${getDatalogConfig().currentPageNumber}">
 											</div>
 										</div>
 										<div class="config-set">
@@ -356,10 +308,9 @@ function subscribeDataLogTopic() {
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {
-      server.subscription.datalogSubscription =
-        server.service.pubsubService.SubscribeDataLogTopic({
-          ClientName: "DataLog",
-        });
+      server.subscription.datalogSubscription = server.service.pubsubService.SubscribeDataLogTopic({
+        ClientName: "DataLog",
+      });
       server.subscription.datalogSubscription.on("data", (data) => {
         // ++counter;
         // if (counter === 20002) {
@@ -386,11 +337,7 @@ function refreshDatalogData() {
     try {
       if (getDatalogData().length > 0) {
         var newDataAsString = getNewDataAsString();
-        updateLogFileWithNewData(
-          newDataAsString,
-          datalogConfig,
-          updateDatalogPanelFromFileData
-        );
+        updateLogFileWithNewData(newDataAsString, datalogConfig, updateDatalogPanelFromFileData);
       } else {
         updateDatalogPanelFromFileData(datalogConfig);
       }
@@ -438,8 +385,7 @@ function updateDatalogPanelFromFileData(datalogConfig) {
 
   try {
     var datalogData = [];
-    var startIndex =
-      (datalogConfig.currentPageNumber - 1) * datalogConfig.recordsPerPage + 1;
+    var startIndex = (datalogConfig.currentPageNumber - 1) * datalogConfig.recordsPerPage + 1;
     var stopIndex = startIndex + datalogConfig.recordsPerPage - 1;
     var counter = 0;
 
@@ -447,9 +393,7 @@ function updateDatalogPanelFromFileData(datalogConfig) {
     lineReader.eachLine(logFilePath, (data, last) => {
       if (last) {
         console.log(counter);
-        getDatalogConfig().maxPageNumber = Math.ceil(
-          counter / datalogConfig.recordsPerPage
-        );
+        getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
         selfWebView.postMessage({
           command: "updateMaxPageNumber",
           maxPageNumber: getDatalogConfig().maxPageNumber,
@@ -502,8 +446,7 @@ function updateDatalogPanelFromInMemoryData(datalogConfig) {
 
   try {
     var datalogData = [];
-    var startIndex =
-      (datalogConfig.currentPageNumber - 1) * datalogConfig.recordsPerPage + 1;
+    var startIndex = (datalogConfig.currentPageNumber - 1) * datalogConfig.recordsPerPage + 1;
     var stopIndex = startIndex + datalogConfig.recordsPerPage - 1;
 
     var counter = 0;
@@ -522,9 +465,7 @@ function updateDatalogPanelFromInMemoryData(datalogConfig) {
       }
     });
 
-    getDatalogConfig().maxPageNumber = Math.ceil(
-      counter / datalogConfig.recordsPerPage
-    );
+    getDatalogConfig().maxPageNumber = Math.ceil(counter / datalogConfig.recordsPerPage);
     selfWebView.postMessage({
       command: "updateMaxPageNumber",
       maxPageNumber: getDatalogConfig().maxPageNumber,

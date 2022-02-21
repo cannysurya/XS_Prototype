@@ -41,9 +41,7 @@ if (slnFiles !== []) {
 function activate(context) {
   if (isXSProject) {
     var tfePath = wsPath + "\\TFE.json";
-    var tfeData = JSON.parse(
-      fs.readFileSync(tfePath, { encoding: "utf8", flag: "r" })
-    );
+    var tfeData = JSON.parse(fs.readFileSync(tfePath, { encoding: "utf8", flag: "r" }));
   }
 
   context.subscriptions.push(
@@ -52,6 +50,7 @@ function activate(context) {
       SiteConfigurationPanel.createOrShow(context.extensionUri);
       DataLogPanel.createOrShow(context.extensionUri);
       TFEPanel.createOrShow(context.extensionUri);
+      BitMapToolPanel.createOrShow(context.extensionUri);
       setTimeout(function () {
         TFEPanel.loadData();
       }, 1000);
@@ -59,39 +58,27 @@ function activate(context) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "customextension.datalogPanel",
-      function () {
-        DataLogPanel.createOrShow(context.extensionUri);
-      }
-    )
+    vscode.commands.registerCommand("customextension.datalogPanel", function () {
+      DataLogPanel.createOrShow(context.extensionUri);
+    })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "customextension.siteConfigurationPanel",
-      function () {
-        SiteConfigurationPanel.createOrShow(context.extensionUri);
-      }
-    )
+    vscode.commands.registerCommand("customextension.siteConfigurationPanel", function () {
+      SiteConfigurationPanel.createOrShow(context.extensionUri);
+    })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "customextension.bitmaptoolPanel",
-      function () {
-        BitMapToolPanel.createOrShow(context.extensionUri);
-      }
-    )
+    vscode.commands.registerCommand("customextension.bitmaptoolPanel", function () {
+      BitMapToolPanel.createOrShow(context.extensionUri);
+    })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "customextension.digitalscopePanel",
-      function () {
-        DigitalScopePanel.createOrShow(context.extensionUri);
-      }
-    )
+    vscode.commands.registerCommand("customextension.digitalscopePanel", function () {
+      DigitalScopePanel.createOrShow(context.extensionUri);
+    })
   );
 }
 

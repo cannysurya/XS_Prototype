@@ -11,18 +11,46 @@ using TestMethodServer.Enum;
 
 namespace TestMethodServer.Services
 {
-  public class PubSubServiceImpl : PubSub.PubSubBase
-  {
+	public class PubSubServiceImpl : PubSub.PubSubBase
+	{
 
 		private ConcurrentDictionary<PubSubTopic, Dictionary<string, object>> _clientCollection = new ConcurrentDictionary<PubSubTopic, Dictionary<string, object>>();
 		private static readonly BufferBlock<ResumeInfo> _resumeTopic = new BufferBlock<ResumeInfo>();
 		private static readonly BufferBlock<DataLogInfo> _datalogTopic = new BufferBlock<DataLogInfo>();
+		private static readonly BufferBlock<BitMapInfo> _bitMapToolTopic = new BufferBlock<BitMapInfo>();
 
+		public override async Task SubscribeBitmapToolTopic(SubRequest request, IServerStreamWriter<BitMapInfo> responseStream, ServerCallContext context)
+		{
+			if (!_clientCollection.ContainsKey(PubSubTopic.BitmapToolTopic))
+			{
+				_clientCollection.TryAdd(PubSubTopic.BitmapToolTopic, new Dictionary<string, object>());
+			}
+			if (_clientCollection[PubSubTopic.BitmapToolTopic].ContainsKey(request.ClientName))
+      {
+				_clientCollection[PubSubTopic.BitmapToolTopic].Remove(request.ClientName);
+			}
+			_clientCollection[PubSubTopic.BitmapToolTopic].Add(request.ClientName, responseStream);
+
+			Console.WriteLine($"Subscribed {request.ClientName} to Bit Map Topic");
+			while (_clientCollection.ContainsKey(PubSubTopic.BitmapToolTopic))
+			{
+        var bitmapInfo = await _bitMapToolTopic.ReceiveAsync();
+
+        foreach (var client in _clientCollection[PubSubTopic.BitmapToolTopic])
+        {
+          await ((IServerStreamWriter<BitMapInfo>)client.Value).WriteAsync(bitmapInfo);
+        }
+      }
+		}
 		public override async Task SubscribeResumeTopic(SubRequest request, IServerStreamWriter<ResumeInfo> responseStream, ServerCallContext context)
 		{
 			if (!_clientCollection.ContainsKey(PubSubTopic.ResumeTopic))
 			{
 				_clientCollection.TryAdd(PubSubTopic.ResumeTopic, new Dictionary<string, object>());
+			}
+			if (_clientCollection[PubSubTopic.ResumeTopic].ContainsKey(request.ClientName))
+			{
+				_clientCollection[PubSubTopic.ResumeTopic].Remove(request.ClientName);
 			}
 			_clientCollection[PubSubTopic.ResumeTopic].Add(request.ClientName, responseStream);
 
@@ -45,6 +73,10 @@ namespace TestMethodServer.Services
 			{
 				_clientCollection.TryAdd(PubSubTopic.DataLogTopic, new Dictionary<string, object>());
 			}
+			if (_clientCollection[PubSubTopic.DataLogTopic].ContainsKey(request.ClientName))
+			{
+				_clientCollection[PubSubTopic.DataLogTopic].Remove(request.ClientName);
+			}
 			_clientCollection[PubSubTopic.DataLogTopic].Add(request.ClientName, responseStream);
 
 			Console.WriteLine($"Subscribed {request.ClientName} to Datalog Topic");
@@ -59,18 +91,23 @@ namespace TestMethodServer.Services
 			}
 		}
 
-		public static void PublishData(PubSubTopic PublishTopic, object PublishData)
+		public static void PublishData(object PublishData)
 		{
-			switch (PublishTopic)
+			var type = PublishData.GetType();
+			if (type == typeof(ResumeInfo))
 			{
-				case PubSubTopic.ResumeTopic:
-					ResumeInfo resumeInfo = PublishData as ResumeInfo;
-					_resumeTopic.Post(resumeInfo);
-					break;
-				case PubSubTopic.DataLogTopic:
-					DataLogInfo dataLogInfo = PublishData as DataLogInfo;
-					_datalogTopic.Post(dataLogInfo);
-					break;
+				ResumeInfo resumeInfo = PublishData as ResumeInfo;
+				_resumeTopic.Post(resumeInfo);
+			}
+			else if (type == typeof(DataLogInfo))
+			{
+				DataLogInfo dataLogInfo = PublishData as DataLogInfo;
+				_datalogTopic.Post(dataLogInfo);
+			}
+			else if (type == typeof(BitMapInfo))
+			{
+				BitMapInfo bitMapInfo = PublishData as BitMapInfo;
+				_bitMapToolTopic.Post(bitMapInfo);
 			}
 		}
 	}
