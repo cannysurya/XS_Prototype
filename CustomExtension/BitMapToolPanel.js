@@ -207,6 +207,9 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "execute":
                   execute();
                   break;
+                case "exportGraphData":
+                  exportGraphData();
+                  break;
                 case "syncData":
                   let bitMapToolGraphData = getBitMapToolGraphData();
                   selfWebView.postMessage({
@@ -250,11 +253,16 @@ var BitMapToolPanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-                  <button onclick="execute()" class="button-1" id="executeButton">Execute</button>
+                  <div class="function-buttons">
+                    <button onclick="execute()" class="button-1" id="executeButton">Fetch Graph Data</button>
+                    <button onclick="onExportClick()" class="button-1" id="executeButton">Export Graph Data</button>
+                  </div>
                   <div class="graph-container">
                     <div id="main-graph"></div>
                     <div id="cursor-graph"></div>
+                    <div id="download-graph"></div>
                   </div>
+                  <img id="jpg-export"></img>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
@@ -279,6 +287,11 @@ function execute() {
         }
       });
     });
+}
+
+function exportGraphData() {
+  getBitMapToolGraphData().updateExportGraphData();
+  selfWebView.postMessage({ command: "exportGraphData", rowPoints: getBitMapToolGraphData().exportGraphRowPoints, columnPoints: getBitMapToolGraphData().exportGraphColumnPoints, dataPoints: getBitMapToolGraphData().exportGraphDataPoints });
 }
 
 function loadMainGraphData(x, y) {
@@ -338,7 +351,6 @@ function plotCursorGraph() {
 
 (function subscribeBitMapToolGraph() {
   let isFirstSample = true;
-  let totolSamplesReceived = 0;
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {

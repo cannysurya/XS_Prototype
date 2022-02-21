@@ -44,6 +44,27 @@ var bitMapToolGraphData = {
   cursorGraphColumnRange: 0,
   mainGraphRowCount: 2160,
   mainGraphColumnCount: 3840,
+  exportGraphRowPoints: [],
+  exportGraphColumnPoints: [],
+  exportGraphDataPoints: [],
+  exportGraphData: {
+    source: {
+      x: 0,
+      y: 0,
+    },
+    target: [
+      {
+        x: 100,
+        y: 100,
+      },
+      {
+        x: 199,
+        y: 198,
+      },
+    ],
+    width: 100,
+    height: 100,
+  },
   updateMainGraphData: (mainGraphData) => {
     for (let rowNumber = 0; rowNumber < bitMapToolGraphData.mainGraphRowCount; rowNumber++) {
       for (let columnNumber = 0; columnNumber < bitMapToolGraphData.mainGraphColumnCount; columnNumber++) {
@@ -67,6 +88,51 @@ var bitMapToolGraphData = {
       bitMapToolGraphData.cursorGraphColumnReference = 0;
       bitMapToolGraphData.cursorGraphRowReference++;
     }
+  },
+  updateExportGraphData: () => {
+    let data = bitMapToolGraphData.exportGraphData;
+    let rowPoints = [];
+    let columnPoints = [];
+    let dataPoints = [];
+
+    let startRow = data.source.x;
+    let startColumn = data.source.y;
+    let stopRow = startRow + data.height;
+    let stopColumn = startColumn + data.width;
+
+    for (let rowNumber = startRow; rowNumber < stopRow; rowNumber++) {
+      rowPoints.push(rowNumber);
+    }
+    for (let columnNumber = startColumn; columnNumber < stopColumn; columnNumber++) {
+      columnPoints.push(columnNumber);
+    }
+
+    for (let rowNumber = startRow; rowNumber < stopRow; rowNumber++) {
+      let dataPoint = [];
+      for (let columnNumber = startColumn; columnNumber < stopColumn; columnNumber++) {
+        let sourceValue = null;
+        if (bitMapToolGraphData.mainGraphDataPoints[rowNumber] != null && bitMapToolGraphData.mainGraphDataPoints[rowNumber][columnNumber] != null) {
+          sourceValue = bitMapToolGraphData.mainGraphDataPoints[rowNumber][columnNumber];
+          data.target.forEach((target) => {
+            if (bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber] != null && bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber][target.y + columnNumber] != null) {
+              let targetValue = bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber][target.y + columnNumber];
+              if (sourceValue === 1 && targetValue === 0) {
+                sourceValue = 0.5;
+              }
+              if (sourceValue === 0 && targetValue === 1) {
+                sourceValue = 0.5;
+              }
+            }
+          });
+        }
+        dataPoint.push(sourceValue);
+      }
+      dataPoints.push(dataPoint);
+    }
+
+    bitMapToolGraphData.exportGraphRowPoints = rowPoints;
+    bitMapToolGraphData.exportGraphColumnPoints = columnPoints;
+    bitMapToolGraphData.exportGraphDataPoints = dataPoints;
   },
 };
 

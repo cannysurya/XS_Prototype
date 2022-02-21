@@ -37,3 +37,13 @@ body {
   height: 600px;
   width: 200px;
 }
+
+#download-graph {
+  display: none;
+}
+
+.function-buttons {
+  display: flex;
+  justify-content: flex-start;
+  width: 500px;
+}

@@ -138,6 +138,66 @@ function execute() {
   });
 }
 
+function onExportClick() {
+  vscode.postMessage({
+    command: "exportGraphData",
+  });
+}
+
+function exportGraphData(rowPoints, columnPoints, dataPoints) {
+  var img_jpg = document.getElementById("jpg-export");
+  Plotly.newPlot(
+    "download-graph",
+    [
+      {
+        x: rowPoints,
+        y: columnPoints,
+        z: dataPoints,
+        colorscale: [
+          [0, "#FF0000"],
+          [0.5, "#3f3f01"],
+          [1, "#00FF00"],
+        ],
+        type: "heatmap",
+        showscale: false,
+        hoverinfo: "x+y",
+      },
+    ],
+    {
+      autosize: true,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      title: "",
+      showlegend: false,
+      margin: {
+        l: 40,
+        r: 10,
+        t: 0,
+        b: 40,
+      },
+      xaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: true,
+        ticks: "",
+        ticksuffix: " ",
+      },
+      yaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: true,
+        ticks: "",
+        ticksuffix: " ",
+      },
+    }
+  ).then((gd) => {
+    Plotly.toImage(gd, { height: 768, width: 1024 }).then((url) => {
+      img_jpg.src = url;
+    });
+  });
+  document.getElementById("download-graph").querySelectorAll(".modebar-btn")[0].click();
+}
+
 window.addEventListener("message", (event) => {
   switch (event.data.command) {
     case "updateMainGraphRowPoints":
@@ -173,11 +233,9 @@ window.addEventListener("message", (event) => {
       cursorGraphDataPoints = event.data.cursorGraphDataPoints;
       plotCursorGraph();
       plotMainGraph();
-    case "stringData":
-      let stringData = event.data.receivedData;
-      console.log(stringData);
       break;
-    case "arrayData":
+    case "exportGraphData":
+      exportGraphData(event.data.rowPoints, event.data.columnPoints, event.data.dataPoints);
       break;
   }
 });
