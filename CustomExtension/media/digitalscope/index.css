@@ -8,3 +8,44 @@ body {
   margin: 25px;
   width: 100%;
 }
+
+.checkboxdiv-names {
+  padding: 0px 0px 0px 10px;
+}
+
+.digitalScopeControls {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  width: 1180px;
+  align-items: center;
+}
+
+.scopeContainer {
+  display: flex !important;
+  height: auto;
+  width: 1200px;
+}
+#plot {
+  height: 600px;
+  width: 1000px;
+  background-color: black;
+  overflow: auto;
+}
+
+#pinList {
+  width: 200px !important;
+}
+
+#cursorType {
+  background-color: var(--vscode-input-background);
+  border-color: var(--vscode-foreground);
+  color: var(--vscode-foreground);
+  width: 150px;
+  margin: 5px;
+}
+
+.inputControls {
+  width: 150px !important;
+  margin: 5px;
+}
