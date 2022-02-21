@@ -2,15 +2,23 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
+const nodeHtmlToImage = require("node-html-to-image");
 const { getServers, getBitMapToolGraphData } = require("./GlobalState");
 const graphDirectory = __dirname + "/graphdata/";
+const graphImageDirectory = __dirname + "/graphImage/";
 let graphFileCounter = 1;
+let graphImageCounter = 1;
 let isMainGraphRenderInProgress = false;
 var selfWebView = undefined;
 
 if (fs.existsSync(graphDirectory)) {
   fs.rmdirSync(graphDirectory, { recursive: true });
   fs.mkdirSync(graphDirectory);
+}
+
+if (fs.existsSync(graphImageDirectory)) {
+  fs.rmdirSync(graphImageDirectory, { recursive: true });
+  fs.mkdirSync(graphImageDirectory);
 }
 
 var __awaiter =
@@ -225,6 +233,9 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "loadMainGraphData":
                   loadMainGraphData(data.x, data.y);
                   break;
+                case "generateSnapshot":
+                  generateImageFromHtml(data.htmlString);
+                  break;
               }
               return [2 /*return*/];
             });
@@ -253,16 +264,17 @@ var BitMapToolPanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-                  <div class="function-buttons">
-                    <button onclick="execute()" class="button-1">Fetch Graph Data</button>
-                    <button onclick="openConfiguration()" class="button-1">Export Graph Data</button>
+                  <div class="main-container" id="maincontainer">
+                    <div class="function-buttons">
+                      <button onclick="execute()" class="button-1">Fetch Graph Data</button>
+                      <button onclick="openConfiguration()" class="button-1">Export Graph Data</button>
+                    </div>
+                    <div class="graph-container">
+                      <div id="main-graph"></div>
+                      <div id="cursor-graph"></div>
+                    </div>
                   </div>
-                  <div class="graph-container">
-                    <div id="main-graph"></div>
-                    <div id="cursor-graph"></div>
-                    <div id="download-graph"></div>
-                  </div>
-                  <img id="jpg-export"></img>
+                  <div id="download-graph"></div>
                   <div class="export-configuration hide" id="exportconfiguration">
                     <div class="header">
                       <div class="label pad-6-4 bold">
@@ -272,6 +284,17 @@ var BitMapToolPanel = /** @class */ (function () {
                     </div>
                     <div class="function-buttons">
                       <button onclick="onExportClick()" class="button-1">Export</button>
+                    </div>
+                  </div>
+                  <div class="image-container hide" id="imagecontainer">
+                    <div class="header">
+                      <div class="label pad-6-4 bold">
+                        Generated Image
+                      </div>
+                      <button class="button-2" onclick="closeImageContainer()">X</button>
+                    </div>
+                    <div class="image-wrapper">
+                      <img id="imageelement"></img>
                     </div>
                   </div>
                 </body>
@@ -298,6 +321,17 @@ function execute() {
         }
       });
     });
+}
+
+function generateImageFromHtml(htmlString) {
+  nodeHtmlToImage({
+    output: `${graphImageDirectory}/sample${graphImageCounter}.png`,
+    html: `<!DOCTYPE html><html><head><style>body{width:3840px;height:2160px;}</style></head><body>${htmlString}</body></html>`,
+  })
+    .then(() => {
+      vscode.window.showInformationMessage(`The sample image sample${graphImageCounter} was successfully created...`);
+    })
+    .catch((err) => {});
 }
 
 function exportGraphData() {
@@ -395,9 +429,7 @@ function plotCursorGraph() {
               }
             }
           );
-        } catch (e) {
-          debugger;
-        }
+        } catch (e) {}
       });
     });
 })();

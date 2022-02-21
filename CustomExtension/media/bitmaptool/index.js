@@ -146,15 +146,27 @@ function onExportClick() {
 }
 
 function openConfiguration() {
+  document.getElementById("maincontainer").classList.add("hide");
   document.getElementById("exportconfiguration").classList.remove("hide");
 }
 
 function closeConfiguration() {
+  document.getElementById("maincontainer").classList.remove("hide");
   document.getElementById("exportconfiguration").classList.add("hide");
 }
 
+function openImageContainer() {
+  document.getElementById("maincontainer").classList.add("hide");
+  document.getElementById("imagecontainer").classList.remove("hide");
+}
+
+function closeImageContainer() {
+  document.getElementById("maincontainer").classList.remove("hide");
+  document.getElementById("imagecontainer").classList.add("hide");
+}
+
 function exportGraphData(rowPoints, columnPoints, dataPoints) {
-  var img_jpg = document.getElementById("jpg-export");
+  var img_jpg = document.getElementById("imageelement");
   Plotly.newPlot(
     "download-graph",
     [
@@ -164,12 +176,11 @@ function exportGraphData(rowPoints, columnPoints, dataPoints) {
         z: dataPoints,
         colorscale: [
           [0, "#FF0000"],
-          [0.5, "#3f3f01"],
           [1, "#00FF00"],
         ],
         type: "heatmap",
         showscale: false,
-        hoverinfo: "x+y",
+        hoverinfo: "none",
       },
     ],
     {
@@ -179,32 +190,33 @@ function exportGraphData(rowPoints, columnPoints, dataPoints) {
       title: "",
       showlegend: false,
       margin: {
-        l: 40,
-        r: 10,
+        l: 0,
+        r: 0,
         t: 0,
-        b: 40,
+        b: 0,
       },
       xaxis: {
         showgrid: false,
         zeroline: false,
-        visible: true,
-        ticks: "",
-        ticksuffix: " ",
+        visible: false,
       },
       yaxis: {
         showgrid: false,
         zeroline: false,
-        visible: true,
-        ticks: "",
-        ticksuffix: " ",
+        visible: false,
       },
-    }
+    },
+    { displayModeBar: false }
   ).then((gd) => {
+    vscode.postMessage({
+      command: "generateSnapshot",
+      htmlString: gd.innerHTML,
+    });
     Plotly.toImage(gd, { height: 768, width: 1024 }).then((url) => {
       img_jpg.src = url;
+      openImageContainer();
     });
   });
-  document.getElementById("download-graph").querySelectorAll(".modebar-btn")[0].click();
 }
 
 window.addEventListener("message", (event) => {

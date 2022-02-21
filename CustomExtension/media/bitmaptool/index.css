@@ -28,7 +28,7 @@ body {
 
 .button-2 {
   align-items: center;
-  background: var(--vscode-button-foreground);
+  background: transparent;
   border: 1px solid var(--vscode-button-background);
   color: var(--vscode-button-background);
   display: flex;
@@ -43,8 +43,8 @@ body {
 }
 
 .button-2:hover {
-  background: var(--vscode-button-foreground);
-  border: 1px solid var(--vscode-button-background);
+  background: transparent;
+  border: 2px solid var(--vscode-button-background);
 }
 
 .button-2:active {
@@ -58,7 +58,6 @@ body {
 }
 
 .export-configuration {
-  background-color: #fff;
   height: 100%;
   left: 0;
   position: absolute;
@@ -95,7 +94,7 @@ body {
   display: flex;
   height: auto;
   overflow: auto;
-  width: 1200px;
+  width: 100%;
 }
 
 .header {
@@ -107,6 +106,26 @@ body {
 
 .hide {
   display: none;
+}
+
+.main-container {
+  height: 100%;
+  width: 100%;
+}
+
+.image-container {
+  height: 838px;
+  left: 0;
+  overflow: auto;
+  padding: 10px 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.image-wrapper {
+  display: flex;
+  justify-content: center;
 }
 
 .label {
@@ -133,6 +152,13 @@ body {
 
 #download-graph {
   display: none;
+  height: 2160px;
+  width: 3840px;
+}
+
+#imageelement {
+  height: 768px;
+  width: 1024px;
 }
 
 input {
