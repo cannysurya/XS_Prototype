@@ -3,10 +3,15 @@ body {
   display: flex;
   flex-direction: column;
   font-family: sans-serif !important;
-  height: 100%;
+  height: calc(100% - 50px);
   justify-content: center;
   margin: 25px;
-  width: 100%;
+  position: relative;
+  width: calc(100% - 50px);
+}
+
+.bold {
+  font-weight: bold;
 }
 
 .button-1 {
@@ -21,11 +26,99 @@ body {
   transform: scale(0.95);
 }
 
+.button-2 {
+  align-items: center;
+  background: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-background);
+  color: var(--vscode-button-background);
+  display: flex;
+  font-weight: bold;
+  height: 25px;
+  justify-content: center;
+  margin: 15px;
+  outline: none !important;
+  padding: 5px 15px;
+  transition: 0.1s;
+  width: 20px;
+}
+
+.button-2:hover {
+  background: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-background);
+}
+
+.button-2:active {
+  transform: scale(0.95);
+}
+
+.control-container {
+  align-items: center;
+  display: flex;
+  width: 150px;
+}
+
+.export-configuration {
+  background-color: #fff;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.export-source-configuration {
+  border: 1px solid var(--vscode-editorWidget-border);
+  margin: 20px 0;
+}
+
+.export-source-configuration-controls {
+  display: flex;
+}
+
+.export-target-configuration {
+  border: 1px solid var(--vscode-editorWidget-border);
+  margin: 20px 0;
+}
+
+.export-target-configuration-controls {
+  display: flex;
+  padding-left: 50px;
+}
+
+.function-buttons {
+  display: flex;
+  justify-content: flex-start;
+  width: 500px;
+}
+
 .graph-container {
   display: flex;
   height: auto;
   overflow: auto;
   width: 1200px;
+}
+
+.header {
+  display: flex;
+  height: 50px;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.hide {
+  display: none;
+}
+
+.label {
+  align-items: center;
+  display: flex;
+}
+
+.pad-6-4 {
+  padding: 6px 4px;
+}
+
+.target-configurations {
 }
 
 #main-graph {
@@ -42,8 +135,10 @@ body {
   display: none;
 }
 
-.function-buttons {
-  display: flex;
-  justify-content: flex-start;
-  width: 500px;
+input {
+  height: 20px;
+  width: 50px !important;
+  position: relative;
+  top: 0px;
+  left: 5px;
 }

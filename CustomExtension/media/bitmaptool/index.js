@@ -139,9 +139,18 @@ function execute() {
 }
 
 function onExportClick() {
+  closeConfiguration();
   vscode.postMessage({
     command: "exportGraphData",
   });
+}
+
+function openConfiguration() {
+  document.getElementById("exportconfiguration").classList.remove("hide");
+}
+
+function closeConfiguration() {
+  document.getElementById("exportconfiguration").classList.add("hide");
 }
 
 function exportGraphData(rowPoints, columnPoints, dataPoints) {

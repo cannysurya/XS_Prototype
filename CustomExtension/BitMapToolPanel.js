@@ -254,8 +254,8 @@ var BitMapToolPanel = /** @class */ (function () {
                 </head>
                 <body>
                   <div class="function-buttons">
-                    <button onclick="execute()" class="button-1" id="executeButton">Fetch Graph Data</button>
-                    <button onclick="onExportClick()" class="button-1" id="executeButton">Export Graph Data</button>
+                    <button onclick="execute()" class="button-1">Fetch Graph Data</button>
+                    <button onclick="openConfiguration()" class="button-1">Export Graph Data</button>
                   </div>
                   <div class="graph-container">
                     <div id="main-graph"></div>
@@ -263,6 +263,87 @@ var BitMapToolPanel = /** @class */ (function () {
                     <div id="download-graph"></div>
                   </div>
                   <img id="jpg-export"></img>
+                  <div class="export-configuration hide" id="exportconfiguration">
+                    <div class="header">
+                      <div class="label pad-6-4 bold">
+                        Export Configuration
+                      </div>
+                      <button class="button-2" onclick="closeConfiguration()">X</button>
+                    </div>
+                    <div class="export-source-configuration">
+                      <div class="label pad-6-4 bold">
+                        Source Configuration
+                      </div>
+                      <div class="export-source-configuration-controls">
+                        <div class="control-container">
+                          <div class="label pad-6-4">
+                            X
+                          </div>
+                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.source.x}">
+                        </div>
+                        <div class="control-container">
+                          <div class="label pad-6-4">
+                            Y
+                          </div>
+                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.source.y}">
+                        </div>
+                        <div class="control-container">
+                          <div class="label pad-6-4">
+                            Width
+                          </div>
+                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.width}">
+                        </div>
+                        <div class="control-container">
+                          <div class="label pad-6-4">
+                            Height
+                          </div>
+                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.height}">
+                        </div>
+                      </div>
+                    </div>
+                    <div class="export-target-configuration">
+                      <div class="label pad-6-4 bold">
+                        Target Configuration
+                      </div>
+                      <div class="function-buttons">
+                        <button onclick="addTargetConfiguration()" class="button-1">Add</button>
+                        <button onclick="deleteTargetConfiguration()" class="button-1">Delete</button>
+                      </div>
+                      <div class="target-configurations">
+                        <div class="export-target-configuration-controls">
+                          <div class="control-container">
+                            <div class="label pad-6-4">
+                              X
+                            </div>
+                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[0].x}">
+                          </div>
+                          <div class="control-container">
+                            <div class="label pad-6-4">
+                              Y
+                            </div>
+                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[0].y}">
+                          </div>
+                        </div>
+                        <div class="export-target-configuration-controls">
+                          <div class="control-container">
+                            <div class="label pad-6-4">
+                              X
+                            </div>
+                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[1].x}">
+                          </div>
+                          <div class="control-container">
+                            <div class="label pad-6-4">
+                              Y
+                            </div>
+                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[1].y}">
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="function-buttons">
+                      <button onclick="onExportClick()" class="button-1">Export</button>
+                    </div>
+                  </div>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
@@ -332,7 +413,7 @@ function updateMainGraphDataWithString(stringData) {
     if (row.trim() === "") {
       return;
     }
-    mainGraphData[index] = row.split(",");
+    mainGraphData[index] = row.split(",").map(Number);
   });
   getBitMapToolGraphData().updateMainGraphData(mainGraphData);
 }
