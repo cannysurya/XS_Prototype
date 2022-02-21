@@ -254,6 +254,9 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "updateHeight":
                   updateHeight(data.value, data.index);
                   break;
+                case "deleteConfiguration":
+                  deleteConfiguration(data.index);
+                  break;
               }
               return [2 /*return*/];
             });
@@ -348,6 +351,10 @@ function addConfiguration(xRange, yRange) {
   getBitMapToolGraphData().addConfiguration(xRange, yRange);
 }
 
+function deleteConfiguration(index) {
+  getBitMapToolGraphData().deleteConfiguration(index);
+}
+
 function openConfiguration() {
   selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
 }
@@ -380,6 +387,10 @@ function generateImageFromHtml(htmlString) {
 }
 
 function exportGraphData() {
+  if (getBitMapToolGraphData().exportGraphData.length === 0) {
+    vscode.window.showWarningMessage("No data to export");
+    return;
+  }
   getBitMapToolGraphData().updateExportGraphData();
   selfWebView.postMessage({ command: "exportGraphData", rowPoints: getBitMapToolGraphData().exportGraphRowPoints, columnPoints: getBitMapToolGraphData().exportGraphColumnPoints, dataPoints: getBitMapToolGraphData().exportGraphDataPoints });
 }

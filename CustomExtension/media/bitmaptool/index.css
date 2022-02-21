@@ -68,20 +68,12 @@ body {
 .export-configuration-container {
   border: 1px solid var(--vscode-editorWidget-border);
   margin: 20px;
+  padding: 20px 0;
 }
 
-.export-source-configuration-controls {
+.export-configuration-controls {
   display: flex;
-}
-
-.export-target-configuration {
-  border: 1px solid var(--vscode-editorWidget-border);
-  margin: 20px 0;
-}
-
-.export-target-configuration-controls {
-  display: flex;
-  padding-left: 50px;
+  margin-left: 20px;
 }
 
 .function-buttons {
@@ -161,7 +153,7 @@ body {
 input {
   border: 1px solid var(--vscode-editorWidget-border) !important;
   height: 20px;
-  width: 50px !important;
+  width: 70px !important;
   position: relative;
   top: 0px;
   left: 5px;

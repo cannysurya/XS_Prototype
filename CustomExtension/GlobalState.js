@@ -97,28 +97,32 @@ let bitMapToolGraphData = {
       columnPoints.push(columnNumber);
     }
 
-    for (let rowNumber = 0; rowNumber < dataRowSize; rowNumber++) {
-      let dataPoint = [];
-      for (let columnNumber = 0; columnNumber < dataColumnSize; columnNumber++) {
-        let result = undefined;
-        exportGraphData.forEach((data) => {
-          if (rowNumber < data.height && columnNumber < data.width) {
-            if (mainGraphDataPoints[data.x + rowNumber] != null && mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] != null) {
-              if (result === undefined) {
-                result = mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] === 1 ? true : false;
-              } else {
-                if (data.Operator === "And") {
-                  result = result && mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] === 1 ? true : false;
+    try {
+      for (let rowNumber = 0; rowNumber < dataRowSize; rowNumber++) {
+        let dataPoint = [];
+        for (let columnNumber = 0; columnNumber < dataColumnSize; columnNumber++) {
+          let result = undefined;
+          exportGraphData.forEach((data) => {
+            if (rowNumber < data.height && columnNumber < data.width) {
+              if (mainGraphDataPoints[data.y + rowNumber] != null && mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] != null) {
+                if (result === undefined) {
+                  result = mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] === 1 ? true : false;
                 } else {
-                  result = result || mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] === 1 ? true : false;
+                  if (data.Operator === "And") {
+                    result = result && mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] === 1 ? true : false;
+                  } else {
+                    result = result || mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] === 1 ? true : false;
+                  }
                 }
               }
             }
-          }
-        });
-        dataPoint.push(result ? 1 : 0);
+          });
+          dataPoint.push(result ? 1 : 0);
+        }
+        dataPoints.push(dataPoint);
       }
-      dataPoints.push(dataPoint);
+    } catch (e) {
+      debugger;
     }
 
     bitMapToolGraphData.exportGraphRowPoints = rowPoints;
@@ -150,6 +154,10 @@ let bitMapToolGraphData = {
   updateHeight: (value, index) => {
     let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
     configuration.height = parseInt(value);
+  },
+  deleteConfiguration: (index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    bitMapToolGraphData.exportGraphData.splice(bitMapToolGraphData.exportGraphData.indexOf(configuration), 1);
   },
 };
 

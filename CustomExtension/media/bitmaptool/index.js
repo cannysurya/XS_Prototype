@@ -182,7 +182,7 @@ function loadConfiguration(data) {
   parentContainer.innerHTML = "";
   data.forEach((datum) => {
     let wrapperContainer = document.createElement("div");
-    wrapperContainer.classList.add("export-source-configuration-controls");
+    wrapperContainer.classList.add("export-configuration-controls");
 
     let xValueComponent = document.createElement("div");
     xValueComponent.classList.add("control-container");
@@ -264,10 +264,22 @@ function loadConfiguration(data) {
     heightComponent.appendChild(heightHeader);
     heightComponent.appendChild(heightContent);
 
+    let deleteComponent = document.createElement("button");
+    deleteComponent.classList.add("button-2");
+    deleteComponent.innerHTML = "X";
+    deleteComponent.addEventListener("click", (e) => {
+      vscode.postMessage({
+        command: "deleteConfiguration",
+        index: datum.index,
+      });
+      parentContainer.removeChild(wrapperContainer);
+    });
+
     wrapperContainer.appendChild(xValueComponent);
     wrapperContainer.appendChild(yValueComponent);
     wrapperContainer.appendChild(widthComponent);
     wrapperContainer.appendChild(heightComponent);
+    wrapperContainer.appendChild(deleteComponent);
     parentContainer.appendChild(wrapperContainer);
   });
 }
