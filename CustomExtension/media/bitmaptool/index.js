@@ -180,7 +180,7 @@ function closeImageContainer() {
 function loadConfiguration(data) {
   let parentContainer = document.getElementById("exportconfigcontainer");
   parentContainer.innerHTML = "";
-  data.forEach((datum) => {
+  data.forEach((datum, index) => {
     let wrapperContainer = document.createElement("div");
     wrapperContainer.classList.add("export-configuration-controls");
 
@@ -264,6 +264,34 @@ function loadConfiguration(data) {
     heightComponent.appendChild(heightHeader);
     heightComponent.appendChild(heightContent);
 
+    let operationComponent = document.createElement("div");
+    operationComponent.classList.add("control-container");
+    let operationHeader = document.createElement("div");
+    operationHeader.classList.add("label");
+    operationHeader.classList.add("pad-6-4");
+    operationHeader.innerHTML = "Operator";
+    let operationContent = document.createElement("select");
+    let option1 = document.createElement("option");
+    option1.text = "And";
+    operationContent.add(option1);
+    let option2 = document.createElement("option");
+    option2.text = "Or";
+    operationContent.add(option2);
+    operationContent.selectedIndex = datum.Operator === "And" ? 0 : 1;
+    operationContent.addEventListener("change", (e) => {
+      vscode.postMessage({
+        command: "updateOperation",
+        value: e.target.value,
+        index: datum.index,
+      });
+    });
+    operationComponent.appendChild(operationHeader);
+    operationComponent.appendChild(operationContent);
+
+    if (index === 0) {
+      operationComponent.classList.add("visibility-hide");
+    }
+
     let deleteComponent = document.createElement("button");
     deleteComponent.classList.add("button-2");
     deleteComponent.innerHTML = "X";
@@ -279,6 +307,7 @@ function loadConfiguration(data) {
     wrapperContainer.appendChild(yValueComponent);
     wrapperContainer.appendChild(widthComponent);
     wrapperContainer.appendChild(heightComponent);
+    wrapperContainer.appendChild(operationComponent);
     wrapperContainer.appendChild(deleteComponent);
     parentContainer.appendChild(wrapperContainer);
   });

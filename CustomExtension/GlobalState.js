@@ -155,6 +155,10 @@ let bitMapToolGraphData = {
     let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
     configuration.height = parseInt(value);
   },
+  updateOperation: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.Operator = value;
+  },
   deleteConfiguration: (index) => {
     let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
     bitMapToolGraphData.exportGraphData.splice(bitMapToolGraphData.exportGraphData.indexOf(configuration), 1);

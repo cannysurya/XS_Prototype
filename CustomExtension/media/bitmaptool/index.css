@@ -129,6 +129,10 @@ body {
   padding: 6px 4px;
 }
 
+.visibility-hide {
+  visibility: hidden;
+}
+
 #main-graph {
   height: 600px;
   width: 800px;
@@ -152,6 +156,16 @@ body {
 
 input {
   border: 1px solid var(--vscode-editorWidget-border) !important;
+  height: 20px;
+  width: 70px !important;
+  position: relative;
+  top: 0px;
+  left: 5px;
+}
+
+select {
+  border: 1px solid var(--vscode-editorWidget-border) !important;
+  color: var(--vscode-input-foreground);
   height: 20px;
   width: 70px !important;
   position: relative;

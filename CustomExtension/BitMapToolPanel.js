@@ -254,6 +254,9 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "updateHeight":
                   updateHeight(data.value, data.index);
                   break;
+                case "updateOperation":
+                  updateOperation(data.value, data.index);
+                  break;
                 case "deleteConfiguration":
                   deleteConfiguration(data.index);
                   break;
@@ -347,12 +350,16 @@ function updateHeight(value, index) {
   getBitMapToolGraphData().updateHeight(value, index);
 }
 
+function updateOperation(value, index) {
+  getBitMapToolGraphData().updateOperation(value, index);
+}
 function addConfiguration(xRange, yRange) {
   getBitMapToolGraphData().addConfiguration(xRange, yRange);
 }
 
 function deleteConfiguration(index) {
   getBitMapToolGraphData().deleteConfiguration(index);
+  selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
 }
 
 function openConfiguration() {
