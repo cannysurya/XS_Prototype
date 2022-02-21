@@ -47,24 +47,22 @@ var bitMapToolGraphData = {
   exportGraphRowPoints: [],
   exportGraphColumnPoints: [],
   exportGraphDataPoints: [],
-  exportGraphData: {
-    source: {
+  exportGraphData: [
+    {
       x: 0,
       y: 0,
+      width: 100,
+      height: 100,
+      Operator: "And",
     },
-    target: [
-      {
-        x: 100,
-        y: 100,
-      },
-      {
-        x: 199,
-        y: 198,
-      },
-    ],
-    width: 100,
-    height: 100,
-  },
+    {
+      x: 99,
+      y: 100,
+      width: 110,
+      height: 110,
+      Operator: "Or",
+    },
+  ],
   updateMainGraphData: (mainGraphData) => {
     for (let rowNumber = 0; rowNumber < bitMapToolGraphData.mainGraphRowCount; rowNumber++) {
       for (let columnNumber = 0; columnNumber < bitMapToolGraphData.mainGraphColumnCount; columnNumber++) {
@@ -90,42 +88,49 @@ var bitMapToolGraphData = {
     }
   },
   updateExportGraphData: () => {
-    let data = bitMapToolGraphData.exportGraphData;
+    let dataRowSize = 0;
+    let dataColumnSize = 0;
     let rowPoints = [];
     let columnPoints = [];
     let dataPoints = [];
+    let exportGraphData = bitMapToolGraphData.exportGraphData;
+    let mainGraphDataPoints = bitMapToolGraphData.mainGraphDataPoints;
+    exportGraphData.forEach((data) => {
+      if (data.width > dataColumnSize) {
+        dataColumnSize = data.width;
+      }
+      if (data.height > dataRowSize) {
+        dataRowSize = data.height;
+      }
+    });
 
-    let startRow = data.source.x;
-    let startColumn = data.source.y;
-    let stopRow = startRow + data.height;
-    let stopColumn = startColumn + data.width;
-
-    for (let rowNumber = startRow; rowNumber < stopRow; rowNumber++) {
+    for (let rowNumber = 0; rowNumber < dataRowSize; rowNumber++) {
       rowPoints.push(rowNumber);
     }
-    for (let columnNumber = startColumn; columnNumber < stopColumn; columnNumber++) {
+    for (let columnNumber = 0; columnNumber < dataColumnSize; columnNumber++) {
       columnPoints.push(columnNumber);
     }
 
-    for (let rowNumber = startRow; rowNumber < stopRow; rowNumber++) {
+    for (let rowNumber = 0; rowNumber < dataRowSize; rowNumber++) {
       let dataPoint = [];
-      for (let columnNumber = startColumn; columnNumber < stopColumn; columnNumber++) {
-        let sourceValue = null;
-        if (bitMapToolGraphData.mainGraphDataPoints[rowNumber] != null && bitMapToolGraphData.mainGraphDataPoints[rowNumber][columnNumber] != null) {
-          sourceValue = bitMapToolGraphData.mainGraphDataPoints[rowNumber][columnNumber];
-          data.target.forEach((target) => {
-            if (bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber] != null && bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber][target.y + columnNumber] != null) {
-              let targetValue = bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber][target.y + columnNumber];
-              if (sourceValue === 1 && targetValue === 0) {
-                sourceValue = 0.5;
-              }
-              if (sourceValue === 0 && targetValue === 1) {
-                sourceValue = 0.5;
+      for (let columnNumber = 0; columnNumber < dataColumnSize; columnNumber++) {
+        let result = undefined;
+        exportGraphData.forEach((data) => {
+          if (rowNumber < data.height && columnNumber < data.width) {
+            if (mainGraphDataPoints[data.x + rowNumber] != null && mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] != null) {
+              if (result === undefined) {
+                result = mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] === 1 ? true : false;
+              } else {
+                if (data.Operator === "And") {
+                  result = result && mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] === 1 ? true : false;
+                } else {
+                  result = result || mainGraphDataPoints[data.x + rowNumber][data.y + columnNumber] === 1 ? true : false;
+                }
               }
             }
-          });
-        }
-        dataPoint.push(sourceValue);
+          }
+        });
+        dataPoint.push(result ? 1 : 0);
       }
       dataPoints.push(dataPoint);
     }
