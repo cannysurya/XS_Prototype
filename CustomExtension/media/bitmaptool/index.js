@@ -51,8 +51,17 @@ function plotMainGraph() {
         ticks: "",
         ticksuffix: " ",
       },
-    }
-  );
+    },
+    { modeBarButtons: [["zoom2d"], ["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["select2d"]] }
+  ).then((gd) => {
+    gd.on("plotly_selected", (eventData) => {
+      vscode.postMessage({
+        command: "addConfiguration",
+        x: eventData.range.x,
+        y: eventData.range.y,
+      });
+    });
+  });
 }
 
 function plotCursorGraph(bitMapToolGraphData) {
@@ -148,6 +157,9 @@ function onExportClick() {
 function openConfiguration() {
   document.getElementById("maincontainer").classList.add("hide");
   document.getElementById("exportconfiguration").classList.remove("hide");
+  vscode.postMessage({
+    command: "openConfiguration",
+  });
 }
 
 function closeConfiguration() {
@@ -163,6 +175,101 @@ function openImageContainer() {
 function closeImageContainer() {
   document.getElementById("maincontainer").classList.remove("hide");
   document.getElementById("imagecontainer").classList.add("hide");
+}
+
+function loadConfiguration(data) {
+  let parentContainer = document.getElementById("exportconfigcontainer");
+  parentContainer.innerHTML = "";
+  data.forEach((datum) => {
+    let wrapperContainer = document.createElement("div");
+    wrapperContainer.classList.add("export-source-configuration-controls");
+
+    let xValueComponent = document.createElement("div");
+    xValueComponent.classList.add("control-container");
+    let xValueHeader = document.createElement("div");
+    xValueHeader.classList.add("label");
+    xValueHeader.classList.add("pad-6-4");
+    xValueHeader.innerHTML = "X";
+    let xValueContent = document.createElement("input");
+    xValueContent.type = "number";
+    xValueContent.min = "1";
+    xValueContent.value = datum.x;
+    xValueContent.addEventListener("change", (e) => {
+      vscode.postMessage({
+        command: "updateXValue",
+        value: e.target.value,
+        index: datum.index,
+      });
+    });
+    xValueComponent.appendChild(xValueHeader);
+    xValueComponent.appendChild(xValueContent);
+
+    let yValueComponent = document.createElement("div");
+    yValueComponent.classList.add("control-container");
+    let yValueHeader = document.createElement("div");
+    yValueHeader.classList.add("label");
+    yValueHeader.classList.add("pad-6-4");
+    yValueHeader.innerHTML = "Y";
+    let yValueContent = document.createElement("input");
+    yValueContent.type = "number";
+    yValueContent.min = "1";
+    yValueContent.value = datum.y;
+    yValueContent.addEventListener("change", (e) => {
+      vscode.postMessage({
+        command: "updateYValue",
+        value: e.target.value,
+        index: datum.index,
+      });
+    });
+    yValueComponent.appendChild(yValueHeader);
+    yValueComponent.appendChild(yValueContent);
+
+    let widthComponent = document.createElement("div");
+    widthComponent.classList.add("control-container");
+    let widthHeader = document.createElement("div");
+    widthHeader.classList.add("label");
+    widthHeader.classList.add("pad-6-4");
+    widthHeader.innerHTML = "Width";
+    let widthContent = document.createElement("input");
+    widthContent.type = "number";
+    widthContent.min = "1";
+    widthContent.value = datum.width;
+    widthContent.addEventListener("change", (e) => {
+      vscode.postMessage({
+        command: "updateWidth",
+        value: e.target.value,
+        index: datum.index,
+      });
+    });
+    widthComponent.appendChild(widthHeader);
+    widthComponent.appendChild(widthContent);
+
+    let heightComponent = document.createElement("div");
+    heightComponent.classList.add("control-container");
+    let heightHeader = document.createElement("div");
+    heightHeader.classList.add("label");
+    heightHeader.classList.add("pad-6-4");
+    heightHeader.innerHTML = "Height";
+    let heightContent = document.createElement("input");
+    heightContent.type = "number";
+    heightContent.min = "1";
+    heightContent.value = datum.height;
+    heightContent.addEventListener("change", (e) => {
+      vscode.postMessage({
+        command: "updateHeight",
+        value: e.target.value,
+        index: datum.index,
+      });
+    });
+    heightComponent.appendChild(heightHeader);
+    heightComponent.appendChild(heightContent);
+
+    wrapperContainer.appendChild(xValueComponent);
+    wrapperContainer.appendChild(yValueComponent);
+    wrapperContainer.appendChild(widthComponent);
+    wrapperContainer.appendChild(heightComponent);
+    parentContainer.appendChild(wrapperContainer);
+  });
 }
 
 function exportGraphData(rowPoints, columnPoints, dataPoints) {
@@ -257,6 +364,9 @@ window.addEventListener("message", (event) => {
       break;
     case "exportGraphData":
       exportGraphData(event.data.rowPoints, event.data.columnPoints, event.data.dataPoints);
+      break;
+    case "loadConfiguration":
+      loadConfiguration(event.data.data);
       break;
   }
 });

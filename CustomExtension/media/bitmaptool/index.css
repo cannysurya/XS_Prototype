@@ -44,7 +44,7 @@ body {
 
 .button-2:hover {
   background: transparent;
-  border: 2px solid var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
 }
 
 .button-2:active {
@@ -65,9 +65,9 @@ body {
   width: 100%;
 }
 
-.export-source-configuration {
+.export-configuration-container {
   border: 1px solid var(--vscode-editorWidget-border);
-  margin: 20px 0;
+  margin: 20px;
 }
 
 .export-source-configuration-controls {
@@ -137,9 +137,6 @@ body {
   padding: 6px 4px;
 }
 
-.target-configurations {
-}
-
 #main-graph {
   height: 600px;
   width: 800px;
@@ -162,6 +159,7 @@ body {
 }
 
 input {
+  border: 1px solid var(--vscode-editorWidget-border) !important;
   height: 20px;
   width: 50px !important;
   position: relative;

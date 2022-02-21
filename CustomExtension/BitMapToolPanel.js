@@ -13,13 +13,13 @@ var selfWebView = undefined;
 
 if (fs.existsSync(graphDirectory)) {
   fs.rmdirSync(graphDirectory, { recursive: true });
-  fs.mkdirSync(graphDirectory);
 }
+fs.mkdirSync(graphDirectory);
 
 if (fs.existsSync(graphImageDirectory)) {
   fs.rmdirSync(graphImageDirectory, { recursive: true });
-  fs.mkdirSync(graphImageDirectory);
 }
+fs.mkdirSync(graphImageDirectory);
 
 var __awaiter =
   (this && this.__awaiter) ||
@@ -236,6 +236,24 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "generateSnapshot":
                   generateImageFromHtml(data.htmlString);
                   break;
+                case "openConfiguration":
+                  openConfiguration();
+                  break;
+                case "addConfiguration":
+                  addConfiguration(data.x, data.y);
+                  break;
+                case "updateXValue":
+                  updateXValue(data.value, data.index);
+                  break;
+                case "updateYValue":
+                  updateYValue(data.value, data.index);
+                  break;
+                case "updateWidth":
+                  updateWidth(data.value, data.index);
+                  break;
+                case "updateHeight":
+                  updateHeight(data.value, data.index);
+                  break;
               }
               return [2 /*return*/];
             });
@@ -282,6 +300,9 @@ var BitMapToolPanel = /** @class */ (function () {
                       </div>
                       <button class="button-2" onclick="closeConfiguration()">X</button>
                     </div>
+                    <div class="export-configuration-container" id="exportconfigcontainer">
+                      
+                    </div>
                     <div class="function-buttons">
                       <button onclick="onExportClick()" class="button-1">Export</button>
                     </div>
@@ -307,6 +328,30 @@ var BitMapToolPanel = /** @class */ (function () {
   return BitMapToolPanel;
 })();
 
+function updateXValue(value, index) {
+  getBitMapToolGraphData().updateXValue(value, index);
+}
+
+function updateYValue(value, index) {
+  getBitMapToolGraphData().updateYValue(value, index);
+}
+
+function updateWidth(value, index) {
+  getBitMapToolGraphData().updateWidth(value, index);
+}
+
+function updateHeight(value, index) {
+  getBitMapToolGraphData().updateHeight(value, index);
+}
+
+function addConfiguration(xRange, yRange) {
+  getBitMapToolGraphData().addConfiguration(xRange, yRange);
+}
+
+function openConfiguration() {
+  selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
+}
+
 function execute() {
   getServers()
     .filter((x) => x.isActive)
@@ -329,7 +374,7 @@ function generateImageFromHtml(htmlString) {
     html: `<!DOCTYPE html><html><head><style>body{width:3840px;height:2160px;}</style></head><body>${htmlString}</body></html>`,
   })
     .then(() => {
-      vscode.window.showInformationMessage(`The sample image sample${graphImageCounter} was successfully created...`);
+      vscode.window.showInformationMessage(`The sample image sample${graphImageCounter++} was successfully created...`);
     })
     .catch((err) => {});
 }

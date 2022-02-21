@@ -14,19 +14,20 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const testMethodPackage = protoDescriptor.testmethod;
 
-var startTime = undefined;
+let startTime = undefined;
+let configurationIndex = 0;
 
-var tfeData = {};
+let tfeData = {};
 
-var datalogData = [];
-var datalogConfig = {
+let datalogData = [];
+let datalogConfig = {
   recordsPerPage: 10,
   currentPageNumber: 1,
   maxPageNumber: 1,
   refreshRate: 100,
 };
 
-var bitMapToolGraphData = {
+let bitMapToolGraphData = {
   mainGraphRowPoints: [],
   mainGraphColumnPoints: [],
   mainGraphDataPoints: [],
@@ -47,22 +48,7 @@ var bitMapToolGraphData = {
   exportGraphRowPoints: [],
   exportGraphColumnPoints: [],
   exportGraphDataPoints: [],
-  exportGraphData: [
-    {
-      x: 0,
-      y: 0,
-      width: 100,
-      height: 100,
-      Operator: "And",
-    },
-    {
-      x: 99,
-      y: 100,
-      width: 110,
-      height: 110,
-      Operator: "Or",
-    },
-  ],
+  exportGraphData: [],
   updateMainGraphData: (mainGraphData) => {
     for (let rowNumber = 0; rowNumber < bitMapToolGraphData.mainGraphRowCount; rowNumber++) {
       for (let columnNumber = 0; columnNumber < bitMapToolGraphData.mainGraphColumnCount; columnNumber++) {
@@ -71,11 +57,11 @@ var bitMapToolGraphData = {
     }
   },
   updateCursorGraphData: (cursorGraphData) => {
-    var cursorGraphDataLength = cursorGraphData.length;
-    var rowReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphRowCount / bitMapToolGraphData.cursorGraphRowScale);
-    var columnReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphColumnCount / bitMapToolGraphData.cursorGraphColumnScale);
+    let cursorGraphDataLength = cursorGraphData.length;
+    let rowReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphRowCount / bitMapToolGraphData.cursorGraphRowScale);
+    let columnReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphColumnCount / bitMapToolGraphData.cursorGraphColumnScale);
     for (let rowNumber = 0; rowNumber < cursorGraphDataLength; rowNumber++) {
-      var cursorGraphDataRowLength = cursorGraphData[rowNumber].length;
+      let cursorGraphDataRowLength = cursorGraphData[rowNumber].length;
       for (let columnNumber = 0; columnNumber < cursorGraphDataRowLength; columnNumber++) {
         bitMapToolGraphData.cursorGraphDataPoints[bitMapToolGraphData.cursorGraphRowReference * rowReferenceOfSample + rowNumber][bitMapToolGraphData.cursorGraphColumnReference * columnReferenceOfSample + columnNumber] = cursorGraphData[rowNumber][columnNumber];
       }
@@ -139,6 +125,32 @@ var bitMapToolGraphData = {
     bitMapToolGraphData.exportGraphColumnPoints = columnPoints;
     bitMapToolGraphData.exportGraphDataPoints = dataPoints;
   },
+  addConfiguration: (xRange, yRange) => {
+    bitMapToolGraphData.exportGraphData.push({
+      x: Math.ceil(xRange[0]),
+      y: Math.ceil(yRange[0]),
+      width: Math.ceil(xRange[1] - xRange[0]),
+      height: Math.ceil(yRange[1] - yRange[0]),
+      Operator: "And",
+      index: configurationIndex++,
+    });
+  },
+  updateXValue: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.x = parseInt(value);
+  },
+  updateYValue: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.y = parseInt(value);
+  },
+  updateWidth: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.width = parseInt(value);
+  },
+  updateHeight: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.height = parseInt(value);
+  },
 };
 
 function initializeBitMapToolGraph() {
@@ -164,7 +176,7 @@ function initializeBitMapToolGraph() {
 
 initializeBitMapToolGraph();
 
-var server1 = {
+let server1 = {
   name: "Server 1",
   debugConfiguration: {
     local: {
@@ -200,7 +212,7 @@ var server1 = {
   isActive: true,
 };
 
-var server2 = {
+let server2 = {
   name: "Server 2",
   debugConfiguration: {
     local: {
@@ -235,7 +247,7 @@ var server2 = {
   isActive: false,
 };
 
-var servers = [server1, server2];
+let servers = [server1, server2];
 
 exports.getTFEData = () => tfeData;
 exports.getDatalogData = () => datalogData;
