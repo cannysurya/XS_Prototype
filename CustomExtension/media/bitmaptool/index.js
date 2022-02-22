@@ -33,8 +33,8 @@ function plotMainGraph() {
       showlegend: false,
       margin: {
         l: 40,
-        r: 10,
-        t: 0,
+        r: 0,
+        t: 20,
         b: 40,
       },
       xaxis: {
@@ -52,7 +52,7 @@ function plotMainGraph() {
         ticksuffix: " ",
       },
     },
-    { modeBarButtons: [["zoom2d"], ["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["select2d"]] }
+    { displaylogo: false, displayModeBar: true, modeBarButtons: [["zoom2d"], ["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["select2d"]] }
   ).then((gd) => {
     gd.on("plotly_selected", (eventData) => {
       vscode.postMessage({
