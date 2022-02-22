@@ -218,6 +218,9 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "exportGraphData":
                   exportGraphData();
                   break;
+                case "saveGraphData":
+                  saveGraphData();
+                  break;
                 case "syncData":
                   let bitMapToolGraphData = getBitMapToolGraphData();
                   selfWebView.postMessage({
@@ -257,6 +260,9 @@ var BitMapToolPanel = /** @class */ (function () {
                   break;
                 case "deleteConfiguration":
                   deleteConfiguration(data.index);
+                  break;
+                case "postMessage":
+                  vscode.window.showInformationMessage(data.message);
                   break;
               }
               return [2 /*return*/];
@@ -388,6 +394,10 @@ function exportGraphData() {
   }
   getBitMapToolGraphData().updateExportGraphData();
   selfWebView.postMessage({ command: "exportGraphData", rowPoints: getBitMapToolGraphData().exportGraphRowPoints, columnPoints: getBitMapToolGraphData().exportGraphColumnPoints, dataPoints: getBitMapToolGraphData().exportGraphDataPoints });
+}
+
+function saveGraphData() {
+  selfWebView.postMessage({ command: "saveGraphData", rowPoints: getBitMapToolGraphData().mainGraphRowPoints, columnPoints: getBitMapToolGraphData().mainGraphColumnPoints, dataPoints: getBitMapToolGraphData().mainGraphDataPoints });
 }
 
 function loadMainGraphData(x, y) {

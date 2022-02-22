@@ -73,7 +73,32 @@ function plotMainGraph() {
         ticksuffix: " ",
       },
     },
-    { displaylogo: false, displayModeBar: true, modeBarButtons: [["zoom2d"], ["zoomIn2d"], ["zoomOut2d"], ["autoScale2d"], ["select2d"]] }
+    {
+      displaylogo: false,
+      displayModeBar: true,
+      modeBarButtons: [
+        [
+          {
+            name: "Snapshot",
+            icon: Plotly.Icons.camera,
+            click: () => {
+              vscode.postMessage({
+                command: "postMessage",
+                message: "Saving Snapshot...",
+              });
+              vscode.postMessage({
+                command: "saveGraphData",
+              });
+            },
+          },
+        ],
+        ["zoom2d"],
+        ["zoomIn2d"],
+        ["zoomOut2d"],
+        ["autoScale2d"],
+        ["select2d"],
+      ],
+    }
   ).then((gd) => {
     gd.on("plotly_selected", (eventData) => {
       vscode.postMessage({
@@ -184,6 +209,10 @@ function execute() {
 }
 
 function onExportClick() {
+  vscode.postMessage({
+    command: "postMessage",
+    message: "Exporting Graph Data...",
+  });
   vscode.postMessage({
     command: "exportGraphData",
   });
@@ -389,6 +418,55 @@ function exportGraphData(rowPoints, columnPoints, dataPoints) {
   });
 }
 
+function saveGraphData(rowPoints, columnPoints, dataPoints) {
+  Plotly.newPlot(
+    "download-graph",
+    [
+      {
+        x: rowPoints,
+        y: columnPoints,
+        z: dataPoints,
+        colorscale: [
+          [0, "#FF0000"],
+          [1, "#00FF00"],
+        ],
+        type: "heatmap",
+        showscale: false,
+        hoverinfo: "none",
+      },
+    ],
+    {
+      autosize: true,
+      paper_bgcolor: "rgba(0,0,0,0)",
+      plot_bgcolor: "rgba(0,0,0,0)",
+      title: "",
+      showlegend: false,
+      margin: {
+        l: 0,
+        r: 0,
+        t: 0,
+        b: 0,
+      },
+      xaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: false,
+      },
+      yaxis: {
+        showgrid: false,
+        zeroline: false,
+        visible: false,
+      },
+    },
+    { displayModeBar: false }
+  ).then((gd) => {
+    vscode.postMessage({
+      command: "generateSnapshot",
+      htmlString: gd.innerHTML,
+    });
+  });
+}
+
 window.addEventListener("message", (event) => {
   switch (event.data.command) {
     case "updateMainGraphRowPoints":
@@ -433,6 +511,9 @@ window.addEventListener("message", (event) => {
       break;
     case "exportGraphData":
       exportGraphData(event.data.rowPoints, event.data.columnPoints, event.data.dataPoints);
+      break;
+    case "saveGraphData":
+      saveGraphData(event.data.rowPoints, event.data.columnPoints, event.data.dataPoints);
       break;
     case "loadConfiguration":
       loadConfiguration(event.data.data);
