@@ -228,6 +228,7 @@ var BitMapToolPanel = /** @class */ (function () {
                     cursorGraphRowPoints: bitMapToolGraphData.cursorGraphRowPoints,
                     cursorGraphColumnPoints: bitMapToolGraphData.cursorGraphColumnPoints,
                     cursorGraphDataPoints: bitMapToolGraphData.cursorGraphDataPoints,
+                    loadConfiguration: getBitMapToolGraphData().exportGraphData,
                   });
                   break;
                 case "loadMainGraphData":
@@ -235,9 +236,6 @@ var BitMapToolPanel = /** @class */ (function () {
                   break;
                 case "generateSnapshot":
                   generateImageFromHtml(data.htmlString);
-                  break;
-                case "openConfiguration":
-                  openConfiguration();
                   break;
                 case "addConfiguration":
                   addConfiguration(data.x, data.y);
@@ -291,7 +289,9 @@ var BitMapToolPanel = /** @class */ (function () {
                   <div class="main-container" id="maincontainer">
                     <div class="function-buttons">
                       <button onclick="execute()" class="button-1">Fetch Graph Data</button>
-                      <button onclick="openConfiguration()" class="button-1">Export Graph Data</button>
+                      <button onclick="onExportClick()" class="button-1">Export</button>
+                    </div>
+                    <div class="export-configuration-container" id="exportconfigcontainer">
                     </div>
                     <div class="graph-container">
                       <div id="main-graph"></div>
@@ -299,20 +299,6 @@ var BitMapToolPanel = /** @class */ (function () {
                     </div>
                   </div>
                   <div id="download-graph"></div>
-                  <div class="export-configuration hide" id="exportconfiguration">
-                    <div class="header">
-                      <div class="label pad-6-4 bold">
-                        Export Configuration
-                      </div>
-                      <button class="button-2" onclick="closeConfiguration()">X</button>
-                    </div>
-                    <div class="export-configuration-container" id="exportconfigcontainer">
-                      
-                    </div>
-                    <div class="function-buttons">
-                      <button onclick="onExportClick()" class="button-1">Export</button>
-                    </div>
-                  </div>
                   <div class="image-container hide" id="imagecontainer">
                     <div class="header">
                       <div class="label pad-6-4 bold">
@@ -355,14 +341,11 @@ function updateOperation(value, index) {
 }
 function addConfiguration(xRange, yRange) {
   getBitMapToolGraphData().addConfiguration(xRange, yRange);
+  selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
 }
 
 function deleteConfiguration(index) {
   getBitMapToolGraphData().deleteConfiguration(index);
-  selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
-}
-
-function openConfiguration() {
   selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
 }
 

@@ -184,23 +184,9 @@ function execute() {
 }
 
 function onExportClick() {
-  closeConfiguration();
   vscode.postMessage({
     command: "exportGraphData",
   });
-}
-
-function openConfiguration() {
-  document.getElementById("maincontainer").classList.add("hide");
-  document.getElementById("exportconfiguration").classList.remove("hide");
-  vscode.postMessage({
-    command: "openConfiguration",
-  });
-}
-
-function closeConfiguration() {
-  document.getElementById("maincontainer").classList.remove("hide");
-  document.getElementById("exportconfiguration").classList.add("hide");
 }
 
 function openImageContainer() {
@@ -441,6 +427,7 @@ window.addEventListener("message", (event) => {
       cursorGraphRowPoints = event.data.cursorGraphRowPoints;
       cursorGraphColumnPoints = event.data.cursorGraphColumnPoints;
       cursorGraphDataPoints = event.data.cursorGraphDataPoints;
+      loadConfiguration(event.data.loadConfiguration);
       plotCursorGraph();
       plotMainGraph();
       break;
@@ -449,6 +436,7 @@ window.addEventListener("message", (event) => {
       break;
     case "loadConfiguration":
       loadConfiguration(event.data.data);
+      y;
       break;
   }
 });
