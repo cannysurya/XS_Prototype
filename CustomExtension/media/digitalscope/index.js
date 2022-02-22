@@ -29,7 +29,8 @@ var pins = {
   ]
 }
 
-for(let z=9; z<=512; z++){
+//Generate 512pins * 262144data
+for(let z=9; z<=16; z++){
   pins.list.push({
     name: `GPIO_${z}`,
     checked: false
@@ -65,7 +66,7 @@ var config = {
     //shapePosition: true ,
   }
 };
-var layout ={
+var layout = {
   width: 1000,
   autosize:true,
   hovermode: false,
@@ -336,13 +337,13 @@ function attachGraphListeners() {
       else if(hoverMode == 'Horizontal' && !globalY.includes(yCoordinate)){
         globalY[globalY.length] = yCoordinate;
       }
-      DrawYellowLine();
+      drawYellowLine();
     }
   });
 
 }
 
-function DrawYellowLine(){
+function drawYellowLine(){
   if(hoverMode == 'Horizontal'){
     cursors.push({
       opacity: 1,
