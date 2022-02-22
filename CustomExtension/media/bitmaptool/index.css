@@ -67,9 +67,7 @@ body {
 
 .export-configuration-container {
   border: 1px solid var(--vscode-editorWidget-border);
-  height: 120px;
   margin: 10px 20px;
-  overflow: auto;
 }
 
 .export-configuration-controls {
