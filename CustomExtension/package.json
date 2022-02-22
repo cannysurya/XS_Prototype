@@ -69,6 +69,7 @@
 		"alert": "^5.0.10",
 		"google-protobuf": "^3.19.3",
 		"line-reader": "^0.4.0",
+		"node-html-to-image": "^3.2.4",
 		"perf_hooks": "0.0.1",
 		"requirejs": "^2.3.6",
 		"reverse-line-reader": "^0.2.6",

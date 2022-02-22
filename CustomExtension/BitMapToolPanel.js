@@ -2,16 +2,24 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
+const nodeHtmlToImage = require("node-html-to-image");
 const { getServers, getBitMapToolGraphData } = require("./GlobalState");
 const graphDirectory = __dirname + "/graphdata/";
+const graphImageDirectory = __dirname + "/graphImage/";
 let graphFileCounter = 1;
+let graphImageCounter = 1;
 let isMainGraphRenderInProgress = false;
 var selfWebView = undefined;
 
 if (fs.existsSync(graphDirectory)) {
   fs.rmdirSync(graphDirectory, { recursive: true });
-  fs.mkdirSync(graphDirectory);
 }
+fs.mkdirSync(graphDirectory);
+
+if (fs.existsSync(graphImageDirectory)) {
+  fs.rmdirSync(graphImageDirectory, { recursive: true });
+}
+fs.mkdirSync(graphImageDirectory);
 
 var __awaiter =
   (this && this.__awaiter) ||
@@ -225,6 +233,33 @@ var BitMapToolPanel = /** @class */ (function () {
                 case "loadMainGraphData":
                   loadMainGraphData(data.x, data.y);
                   break;
+                case "generateSnapshot":
+                  generateImageFromHtml(data.htmlString);
+                  break;
+                case "openConfiguration":
+                  openConfiguration();
+                  break;
+                case "addConfiguration":
+                  addConfiguration(data.x, data.y);
+                  break;
+                case "updateXValue":
+                  updateXValue(data.value, data.index);
+                  break;
+                case "updateYValue":
+                  updateYValue(data.value, data.index);
+                  break;
+                case "updateWidth":
+                  updateWidth(data.value, data.index);
+                  break;
+                case "updateHeight":
+                  updateHeight(data.value, data.index);
+                  break;
+                case "updateOperation":
+                  updateOperation(data.value, data.index);
+                  break;
+                case "deleteConfiguration":
+                  deleteConfiguration(data.index);
+                  break;
               }
               return [2 /*return*/];
             });
@@ -253,16 +288,17 @@ var BitMapToolPanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-                  <div class="function-buttons">
-                    <button onclick="execute()" class="button-1">Fetch Graph Data</button>
-                    <button onclick="openConfiguration()" class="button-1">Export Graph Data</button>
+                  <div class="main-container" id="maincontainer">
+                    <div class="function-buttons">
+                      <button onclick="execute()" class="button-1">Fetch Graph Data</button>
+                      <button onclick="openConfiguration()" class="button-1">Export Graph Data</button>
+                    </div>
+                    <div class="graph-container">
+                      <div id="main-graph"></div>
+                      <div id="cursor-graph"></div>
+                    </div>
                   </div>
-                  <div class="graph-container">
-                    <div id="main-graph"></div>
-                    <div id="cursor-graph"></div>
-                    <div id="download-graph"></div>
-                  </div>
-                  <img id="jpg-export"></img>
+                  <div id="download-graph"></div>
                   <div class="export-configuration hide" id="exportconfiguration">
                     <div class="header">
                       <div class="label pad-6-4 bold">
@@ -270,78 +306,22 @@ var BitMapToolPanel = /** @class */ (function () {
                       </div>
                       <button class="button-2" onclick="closeConfiguration()">X</button>
                     </div>
-                    <div class="export-source-configuration">
-                      <div class="label pad-6-4 bold">
-                        Source Configuration
-                      </div>
-                      <div class="export-source-configuration-controls">
-                        <div class="control-container">
-                          <div class="label pad-6-4">
-                            X
-                          </div>
-                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.source.x}">
-                        </div>
-                        <div class="control-container">
-                          <div class="label pad-6-4">
-                            Y
-                          </div>
-                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.source.y}">
-                        </div>
-                        <div class="control-container">
-                          <div class="label pad-6-4">
-                            Width
-                          </div>
-                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.width}">
-                        </div>
-                        <div class="control-container">
-                          <div class="label pad-6-4">
-                            Height
-                          </div>
-                          <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.height}">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="export-target-configuration">
-                      <div class="label pad-6-4 bold">
-                        Target Configuration
-                      </div>
-                      <div class="function-buttons">
-                        <button onclick="addTargetConfiguration()" class="button-1">Add</button>
-                        <button onclick="deleteTargetConfiguration()" class="button-1">Delete</button>
-                      </div>
-                      <div class="target-configurations">
-                        <div class="export-target-configuration-controls">
-                          <div class="control-container">
-                            <div class="label pad-6-4">
-                              X
-                            </div>
-                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[0].x}">
-                          </div>
-                          <div class="control-container">
-                            <div class="label pad-6-4">
-                              Y
-                            </div>
-                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[0].y}">
-                          </div>
-                        </div>
-                        <div class="export-target-configuration-controls">
-                          <div class="control-container">
-                            <div class="label pad-6-4">
-                              X
-                            </div>
-                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[1].x}">
-                          </div>
-                          <div class="control-container">
-                            <div class="label pad-6-4">
-                              Y
-                            </div>
-                            <input type="number" min="1" value="${getBitMapToolGraphData().exportGraphData.target[1].y}">
-                          </div>
-                        </div>
-                      </div>
+                    <div class="export-configuration-container" id="exportconfigcontainer">
+                      
                     </div>
                     <div class="function-buttons">
                       <button onclick="onExportClick()" class="button-1">Export</button>
+                    </div>
+                  </div>
+                  <div class="image-container hide" id="imagecontainer">
+                    <div class="header">
+                      <div class="label pad-6-4 bold">
+                        Generated Image
+                      </div>
+                      <button class="button-2" onclick="closeImageContainer()">X</button>
+                    </div>
+                    <div class="image-wrapper">
+                      <img id="imageelement"></img>
                     </div>
                   </div>
                 </body>
@@ -353,6 +333,38 @@ var BitMapToolPanel = /** @class */ (function () {
   BitMapToolPanel.viewType = "BitMapToolPanel";
   return BitMapToolPanel;
 })();
+
+function updateXValue(value, index) {
+  getBitMapToolGraphData().updateXValue(value, index);
+}
+
+function updateYValue(value, index) {
+  getBitMapToolGraphData().updateYValue(value, index);
+}
+
+function updateWidth(value, index) {
+  getBitMapToolGraphData().updateWidth(value, index);
+}
+
+function updateHeight(value, index) {
+  getBitMapToolGraphData().updateHeight(value, index);
+}
+
+function updateOperation(value, index) {
+  getBitMapToolGraphData().updateOperation(value, index);
+}
+function addConfiguration(xRange, yRange) {
+  getBitMapToolGraphData().addConfiguration(xRange, yRange);
+}
+
+function deleteConfiguration(index) {
+  getBitMapToolGraphData().deleteConfiguration(index);
+  selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
+}
+
+function openConfiguration() {
+  selfWebView.postMessage({ command: "loadConfiguration", data: getBitMapToolGraphData().exportGraphData });
+}
 
 function execute() {
   getServers()
@@ -370,7 +382,22 @@ function execute() {
     });
 }
 
+function generateImageFromHtml(htmlString) {
+  nodeHtmlToImage({
+    output: `${graphImageDirectory}/sample${graphImageCounter}.png`,
+    html: `<!DOCTYPE html><html><head><style>body{width:3840px;height:2160px;}</style></head><body>${htmlString}</body></html>`,
+  })
+    .then(() => {
+      vscode.window.showInformationMessage(`The sample image "sample${graphImageCounter++}" was successfully created...`);
+    })
+    .catch((err) => {});
+}
+
 function exportGraphData() {
+  if (getBitMapToolGraphData().exportGraphData.length === 0) {
+    vscode.window.showWarningMessage("No data to export");
+    return;
+  }
   getBitMapToolGraphData().updateExportGraphData();
   selfWebView.postMessage({ command: "exportGraphData", rowPoints: getBitMapToolGraphData().exportGraphRowPoints, columnPoints: getBitMapToolGraphData().exportGraphColumnPoints, dataPoints: getBitMapToolGraphData().exportGraphDataPoints });
 }
@@ -465,9 +492,7 @@ function plotCursorGraph() {
               }
             }
           );
-        } catch (e) {
-          debugger;
-        }
+        } catch (e) {}
       });
     });
 })();
