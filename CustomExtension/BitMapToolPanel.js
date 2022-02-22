@@ -388,7 +388,7 @@ function generateImageFromHtml(htmlString) {
     html: `<!DOCTYPE html><html><head><style>body{width:3840px;height:2160px;}</style></head><body>${htmlString}</body></html>`,
   })
     .then(() => {
-      vscode.window.showInformationMessage(`The sample image sample${graphImageCounter++} was successfully created...`);
+      vscode.window.showInformationMessage(`The sample image "sample${graphImageCounter++}" was successfully created...`);
     })
     .catch((err) => {});
 }

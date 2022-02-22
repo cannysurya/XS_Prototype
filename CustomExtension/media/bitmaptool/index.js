@@ -8,7 +8,31 @@ let cursorGraphRowPoints = [];
 let cursorGraphColumnPoints = [];
 let cursorGraphDataPoints = [];
 
+let hasFailValuesInMainGraph = true;
+let hasPassValuesInMainGraph = true;
+
+let hasFailValuesInCursorGraph = true;
+let hasPassValuesInCursorGraph = true;
+
 function plotMainGraph() {
+  function getColorScale() {
+    if (hasFailValuesInMainGraph && hasPassValuesInMainGraph) {
+      return [
+        [0, "#FF0000"],
+        [1, "#00FF00"],
+      ];
+    }
+    if (hasFailValuesInMainGraph) {
+      return [
+        [0, "#FF0000"],
+        [1, "#FF0000"],
+      ];
+    }
+    return [
+      [0, "#00FF00"],
+      [1, "#00FF00"],
+    ];
+  }
   Plotly.newPlot(
     "main-graph",
     [
@@ -16,10 +40,7 @@ function plotMainGraph() {
         x: mainGraphRowPoints,
         y: mainGraphColumnPoints,
         z: mainGraphDataPoints,
-        colorscale: [
-          [0, "#FF0000"],
-          [1, "#00FF00"],
-        ],
+        colorscale: getColorScale(),
         type: "heatmap",
         showscale: false,
         hoverinfo: "x+y",
@@ -64,7 +85,25 @@ function plotMainGraph() {
   });
 }
 
-function plotCursorGraph(bitMapToolGraphData) {
+function plotCursorGraph() {
+  function getColorScale() {
+    if (hasFailValuesInCursorGraph && hasPassValuesInCursorGraph) {
+      return [
+        [0, "#FF0000"],
+        [1, "#00FF00"],
+      ];
+    }
+    if (hasFailValuesInCursorGraph) {
+      return [
+        [0, "#FF0000"],
+        [1, "#FF0000"],
+      ];
+    }
+    return [
+      [0, "#00FF00"],
+      [1, "#00FF00"],
+    ];
+  }
   Plotly.newPlot(
     "cursor-graph",
     [
@@ -72,10 +111,7 @@ function plotCursorGraph(bitMapToolGraphData) {
         x: cursorGraphRowPoints,
         y: cursorGraphColumnPoints,
         z: cursorGraphDataPoints,
-        colorscale: [
-          [0, "#FF0000"],
-          [1, "#00FF00"],
-        ],
+        colorscale: getColorScale(),
         type: "heatmap",
         showscale: false,
         hoverinfo: "none",
@@ -380,6 +416,8 @@ window.addEventListener("message", (event) => {
       plotMainGraph();
       break;
     case "plotMainGraphWithStringData":
+      hasFailValuesInMainGraph = event.data.mainGraphDataPointsInString.includes("0");
+      hasPassValuesInMainGraph = event.data.mainGraphDataPointsInString.includes("1");
       updateMainGraphDataWithString(event.data.mainGraphDataPointsInString);
       plotMainGraph();
       break;
@@ -391,6 +429,9 @@ window.addEventListener("message", (event) => {
       break;
     case "plotCursorGraph":
       cursorGraphDataPoints = event.data.cursorGraphDataPoints;
+      let stringValue = event.data.cursorGraphDataPoints.toString();
+      hasFailValuesInCursorGraph = stringValue.includes("0");
+      hasPassValuesInCursorGraph = stringValue.includes("1");
       plotCursorGraph();
       break;
     case "syncData":
