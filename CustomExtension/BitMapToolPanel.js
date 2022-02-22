@@ -291,6 +291,11 @@ var BitMapToolPanel = /** @class */ (function () {
                       <button onclick="execute()" class="button-1">Fetch Graph Data</button>
                       <button onclick="onExportClick()" class="button-1">Export</button>
                     </div>
+                    <div class="header2">
+                      <div class="label pad-6-4 bold">
+                        Export Configuration
+                      </div>
+                    </div>
                     <div class="export-configuration-container" id="exportconfigcontainer">
                     </div>
                     <div class="graph-container">
