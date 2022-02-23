@@ -89,3 +89,14 @@ body {
   padding: 5px 5px;
   width: 150px;
 }
+#scroll-cont{
+  height:500px;
+  width:20px;
+  cursor: pointer;
+  overflow-y:auto;
+  overflow-x: hidden;
+}
+#inner-scroll{
+  height:50000px;
+  width:0.5px;
+}

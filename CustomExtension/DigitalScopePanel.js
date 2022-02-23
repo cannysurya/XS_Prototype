@@ -283,10 +283,11 @@ var DigitalScopePanel = /** @class */ (function () {
                     <div class="scopeContainer">
                       <div id="pinList"></div>
                       <div id="plot"></div>
+                      <div id="scroll-cont">
+                         <div id="inner-scroll"></div>
+                      </div>
                       <div id="graphViewConfig">
                         <input type="number" id="graphs" min ="0" value="3">
-                        <button class="button-1" id="next">Next</button>
-                        <button class="button-1" id="previous">Previous</button>
                       </div>
                     </div>
                     <div id="xaxisScaling">
