@@ -286,9 +286,6 @@ var DigitalScopePanel = /** @class */ (function () {
                       <div id="scroll-cont">
                          <div id="inner-scroll"></div>
                       </div>
-                      <div id="graphViewConfig">
-                        <input type="number" id="graphs" min ="0" value="3">
-                      </div>
                     </div>
                     <div id="xaxisScaling">
                       <p>X-Axis Scale: &nbsp</p>

@@ -17,7 +17,7 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  width: 1014px;
+  width: 1175px;
   align-items: center;
 }
 
@@ -30,7 +30,7 @@ body {
 #xaxisScaling {
   display: flex;
   height: auto;
-  width: 1014px;
+  width: 1175px;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
@@ -84,19 +84,14 @@ body {
   transform: scale(0.95);
 }
 
-#graphs {
-  margin: 15px;
-  padding: 5px 5px;
-  width: 150px;
-}
-#scroll-cont{
-  height:500px;
-  width:20px;
+#scroll-cont {
+  height: 500px;
+  width: 20px;
   cursor: pointer;
-  overflow-y:auto;
+  overflow-y: auto;
   overflow-x: hidden;
 }
-#inner-scroll{
-  height:50000px;
-  width:0.5px;
+#inner-scroll {
+  height: 50000px;
+  width: 0.5px;
 }

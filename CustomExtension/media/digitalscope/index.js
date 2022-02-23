@@ -20,36 +20,40 @@ var pins = {
      {name: 'GPIO_6',
      checked: true},
      {name: 'GPIO_7',
-     checked: false},
+     checked: true},
      {name: 'GPIO_8',
-     checked: false}
+     checked: true},
+     {name: 'GPIO_9',
+     checked: true}
   ]
 }
 
 //Generate 512pins * 262144data
-for(let z=9; z<=512; z++){
+for(let z=10; z<=512; z++){
   pins.list.push({
     name: `GPIO_${z}`,
     checked: false
   })
 }
 
-var annotations=[];
-var axisValAnnotations=[];
-var tracesAnnotations=[];
-var currentState = "lines";
-var data=[];
+//cursor related variables
 var globalX = [];
 var globalY = [];
 var cursors = [];
 var annotationsArrayToDisplayValue = [];
 var cursorMode = 'Disabled';
 var cursorClicked;
+var valueToBeDisplayedInHorizontalCursorAnotation ;
 var attachListenersFirstTime = true;
-var graphsToDisplay=0;
+var cursorMovementDecision;
+
+//graph related variables
+var axisValAnnotations=[];
+var tracesAnnotations=[];
+var data=[];               // This is whole bunch of data generated/maintained when the checkboxes are selected
+var graphsToDisplay=10;
 var startIndexOfChunk=0;
 var endIndexOfChunk=0;
-var cursorMovementDecision;
 var lowPinValue = 0;
 var highPinValue = 1;
 var config = {
@@ -72,7 +76,7 @@ var layout = {
    },
   yaxis:{
     title: 'Voltage (v)',
-    showticklabels: true,
+    showticklabels: false,
     gridcolor: "rgba(0,0,0,0)"
   },
   margin: {
@@ -88,19 +92,16 @@ var plotHandle = document.getElementById('plot');
 var cursorSelection = document.getElementById("cursorType");
 var minimum = document.getElementById("min");
 var maximum = document.getElementById("max");
-var noOfGraphs = document.getElementById("graphs");
 var scrollElement = document.getElementById('scroll-cont');
-// var initialDataNumber;
-// var finalDataNumber;
 var fixedLength;
-// var configNumber;
+//var noOfGraphs = document.getElementById("graphs");
 // var nextButton = document.getElementById("next");
 // var previousButton = document.getElementById("previous");
 
 maximum.addEventListener('change',scaleXaxis);
 minimum.addEventListener('change',scaleXaxis);
-noOfGraphs.addEventListener('change',updateGraphsToDisplay);
 scrollElement.addEventListener('scroll',quantifyScroll);
+//noOfGraphs.addEventListener('change',updateGraphsToDisplay);
 // nextButton.addEventListener('click',showNextGraphs);
 // previousButton.addEventListener('click',showPreviousGraphs);
 
@@ -195,8 +196,6 @@ function prepareData(){
         color: 'green',
       }
     }
-    // min = min +2;
-    // max = max +2;
     data.push(trace);
   })
 
@@ -233,52 +232,52 @@ function updateSelectedChunk(startIndex,endIndex){
   tracesAnnotations=[];
   for(let i = startIndex;i<=endIndex;i++){
     if(data[i] != undefined){
-     dataNew.push(data[i]);
+     dataNew.push(JSON.parse(JSON.stringify(data[i])));
     }
   }
      let mini=0;
      let maxi=0;
 
   dataNew.forEach(element=>{
-    // element.x=generateSquare(mini,maxi).x;
     
-     element.y=factorYAxisData(element.y,mini,maxi);
+    // this is to scale the data to be displayed to show one above another
+    element.y=factorYAxisData(element.y,mini,maxi);
 
-    //  axisValAnnotations.push({
-    //   xref: 'paper',
-    //   yref: 'y',
-    //   x: 0,
-    //   y: parseFloat(maxi),
-    //   xanchor: 'right',
-    //   yanchor: 'center',
-    //   text: `1`,
-    //   font:{
-    //     family: 'Arial',
-    //     size: 12,
-    //     color: 'white'
-    //   },
-    //   showarrow: false
-    // });
-    // axisValAnnotations.push({
-    //   xref: 'paper',
-    //   yref: 'y',
-    //   x: 0,
-    //   y: parseFloat(mini),
-    //   xanchor: 'right',
-    //   yanchor: 'center',
-    //   text: `0`,
-    //   font:{
-    //     family: 'Arial',
-    //     size: 12,
-    //     color: 'white'
-    //   },
-    //   showarrow: false
-    // });
+     axisValAnnotations.push({
+      xref: 'paper',
+      yref: 'y',
+      x: 0,
+      y: parseFloat(maxi+1),
+      xanchor: 'right',
+      yanchor: 'center',
+      text: `1`,
+      font:{
+        family: 'Arial',
+        size: 12,
+        color: 'white'
+      },
+      showarrow: false
+    });
+    axisValAnnotations.push({
+      xref: 'paper',
+      yref: 'y',
+      x: 0,
+      y: parseFloat(mini),
+      xanchor: 'right',
+      yanchor: 'center',
+      text: `0`,
+      font:{
+        family: 'Arial',
+        size: 12,
+        color: 'white'
+      },
+      showarrow: false
+    });
     tracesAnnotations.push({
       xref: 'paper',
       yref: 'y',
       x: 1,
-      y: parseFloat(maxi-0.3),
+      y: parseFloat(maxi+0.5),
       xanchor: 'left',
       yanchor: 'center',
       text: `${element.name}`,
@@ -297,12 +296,16 @@ function updateSelectedChunk(startIndex,endIndex){
 
   updateAnnotations();
   if(attachListenersFirstTime){
+    console.time("Update data");
     Plotly.newPlot(plotHandle, dataNew, layout, config).then(attachGraphListeners);
+    console.timeEnd("Update data");
     attachListenersFirstTime = false;
     scaleXaxis();
   }
   else{
+    console.time("Update data");
     Plotly.newPlot(plotHandle, dataNew, layout, config);
+    console.timeEnd("Update data");
     scaleXaxis();  
   }
 
@@ -322,50 +325,67 @@ function updateSelectedChunk(startIndex,endIndex){
     
   });
 
+  plotHandle.on('plotly_hover', function(evt){ // not an efficient way. Need to handle it with hovertemplate in prepareData();
+
+    var yAxisValueOnHover = Math.round(evt.yvals[0]);
+    if((yAxisValueOnHover % 2) == 0){
+      for(let i=0;i<dataNew.length;i++){   
+        dataNew[i].hovertemplate = '<b>Voltage(V)</b>: 0 V' +
+        '<br><b>Time(us)</b>: %{x}<br>'
+      }
+    }
+
+    else{
+      for(let i=0;i<dataNew.length;i++){
+        dataNew[i].hovertemplate = '<b>Voltage(V)</b>: 3.3 V' +
+        '<br><b>Time(us)</b>: %{x}<br>'
+      }
+    }
+
+    Plotly.update(plotHandle, dataNew, layout, config);
+
+});
+
 }
 
-function showNextGraphs(){
-  if((startIndexOfChunk+1)+Math.max(0, graphsToDisplay-1) < data.length){
-    startIndexOfChunk = startIndexOfChunk+1;
-    endIndexOfChunk = startIndexOfChunk+(Math.max(0, graphsToDisplay-1));
-    updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
- }
-}
+// function showNextGraphs(){
+//   if((startIndexOfChunk+1)+Math.max(0, graphsToDisplay-1) < data.length){
+//     startIndexOfChunk = startIndexOfChunk+1;
+//     endIndexOfChunk = startIndexOfChunk+(Math.max(0, graphsToDisplay-1));
+//     updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
+//  }
+// }
 
 function updateGraphsToDisplay(){
   fixedLength = (data.length)*500;
   document.getElementById("inner-scroll").style.height=`${fixedLength}px`;
   scrollElement.scrollTop = fixedLength;
   startIndexOfChunk = 0;
-  graphsToDisplay = parseInt(noOfGraphs.value);
   endIndexOfChunk = Math.max(0, graphsToDisplay - 1);
   updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
 }
-function quantifyScroll(e){
-  
+
+function quantifyScroll(){
+  //this function will be called on scrolling(continuosly :( need to improve)
   const [totalHeight, currentHeight] = [scrollElement.scrollHeight, scrollElement.scrollTop];
-  console.log("Scroll Height: ", scrollElement.scrollHeight, "Scroll Top: ", scrollElement.scrollTop);;
-  console.log( "Scroll Client Height: ", scrollElement.clientHeight);
   var bottomNo = fixedLength-scrollElement.scrollTop;
   var heightOfEachPlot = totalHeight / (data.length - graphsToDisplay + 1);
-  var heightOfVisiblePlots = graphsToDisplay * heightOfEachPlot;
 
   startIndexOfChunk = parseInt(bottomNo / heightOfEachPlot);
   endIndexOfChunk = startIndexOfChunk + graphsToDisplay - 1;
   startIndexOfChunk = startIndexOfChunk < 0 ? 0 : startIndexOfChunk;
   startIndexOfChunk = startIndexOfChunk > (data.length - graphsToDisplay) ? data.length - graphsToDisplay : startIndexOfChunk;
   endIndexOfChunk = (endIndexOfChunk > data.length - 1) ? data.length - 1 : endIndexOfChunk;
-  // console.log(initialDataNumber, finalDataNumber);
   updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
 }
 
-function showPreviousGraphs(){
-  if(startIndexOfChunk > 0){
-    endIndexOfChunk = Math.max(0, endIndexOfChunk -1);
-    startIndexOfChunk = Math.max(0, startIndexOfChunk - 1);
-    updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
-  }
-}
+// function showPreviousGraphs(){
+//   if(startIndexOfChunk > 0){
+//     endIndexOfChunk = Math.max(0, endIndexOfChunk -1);
+//     startIndexOfChunk = Math.max(0, startIndexOfChunk - 1);
+//     updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
+//   }
+// }
 
 
 //cursor related functions
@@ -441,6 +461,7 @@ function attachGraphListeners() {
       }
       else if(cursorMode == 'Horizontal' && !globalY.includes(yCoordinate)){
         globalY[globalY.length] = yCoordinate;
+        valueToBeDisplayedInHorizontalCursorAnotation = ((yCoordinate % 2.0) > 1.0) ? 0.0 : ((yCoordinate % 2.0) * 3.3 ).toFixed(1);
       }
       drawYellowLine();
     }
@@ -469,7 +490,7 @@ function drawYellowLine(){
       y: globalY[globalY.length-1],
       xref: 'paper',
       x: 0,
-      text: globalY[globalY.length-1],
+      text: valueToBeDisplayedInHorizontalCursorAnotation,
       showarrow: false,
       font: {
         size: 12
