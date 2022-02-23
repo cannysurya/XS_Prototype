@@ -1,9 +1,6 @@
 const vscode = acquireVsCodeApi();
 
-var annotations=[];
-var axisValAnnotations=[];
-var tracesAnnotations=[];
-var currentState = "lines";
+
 var pins = {
   group: {
     name: "All Pins",
@@ -30,13 +27,18 @@ var pins = {
 }
 
 //Generate 512pins * 262144data
-for(let z=9; z<=16; z++){
+for(let z=9; z<=512; z++){
   pins.list.push({
     name: `GPIO_${z}`,
     checked: false
   })
 }
 
+var annotations=[];
+var axisValAnnotations=[];
+var tracesAnnotations=[];
+var currentState = "lines";
+var data=[];
 var globalX = [];
 var globalY = [];
 var cursors = [];
@@ -44,44 +46,42 @@ var annotationsArrayToDisplayValue = [];
 var hoverMode = 'Disabled';
 var cursorClicked;
 var attachListenersFirstTime = true;
+var graphsToDisplay=0;
+var startIndexOfChunk=0;
+var endIndexOfChunk=0;
+var cursorMovementDecision;
+var lowPinValue = 0;
+var highPinValue = 1;
 var config = {
-  modeBarButtonsToAdd: [
-    {
-      name: 'marker',
-      icon: Plotly.Icons.pencil,
-      direction: 'up',
-      click: function(gd) {
-         if(currentState=="lines"){
-          Plotly.restyle(gd, 'mode', 'lines+markers');
-          currentState="markers"
-        }
-        else{
-          Plotly.restyle(gd, 'mode', 'lines');
-          currentState = "lines"
-        }
-    }
-  }
-],
+  modeBarButtonsToRemove: ['toImage', 'resetScale2d', 'hoverCompareCartesian', 'toggleSpikelines'],
+  displaylogo: false,
   edits: {
     //shapePosition: true ,
   }
 };
 var layout = {
-  width: 1000,
-  autosize:true,
+  autosize: true,
   hovermode: false,
-  dragmode: false,
+  dragmode: true,
   paper_bgcolor: "rgba(0,0,0,0)",
   plot_bgcolor: "rgba(0,0,0,0)",
   xaxis: {
+     title: 'Time (microsecond)',
      type: 'linear',
      domain: [0, 1],
-     ticksuffix: "ns",
+     ticksuffix: "us",
      gridcolor: "rgba(0,0,0,0)"
    },
   yaxis:{
+    title: 'Voltage (v)',
     showticklabels: false,
     gridcolor: "rgba(0,0,0,0)"
+  },
+  margin: {
+    l: 40,
+    r: 60,
+    t: 5,
+    b: 40,
   },
   showlegend: false,
 };
@@ -90,9 +90,17 @@ var plotHandle = document.getElementById('plot');
 var cursorSelection = document.getElementById("cursorType");
 var minimum = document.getElementById("min");
 var maximum = document.getElementById("max");
+var noOfGraphs = document.getElementById("graphs");
+var nextButton = document.getElementById("next");
+var previousButton = document.getElementById("previous");
 
 maximum.addEventListener('change',scaleXaxis);
 minimum.addEventListener('change',scaleXaxis);
+noOfGraphs.addEventListener('change',updateGraphsToDisplay);
+nextButton.addEventListener('click',showNextGraphs);
+previousButton.addEventListener('click',showPreviousGraphs);
+
+
 
 //Pin list check box tree related functions
 function renderTable() {
@@ -113,7 +121,8 @@ function renderTable() {
         </div>
       `
   })
-  drawGraphs();
+  prepareData();
+  debugger;
 }
 
 function selectAllPins(obj){
@@ -141,40 +150,9 @@ function generateSquare(min,max){
   
   var x =[];
   var y=[];
-  
-  axisValAnnotations.push({
-    xref: 'paper',
-    yref: 'y',
-    x: 0,
-    y: parseFloat(max),
-    xanchor: 'right',
-    yanchor: 'center',
-    text: `1`,
-    font:{
-      family: 'Arial',
-      size: 12,
-      color: 'white'
-    },
-    showarrow: false
-  });
-  axisValAnnotations.push({
-    xref: 'paper',
-    yref: 'y',
-    x: 0,
-    y: parseFloat(min),
-    xanchor: 'right',
-    yanchor: 'center',
-    text: `0`,
-    font:{
-      family: 'Arial',
-      size: 12,
-      color: 'white'
-    },
-    showarrow: false
-  });
-
+  var us = 0.0296875; //time taken for acquiring one sample
   for(let i=1;i<=262144;i++){
-      x.push(i);
+      x.push(us*i);
   }
 
   for(let i=1;i<=2048;i++){
@@ -192,19 +170,19 @@ function generateSquare(min,max){
   }
 }
 
-function drawGraphs(){
-  var data=[];
-  tracesAnnotations=[];
-  axisValAnnotations = [];
+function prepareData(){
+  
+  data=[];
   var min=0;
   var max=1;
   
   var trace ={};
-  layout.height = Math.max(100*pins.list.length,300);
-  pins.list.filter(e => {return (e.checked===true)}).forEach((pinName) => {
+  let checkedPins = pins.list.filter(e => {return (e.checked===true)});
+  checkedPins.forEach((pinName) => {
     trace ={};
      trace ={
       name: pinName.name,
+      //below two lines is the data we need to fetch from the file and update
       x: generateSquare(min,max).x,
       y: generateSquare(min,max).y,
       mode: 'lines',
@@ -212,20 +190,82 @@ function drawGraphs(){
         size:5
       },
       hovertemplate:'<b>Voltage(V)</b>: %{y}V' +
-        '<br><b>Time(ns)</b>: %{x}<br>',
+        '<br><b>Time(us)</b>: %{x}<br>',
       type: 'scatter',
       line: {
         color: 'green',
       }
     }
-    tracesAnnotations.push({
+    min = min +2;
+    max = max +2;
+    data.push(trace);
+  })
+
+  updateGraphsToDisplay();
+}
+
+function factorYAxisData(yData, lowFactor, highFactor){
+  yData.forEach((el, index) => {
+    if(el == lowPinValue){
+      yData[index] = data+lowFactor;
+    }
+    else if(el == highPinValue){
+      yData[index] = data+highFactor;
+    }
+  });
+
+  return yData;
+}
+
+function scaleXaxis(){
+  let lowRange = parseInt(minimum.value);
+  let highRange = parseInt(maximum.value);
+  layout.xaxis.autorange = false;
+  layout.xaxis.range = [lowRange,highRange];
+  Plotly.relayout(plotHandle, layout);
+}
+
+
+function updateSelectedChunk(startIndex,endIndex){
+  
+  var dataNew=[];
+  axisValAnnotations=[];
+  tracesAnnotations=[];
+  for(let i = startIndex;i<=endIndex;i++){
+    if(data[i] != undefined){
+     dataNew.push(data[i]);
+    }
+  }
+     let mini=0;
+     let maxi=1;
+
+  dataNew.forEach(element=>{
+    // element.x=generateSquare(mini,maxi).x;
+     element.y=factorYAxisData(element.y,mini,maxi);
+
+     axisValAnnotations.push({
       xref: 'paper',
-      yref: 'paper',
-      x: 0.5,
-      y: 0,
+      yref: 'y',
+      x: 0,
+      y: parseFloat(maxi),
       xanchor: 'right',
       yanchor: 'center',
-      text: `<---Time(ns)--->`,
+      text: `1`,
+      font:{
+        family: 'Arial',
+        size: 12,
+        color: 'white'
+      },
+      showarrow: false
+    });
+    axisValAnnotations.push({
+      xref: 'paper',
+      yref: 'y',
+      x: 0,
+      y: parseFloat(mini),
+      xanchor: 'right',
+      yanchor: 'center',
+      text: `0`,
       font:{
         family: 'Arial',
         size: 12,
@@ -237,10 +277,10 @@ function drawGraphs(){
       xref: 'paper',
       yref: 'y',
       x: 1,
-      y: parseFloat(max-0.3),
+      y: parseFloat(maxi-0.3),
       xanchor: 'left',
       yanchor: 'center',
-      text: pinName.name,
+      text: `${element.name}`,
       font:{
         family: 'Arial',
         size: 12,
@@ -248,33 +288,54 @@ function drawGraphs(){
       },
       showarrow: false
     });
-    min = min +2;
-    max = max +2;
-    data.push(trace);
-  })
+
+     mini=mini+2;
+     maxi=maxi+2;
+
+  });
 
   updateAnnotations();
   if(attachListenersFirstTime){
-    Plotly.newPlot(plotHandle, data, layout, config).then(attachGraphListeners);
+    Plotly.newPlot(plotHandle, dataNew, layout, config).then(attachGraphListeners);
     attachListenersFirstTime = false;
+    scaleXaxis();
   }
   else{
-    Plotly.newPlot(plotHandle, data, layout, config);  
+    Plotly.newPlot(plotHandle, dataNew, layout, config);
+    scaleXaxis();  
+  }
+
+}
+
+function showNextGraphs(){
+  if((startIndexOfChunk+1)+Math.max(0, graphsToDisplay-1) < data.length){
+    startIndexOfChunk = startIndexOfChunk+1;
+    endIndexOfChunk = startIndexOfChunk+(Math.max(0, graphsToDisplay-1));
+    updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
+ }
+}
+
+function updateGraphsToDisplay(){
+  startIndexOfChunk = 0;
+  graphsToDisplay = parseInt(noOfGraphs.value);
+  endIndexOfChunk = Math.max(0, graphsToDisplay - 1);
+  updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
+}
+
+function showPreviousGraphs(){
+  if(startIndexOfChunk > 0){
+    endIndexOfChunk = Math.max(0, endIndexOfChunk -1);
+    startIndexOfChunk = Math.max(0, startIndexOfChunk - 1);
+    updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
   }
 }
 
-function scaleXaxis(){
-  let lowRange = parseInt(minimum.value);
-  let highRange = parseInt(maximum.value);
-  layout.xaxis.autorange = false;
-  layout.xaxis.range = [lowRange,highRange];
-  Plotly.relayout(plotHandle, layout);
-}
 
 //cursor related functions
 cursorSelection.onchange = function() {
   hoverMode = (this.value == 'Horizontal')? this.value:((this.value == 'Vertical')? this.value: 'Disabled');
   layout.hovermode = hoverMode;
+  layout.dragmode = (this.value == 'Disabled')? true : false;
   Plotly.relayout(plotHandle,layout);
 }
 
@@ -283,9 +344,10 @@ function attachGraphListeners() {
     var bb = evt.target.getBoundingClientRect();
     var x = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed(1);
     var y = plotHandle._fullLayout.yaxis.p2d(evt.clientY - bb.top).toFixed(1);
-    if(globalX.includes(x) && hoverMode == 'Vertical'){
-        for(let i=0;i<cursors.length;i++){
-          if(cursors[i].x0 == x){
+    if(hoverMode == 'Vertical'){// && globalX.includes(x) || (globalX.includes())){
+      for(let i=0;i<cursors.length;i++){
+        if((cursors[i].x0 == x) ||
+        ((cursors[i].x0 <= (x+cursorMovementDecision)) && (cursors[i].x0 >= (x-cursorMovementDecision)))){
               if(evt.button === 2){
                 cursors.splice(i,1);
                 globalX.splice(i,1);
@@ -296,6 +358,10 @@ function attachGraphListeners() {
                 cursors[i].opacity = 0.3;
                 annotationsArrayToDisplayValue[i].opacity = 0.3;
               }
+              layout.shapes = cursors;
+              updateAnnotations();    
+              Plotly.relayout(plotHandle,layout);
+              break;
           }
         }
       }
@@ -312,16 +378,33 @@ function attachGraphListeners() {
               cursors[i].opacity = 0.3;
               annotationsArrayToDisplayValue[i].opacity = 0.3;
             }
+            layout.shapes = cursors;
+            updateAnnotations();    
+            Plotly.relayout(plotHandle,layout);
           }
         }
       }
-    layout.shapes = cursors;
-    updateAnnotations();    
-    Plotly.relayout(plotHandle,layout);
+    
+  });
+
+  plotHandle.on('plotly_relayout', function(evt){
+  
+    minimum.value = parseInt(layout.xaxis.range[0]);
+    maximum.value = parseInt(layout.xaxis.range[1]);
+  
+    var difference = maximum.value - minimum.value;
+    if(difference < 8000){
+      cursorMovementDecision =  parseInt((difference)/1000);
+    }
+  
+    else{
+      cursorMovementDecision = 10 + parseInt((difference)/1000);
+    }
+    
   });
 
   plotHandle.addEventListener('click', function(evt) {
-    if(evt.pointerId == undefined && hoverMode != 'Disabled'){
+    if(evt.toElement.localName == 'rect' && hoverMode != 'Disabled'){
       if(cursorClicked < cursors.length){
         cursors.splice(cursorClicked,1);
         globalX.splice(cursorClicked,1);

@@ -17,7 +17,7 @@ body {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
-  width: 1180px;
+  width: 1014px;
   align-items: center;
 }
 
@@ -26,15 +26,28 @@ body {
   height: auto;
   width: 1200px;
 }
+
+#xaxisScaling {
+  display: flex;
+  height: auto;
+  width: 1014px;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
+
 #plot {
-  height: 600px;
+  height: 500px;
   width: 1000px;
   background-color: black;
   overflow: auto;
 }
 
 #pinList {
-  width: 200px !important;
+  width: 150px;
+  height: 500px;
+  overflow-y: scroll;
+  margin: 0px 10px;
 }
 
 #cursorType {
@@ -43,9 +56,36 @@ body {
   color: var(--vscode-foreground);
   width: 150px;
   margin: 5px;
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
 }
 
 .inputControls {
   width: 150px !important;
   margin: 5px;
+}
+
+#graphViewConfig {
+  display: flex;
+  flex-direction: column;
+  top: 50px;
+  justify-content: flex-start;
+  margin: 5px;
+}
+
+.button-1 {
+  margin: 15px;
+  outline: none !important;
+  padding: 5px 15px;
+  transition: 0.1s;
+  width: 150px;
+}
+
+.button-1:active {
+  transform: scale(0.95);
+}
+
+#graphs {
+  margin: 15px;
+  padding: 5px 5px;
+  width: 150px;
 }
