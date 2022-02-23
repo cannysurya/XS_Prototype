@@ -10,15 +10,15 @@ var pins = {
     {name: 'Cycle',
      checked: true},
      {name: 'Vector',
-     checked: false},
+     checked: true},
      {name: 'Opcode',
-     checked: false},
+     checked: true},
      {name: 'TimingSet',
-     checked: false},
+     checked: true},
      {name: 'FUNC_SEL_',
-     checked: false},
+     checked: true},
      {name: 'GPIO_6',
-     checked: false},
+     checked: true},
      {name: 'GPIO_7',
      checked: false},
      {name: 'GPIO_8',
@@ -43,7 +43,7 @@ var globalX = [];
 var globalY = [];
 var cursors = [];
 var annotationsArrayToDisplayValue = [];
-var hoverMode = 'Disabled';
+var cursorMode = 'Disabled';
 var cursorClicked;
 var attachListenersFirstTime = true;
 var graphsToDisplay=0;
@@ -54,14 +54,12 @@ var lowPinValue = 0;
 var highPinValue = 1;
 var config = {
   modeBarButtonsToRemove: ['toImage', 'resetScale2d', 'hoverCompareCartesian', 'toggleSpikelines'],
+  modeBarButtonsToAdd: ['hoverClosestCartesian'],
   displaylogo: false,
-  edits: {
-    //shapePosition: true ,
-  }
 };
 var layout = {
   autosize: true,
-  hovermode: false,
+  hovermode: 'closest',
   dragmode: true,
   paper_bgcolor: "rgba(0,0,0,0)",
   plot_bgcolor: "rgba(0,0,0,0)",
@@ -74,7 +72,7 @@ var layout = {
    },
   yaxis:{
     title: 'Voltage (v)',
-    showticklabels: false,
+    showticklabels: true,
     gridcolor: "rgba(0,0,0,0)"
   },
   margin: {
@@ -122,7 +120,6 @@ function renderTable() {
       `
   })
   prepareData();
-  debugger;
 }
 
 function selectAllPins(obj){
@@ -146,7 +143,7 @@ function processPinSelection(obj){
 }
 
 //graph drawing related functions
-function generateSquare(min,max){
+function generateSquare(lowPin,highPin){
   
   var x =[];
   var y=[];
@@ -157,11 +154,11 @@ function generateSquare(min,max){
 
   for(let i=1;i<=2048;i++){
     for(let j=1;j<=64;j++){
-        y.push(max);
+        y.push(lowPin);
         
     }
     for(let j=1;j<=64;j++){
-       y.push(min);
+       y.push(highPin);
     }
   }
   return {
@@ -173,9 +170,6 @@ function generateSquare(min,max){
 function prepareData(){
   
   data=[];
-  var min=0;
-  var max=1;
-  
   var trace ={};
   let checkedPins = pins.list.filter(e => {return (e.checked===true)});
   checkedPins.forEach((pinName) => {
@@ -183,21 +177,21 @@ function prepareData(){
      trace ={
       name: pinName.name,
       //below two lines is the data we need to fetch from the file and update
-      x: generateSquare(min,max).x,
-      y: generateSquare(min,max).y,
+      x: generateSquare(lowPinValue,highPinValue).x,
+      y: generateSquare(lowPinValue,highPinValue).y,
       mode: 'lines',
       marker:{
         size:5
       },
-      hovertemplate:'<b>Voltage(V)</b>: %{y}V' +
+      hovertemplate:'<b>Voltage(V)</b>: %{%{y}+2}V' +
         '<br><b>Time(us)</b>: %{x}<br>',
       type: 'scatter',
       line: {
         color: 'green',
       }
     }
-    min = min +2;
-    max = max +2;
+    // min = min +2;
+    // max = max +2;
     data.push(trace);
   })
 
@@ -205,12 +199,13 @@ function prepareData(){
 }
 
 function factorYAxisData(yData, lowFactor, highFactor){
+ 
   yData.forEach((el, index) => {
     if(el == lowPinValue){
-      yData[index] = data+lowFactor;
+      yData[index] = el+lowFactor;
     }
     else if(el == highPinValue){
-      yData[index] = data+highFactor;
+      yData[index] = el+highFactor;
     }
   });
 
@@ -237,42 +232,43 @@ function updateSelectedChunk(startIndex,endIndex){
     }
   }
      let mini=0;
-     let maxi=1;
+     let maxi=0;
 
   dataNew.forEach(element=>{
     // element.x=generateSquare(mini,maxi).x;
+    debugger;
      element.y=factorYAxisData(element.y,mini,maxi);
 
-     axisValAnnotations.push({
-      xref: 'paper',
-      yref: 'y',
-      x: 0,
-      y: parseFloat(maxi),
-      xanchor: 'right',
-      yanchor: 'center',
-      text: `1`,
-      font:{
-        family: 'Arial',
-        size: 12,
-        color: 'white'
-      },
-      showarrow: false
-    });
-    axisValAnnotations.push({
-      xref: 'paper',
-      yref: 'y',
-      x: 0,
-      y: parseFloat(mini),
-      xanchor: 'right',
-      yanchor: 'center',
-      text: `0`,
-      font:{
-        family: 'Arial',
-        size: 12,
-        color: 'white'
-      },
-      showarrow: false
-    });
+    //  axisValAnnotations.push({
+    //   xref: 'paper',
+    //   yref: 'y',
+    //   x: 0,
+    //   y: parseFloat(maxi),
+    //   xanchor: 'right',
+    //   yanchor: 'center',
+    //   text: `1`,
+    //   font:{
+    //     family: 'Arial',
+    //     size: 12,
+    //     color: 'white'
+    //   },
+    //   showarrow: false
+    // });
+    // axisValAnnotations.push({
+    //   xref: 'paper',
+    //   yref: 'y',
+    //   x: 0,
+    //   y: parseFloat(mini),
+    //   xanchor: 'right',
+    //   yanchor: 'center',
+    //   text: `0`,
+    //   font:{
+    //     family: 'Arial',
+    //     size: 12,
+    //     color: 'white'
+    //   },
+    //   showarrow: false
+    // });
     tracesAnnotations.push({
       xref: 'paper',
       yref: 'y',
@@ -305,6 +301,22 @@ function updateSelectedChunk(startIndex,endIndex){
     scaleXaxis();  
   }
 
+  plotHandle.on('plotly_relayout', function(evt){
+  
+    minimum.value = parseInt(layout.xaxis.range[0]);
+    maximum.value = parseInt(layout.xaxis.range[1]);
+  
+    var difference = maximum.value - minimum.value;
+    if(difference < 8000){
+      cursorMovementDecision =  parseInt((difference)/1000);
+    }
+  
+    else{
+      cursorMovementDecision = 10 + parseInt((difference)/1000);
+    }
+    
+  });
+
 }
 
 function showNextGraphs(){
@@ -333,8 +345,7 @@ function showPreviousGraphs(){
 
 //cursor related functions
 cursorSelection.onchange = function() {
-  hoverMode = (this.value == 'Horizontal')? this.value:((this.value == 'Vertical')? this.value: 'Disabled');
-  layout.hovermode = hoverMode;
+  cursorMode = (this.value == 'Horizontal')? this.value:((this.value == 'Vertical')? this.value: 'Disabled');
   layout.dragmode = (this.value == 'Disabled')? true : false;
   Plotly.relayout(plotHandle,layout);
 }
@@ -342,9 +353,9 @@ cursorSelection.onchange = function() {
 function attachGraphListeners() {
   plotHandle.addEventListener('mousedown', function(evt) {
     var bb = evt.target.getBoundingClientRect();
-    var x = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed(1);
+    var x = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed();
     var y = plotHandle._fullLayout.yaxis.p2d(evt.clientY - bb.top).toFixed(1);
-    if(hoverMode == 'Vertical'){// && globalX.includes(x) || (globalX.includes())){
+    if(cursorMode == 'Vertical'){// && globalX.includes(x) || (globalX.includes())){
       for(let i=0;i<cursors.length;i++){
         if((cursors[i].x0 == x) ||
         ((cursors[i].x0 <= (x+cursorMovementDecision)) && (cursors[i].x0 >= (x-cursorMovementDecision)))){
@@ -365,7 +376,7 @@ function attachGraphListeners() {
           }
         }
       }
-    else if (globalY.includes(y) && hoverMode == 'Horizontal'){
+    else if (globalY.includes(y) && cursorMode == 'Horizontal'){
       for(let i=0;i<cursors.length;i++){
           if(cursors[i].y0 == y){
             if(evt.button === 2){
@@ -387,24 +398,10 @@ function attachGraphListeners() {
     
   });
 
-  plotHandle.on('plotly_relayout', function(evt){
   
-    minimum.value = parseInt(layout.xaxis.range[0]);
-    maximum.value = parseInt(layout.xaxis.range[1]);
-  
-    var difference = maximum.value - minimum.value;
-    if(difference < 8000){
-      cursorMovementDecision =  parseInt((difference)/1000);
-    }
-  
-    else{
-      cursorMovementDecision = 10 + parseInt((difference)/1000);
-    }
-    
-  });
 
   plotHandle.addEventListener('click', function(evt) {
-    if(evt.toElement.localName == 'rect' && hoverMode != 'Disabled'){
+    if(evt.toElement.localName == 'rect' && cursorMode != 'Disabled'){
       if(cursorClicked < cursors.length){
         cursors.splice(cursorClicked,1);
         globalX.splice(cursorClicked,1);
@@ -412,12 +409,12 @@ function attachGraphListeners() {
         cursorClicked = undefined;
       }
       var bb = evt.target.getBoundingClientRect();
-      var xCoordinate = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed(1);
+      var xCoordinate = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed();
       var yCoordinate = plotHandle._fullLayout.yaxis.p2d(evt.clientY - bb.top).toFixed(1);
-      if(hoverMode == 'Vertical' && !globalX.includes(xCoordinate)){
+      if(cursorMode == 'Vertical' && !globalX.includes(xCoordinate)){
         globalX[globalX.length] = xCoordinate;
       }
-      else if(hoverMode == 'Horizontal' && !globalY.includes(yCoordinate)){
+      else if(cursorMode == 'Horizontal' && !globalY.includes(yCoordinate)){
         globalY[globalY.length] = yCoordinate;
       }
       drawYellowLine();
@@ -427,7 +424,7 @@ function attachGraphListeners() {
 }
 
 function drawYellowLine(){
-  if(hoverMode == 'Horizontal'){
+  if(cursorMode == 'Horizontal'){
     cursors.push({
       opacity: 1,
       type: 'line',
@@ -484,7 +481,6 @@ function drawYellowLine(){
     });
 }
 
-layout.hovermode = hoverMode;
 layout.shapes = cursors;
 updateAnnotations();
 Plotly.relayout(plotHandle,layout);
@@ -498,7 +494,7 @@ function updateAnnotations(){
 renderTable();
 
 window.addEventListener("message", (event) => {
-  debugger;
+
   switch (event.data.command) {
   }
 });
