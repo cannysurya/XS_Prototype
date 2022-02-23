@@ -272,8 +272,30 @@ var DigitalScopePanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-									BitMap Tool
-                  <div id="myDiv"></div>
+                    <div class="digitalScopeControls">
+                       <label for="cursorType">Cursor</label>
+                      <select name="cursorType" id="cursorType">
+                        <option value="Disabled" selected="selected">Disabled</option>
+                        <option value="Vertical">Vertical</option>
+                        <option value="Horizontal">Horizontal</option>
+                      </select>
+                    </div>
+                    <div class="scopeContainer">
+                      <div id="pinList"></div>
+                      <div id="plot"></div>
+                      <div id="graphViewConfig">
+                        <input type="number" id="graphs" min ="0" value="3">
+                        <button class="button-1" id="next">Next</button>
+                        <button class="button-1" id="previous">Previous</button>
+                      </div>
+                    </div>
+                    <div id="xaxisScaling">
+                      <p>X-Axis Scale: &nbsp</p>
+                      <label for="min">Min</label>
+                      <input class="inputControls" type="number" id="min" min="0" value="0" />
+                      <label for="max">Max</label>
+                      <input class="inputControls" type="number" id="max" min="0" value="100" />
+                    </div>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
