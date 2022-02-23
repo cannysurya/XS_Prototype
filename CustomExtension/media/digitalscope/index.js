@@ -89,20 +89,25 @@ var cursorSelection = document.getElementById("cursorType");
 var minimum = document.getElementById("min");
 var maximum = document.getElementById("max");
 var noOfGraphs = document.getElementById("graphs");
-var nextButton = document.getElementById("next");
-var previousButton = document.getElementById("previous");
+var scrollElement = document.getElementById('scroll-cont');
+// var initialDataNumber;
+// var finalDataNumber;
+var fixedLength;
+// var configNumber;
+// var nextButton = document.getElementById("next");
+// var previousButton = document.getElementById("previous");
 
 maximum.addEventListener('change',scaleXaxis);
 minimum.addEventListener('change',scaleXaxis);
 noOfGraphs.addEventListener('change',updateGraphsToDisplay);
-nextButton.addEventListener('click',showNextGraphs);
-previousButton.addEventListener('click',showPreviousGraphs);
+scrollElement.addEventListener('scroll',quantifyScroll);
+// nextButton.addEventListener('click',showNextGraphs);
+// previousButton.addEventListener('click',showPreviousGraphs);
 
 
 
 //Pin list check box tree related functions
 function renderTable() {
-
   let tableContainer = document.getElementById("pinList");
   tableContainer.innerHTML = `
       <input type="checkbox" id="checkbox-allpins" 
@@ -236,7 +241,7 @@ function updateSelectedChunk(startIndex,endIndex){
 
   dataNew.forEach(element=>{
     // element.x=generateSquare(mini,maxi).x;
-    debugger;
+    
      element.y=factorYAxisData(element.y,mini,maxi);
 
     //  axisValAnnotations.push({
@@ -328,9 +333,29 @@ function showNextGraphs(){
 }
 
 function updateGraphsToDisplay(){
+  fixedLength = (data.length)*500;
+  document.getElementById("inner-scroll").style.height=`${fixedLength}px`;
+  scrollElement.scrollTop = fixedLength;
   startIndexOfChunk = 0;
   graphsToDisplay = parseInt(noOfGraphs.value);
   endIndexOfChunk = Math.max(0, graphsToDisplay - 1);
+  updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
+}
+function quantifyScroll(e){
+  
+  const [totalHeight, currentHeight] = [scrollElement.scrollHeight, scrollElement.scrollTop];
+  console.log("Scroll Height: ", scrollElement.scrollHeight, "Scroll Top: ", scrollElement.scrollTop);;
+  console.log( "Scroll Client Height: ", scrollElement.clientHeight);
+  var bottomNo = fixedLength-scrollElement.scrollTop;
+  var heightOfEachPlot = totalHeight / (data.length - graphsToDisplay + 1);
+  var heightOfVisiblePlots = graphsToDisplay * heightOfEachPlot;
+
+  startIndexOfChunk = parseInt(bottomNo / heightOfEachPlot);
+  endIndexOfChunk = startIndexOfChunk + graphsToDisplay - 1;
+  startIndexOfChunk = startIndexOfChunk < 0 ? 0 : startIndexOfChunk;
+  startIndexOfChunk = startIndexOfChunk > (data.length - graphsToDisplay) ? data.length - graphsToDisplay : startIndexOfChunk;
+  endIndexOfChunk = (endIndexOfChunk > data.length - 1) ? data.length - 1 : endIndexOfChunk;
+  // console.log(initialDataNumber, finalDataNumber);
   updateSelectedChunk(startIndexOfChunk,endIndexOfChunk);
 }
 
