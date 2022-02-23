@@ -219,6 +219,7 @@ let server1 = {
     resumeSubscription: undefined,
     datalogSubscription: undefined,
     bitmaptoolSubscription: undefined,
+    digitalWaveformSubscription: undefined,
   },
   sites: [],
   isActive: true,

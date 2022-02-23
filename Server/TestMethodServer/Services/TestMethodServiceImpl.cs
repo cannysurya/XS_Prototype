@@ -45,10 +45,23 @@ namespace TestMethodServer.Services
 
 		public override Task<Empty> ExecuteTestMethodForBitmapToolGraph(Empty request, ServerCallContext context)
 		{
+			Console.WriteLine("Executing Bit Map Tool Test Method ...");
 			var canExecuteTestFlow = LoadContext();
 			if (canExecuteTestFlow)
 			{
 				ExecuteTestFlowForBitmapTool();
+			}
+			Console.WriteLine("Test Method Executed Successfully...");
+			return Task.FromResult(new Empty { });
+		}
+
+		public override Task<Empty> ExecuteTestMethodForDigitalWaveformGraph(Empty request, ServerCallContext context)
+		{
+			Console.WriteLine("Executing Digital Waveform Test Method ...");
+			var canExecuteTestFlow = LoadContext();
+			if (canExecuteTestFlow)
+			{
+				ExecuteTestFlowForDigitalWaveform();
 			}
 			Console.WriteLine("Test Method Executed Successfully...");
 			return Task.FromResult(new Empty { });
@@ -112,6 +125,13 @@ namespace TestMethodServer.Services
 		private void ExecuteTestFlowForBitmapTool()
 		{
 			var testMethodType = assembly.GetType($"TestProject.SampleBitMapTestMethod");
+			var myObj = (BaseTestMethod)Activator.CreateInstance(testMethodType);
+			myObj.Execute();
+		}
+
+		private void ExecuteTestFlowForDigitalWaveform()
+		{
+			var testMethodType = assembly.GetType($"TestProject.SampleDigitalWaveformTestMethod");
 			var myObj = (BaseTestMethod)Activator.CreateInstance(testMethodType);
 			myObj.Execute();
 		}

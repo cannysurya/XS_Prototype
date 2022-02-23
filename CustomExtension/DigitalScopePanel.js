@@ -2,6 +2,8 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
+const nodeHtmlToImage = require("node-html-to-image");
+const { getServers } = require("./GlobalState");
 
 var selfWebView = undefined;
 
@@ -31,9 +33,7 @@ var __awaiter =
         }
       }
       function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
       }
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
@@ -72,18 +72,7 @@ var __generator =
       if (f) throw new TypeError("Generator is already executing.");
       while (_)
         try {
-          if (
-            ((f = 1),
-            y &&
-              (t =
-                op[0] & 2
-                  ? y["return"]
-                  : op[0]
-                  ? y["throw"] || ((t = y["return"]) && t.call(y), 0)
-                  : y.next) &&
-              !(t = t.call(y, op[1])).done)
-          )
-            return t;
+          if (((f = 1), y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)) return t;
           if (((y = 0), t)) op = [op[0] & 2, t.value];
           switch (op[0]) {
             case 0:
@@ -103,10 +92,7 @@ var __generator =
               _.trys.pop();
               continue;
             default:
-              if (
-                !((t = _.trys), (t = t.length > 0 && t[t.length - 1])) &&
-                (op[0] === 6 || op[0] === 2)
-              ) {
+              if (!((t = _.trys), (t = t.length > 0 && t[t.length - 1])) && (op[0] === 6 || op[0] === 2)) {
                 _ = 0;
                 continue;
               }
@@ -160,9 +146,7 @@ var DigitalScopePanel = /** @class */ (function () {
   }
 
   DigitalScopePanel.createOrShow = function (extensionUri) {
-    var column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    var column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
     // If we already have a panel, show it.
     if (DigitalScopePanel.currentPanel) {
       DigitalScopePanel.currentPanel._panel.reveal(column);
@@ -171,28 +155,18 @@ var DigitalScopePanel = /** @class */ (function () {
     }
 
     // Otherwise, create a new panel.
-    var panel = vscode.window.createWebviewPanel(
-      DigitalScopePanel.viewType,
-      "Digital Scope Tool",
-      column || vscode.ViewColumn.One,
-      {
-        // Enable javascript in the webview
-        enableScripts: true,
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, "media"),
-          vscode.Uri.joinPath(extensionUri, "out/compiled"),
-        ],
-      }
-    );
+    var panel = vscode.window.createWebviewPanel(DigitalScopePanel.viewType, "Digital Scope Tool", column || vscode.ViewColumn.One, {
+      // Enable javascript in the webview
+      enableScripts: true,
+      // And restrict the webview to only loading content from our extension's `media` directory.
+      localResourceRoots: [vscode.Uri.joinPath(extensionUri, "media"), vscode.Uri.joinPath(extensionUri, "out/compiled")],
+    });
     DigitalScopePanel.currentPanel = new DigitalScopePanel(panel, extensionUri);
   };
 
   DigitalScopePanel.kill = function () {
     var _a;
-    (_a = DigitalScopePanel.currentPanel) === null || _a === void 0
-      ? void 0
-      : _a.dispose();
+    (_a = DigitalScopePanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
     DigitalScopePanel.currentPanel = undefined;
   };
 
@@ -224,6 +198,9 @@ var DigitalScopePanel = /** @class */ (function () {
           return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
               switch (data.command) {
+                case "execute":
+                  execute();
+                  break;
               }
               return [2 /*return*/];
             });
@@ -235,31 +212,11 @@ var DigitalScopePanel = /** @class */ (function () {
   };
 
   DigitalScopePanel.prototype._getHtmlForWebview = function (webview) {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "digitalscope",
-        "index.js"
-      )
-    );
-    const resetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
-    const vscodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "digitalscope",
-        "index.css"
-      )
-    );
-    const plotlyUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "plotly", "plotly.js")
-    );
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "digitalscope", "index.js"));
+    const resetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+    const vscodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "digitalscope", "index.css"));
+    const plotlyUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "plotly", "plotly.js"));
     return `
             <!DOCTYPE html>
                 <html lang="en">
@@ -272,6 +229,7 @@ var DigitalScopePanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
+                  <button onclick="execute()" class="button-1">Fetch Graph Data</button>
                     <div class="digitalScopeControls">
                        <label for="cursorType">Cursor</label>
                       <select name="cursorType" id="cursorType">
@@ -305,5 +263,36 @@ var DigitalScopePanel = /** @class */ (function () {
   DigitalScopePanel.viewType = "DigitalScopePanel";
   return DigitalScopePanel;
 })();
+
+(function SubscribeDigitalWaveformGraph() {
+  getServers()
+    .filter((x) => x.isActive)
+    .forEach((server) => {
+      server.subscription.digitalWaveformSubscription = server.service.pubsubService.SubscribeDigitalWaveformTopic({
+        ClientName: "Digital Waveform Client",
+      });
+      server.subscription.digitalWaveformSubscription.on("data", (data) => {
+        console.timeEnd("Time taken to receive data");
+        console.log(data.Data.length);
+        console.time("Time taken to receive data");
+      });
+    });
+})();
+
+function execute() {
+  getServers()
+    .filter((x) => x.isActive)
+    .forEach((server) => {
+      console.time("Time taken to receive data");
+      server.service.testMethodService.ExecuteTestMethodForDigitalWaveformGraph({}, (err) => {
+        console.log("Receiving gRPC Response from ExecuteTestMethodForDigitalWaveformGraph");
+        if (err) {
+          console.log(err);
+        } else {
+          vscode.window.showInformationMessage("Test Method Executed Successfully...");
+        }
+      });
+    });
+}
 
 exports.DigitalScopePanel = DigitalScopePanel;
