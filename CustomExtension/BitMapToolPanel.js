@@ -401,7 +401,9 @@ function saveGraphData() {
 }
 
 function loadMainGraphData(x, y) {
+  console.time("load main graph");
   if (isMainGraphRenderInProgress) {
+    console.timeEnd("load main graph");
     return;
   }
   isMainGraphRenderInProgress = true;
@@ -420,14 +422,17 @@ function loadMainGraphData(x, y) {
     fs.readFile(actualFileName, "utf8", (err, data) => {
       if (err) {
         console.log(err);
+        console.timeEnd("load main graph");
         return;
       }
       updateMainGraphDataWithString(data);
       plotMainGraphWithStringData(data);
       isMainGraphRenderInProgress = false;
+      console.timeEnd("load main graph");
     });
   } else {
     isMainGraphRenderInProgress = false;
+    console.timeEnd("load main graph");
   }
 }
 
@@ -464,10 +469,8 @@ function plotCursorGraph() {
         ClientName: "BitMapTool",
       });
       server.subscription.bitmaptoolSubscription.on("data", (data) => {
-        // console.timeEnd("Time taken to receive data");
-        // console.log("Total Samples Received - " + ++totolSamplesReceived);
-        // console.time("Time taken to receive data");
-        // return;
+        console.timeEnd("Time taken to receive data");
+        console.time("Time taken to receive data");
         let receivedData = getDataInArrayFormat(data.Data);
         let receivedDataInStringFormat = data.Data;
         try {

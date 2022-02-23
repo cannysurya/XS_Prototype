@@ -517,7 +517,6 @@ window.addEventListener("message", (event) => {
       break;
     case "loadConfiguration":
       loadConfiguration(event.data.data);
-      y;
       break;
   }
 });
