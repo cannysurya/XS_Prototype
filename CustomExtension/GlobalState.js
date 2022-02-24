@@ -189,7 +189,7 @@ initializeBitMapToolGraph();
 
 let digitalWaveformGraphData = {
   graphDataPoints: [],
-  activeChannelRange: [0, 10],
+  scrollCounter: 0,
   channels: [],
   channelsPerView: 10,
   updateGraphData: (data) => {
@@ -197,6 +197,9 @@ let digitalWaveformGraphData = {
   },
   getActiveChannels: () => {
     return digitalWaveformGraphData.channels.filter((x) => x.isActive);
+  },
+  getActiveChannelsBasedOnScrollCounter: () => {
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive).slice(digitalWaveformGraphData.scrollCounter, digitalWaveformGraphData.scrollCounter + 10);
   },
   appendGraphData: (data) => {
     let i = 0;

@@ -203,9 +203,19 @@ var DigitalScopePanel = /** @class */ (function () {
           return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
               switch (data.command) {
+                case "syncData":
+                  let digitalWaveformGraphData = getDigitalWaveformGraphData();
+                  selfWebView.postMessage({
+                    command: "syncData",
+                    dataPoints: digitalWaveformGraphData.graphDataPoints,
+                  });
+                  break;
                 case "execute":
                   clearGraphDirectory();
                   execute();
+                  break;
+                case "updateScrollCounter":
+                  fetchNewData(data.value);
                   break;
               }
               return [2 /*return*/];
@@ -272,6 +282,13 @@ var DigitalScopePanel = /** @class */ (function () {
     });
 })();
 
+function fetchNewData(value) {
+  let digitalWaveformGraphData = getDigitalWaveformGraphData();
+  digitalWaveformGraphData.scrollCounter = value;
+  let activeChannels = digitalWaveformGraphData.getActiveChannelsBasedOnScrollCounter();
+  fetchActiveChannelsInfo(activeChannels);
+}
+
 function updateGraph() {
   selfWebView.postMessage({ command: "updateGraph", dataPoints: getDigitalWaveformGraphData().graphDataPoints });
 }
@@ -326,4 +343,5 @@ function clearGraphDirectory() {
   fs.mkdirSync(graphDirectory);
 }
 
+function fetchActiveChannelsInfo(activeChannels) {}
 exports.DigitalScopePanel = DigitalScopePanel;

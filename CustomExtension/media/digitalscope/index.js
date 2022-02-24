@@ -97,7 +97,16 @@ window.addEventListener("message", (event) => {
     case "updateGraph":
       generateTraces(event.data.dataPoints);
       plotGraph();
+      break;
+    case "syncData":
+      generateTraces(event.data.dataPoints);
+      plotGraph();
+      break;
   }
+});
+
+vscode.postMessage({
+  command: "syncData",
 });
 
 // var pins = {
