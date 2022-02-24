@@ -51,10 +51,20 @@ body {
   transform: scale(0.95);
 }
 
+.channel-container {
+  background: green;
+  height: 30%;
+}
+
 .control-container {
   align-items: center;
   display: flex;
   width: 150px;
+}
+
+.cursor-container {
+  background: orange;
+  height: 30%;
 }
 
 .function-buttons {
@@ -68,6 +78,12 @@ body {
   height: auto;
   overflow: auto;
   width: 100%;
+}
+
+.graph-controls {
+  background: red;
+  margin-left: 10px;
+  width: 400px;
 }
 
 .header {
@@ -117,6 +133,11 @@ body {
 
 .pad-6-4 {
   padding: 6px 4px;
+}
+
+.scale-container {
+  background: yellow;
+  height: 40%;
 }
 
 .visibility-hide {

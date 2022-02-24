@@ -255,6 +255,11 @@ var DigitalScopePanel = /** @class */ (function () {
                     </div>
                     <div class="graph-container">
                       <div id="graph"></div>
+                      <div class="graph-controls">
+                        <div class="channel-container"></div>
+                        <div class="cursor-container"></div>
+                        <div class="scale-container"></div>
+                      </div>
                     </div>
                   </div>
                 </body>

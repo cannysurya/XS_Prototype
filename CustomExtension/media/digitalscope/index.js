@@ -138,8 +138,8 @@ window.addEventListener("message", (event) => {
       break;
     case "syncData":
       generateTraces(event.data.dataPoints);
-      setMaxScrollCounter(event.data.maxScrollCounter);
       scrollCounter = event.data.scrollCounter;
+      setMaxScrollCounter(event.data.maxScrollCounter);
       plotGraph();
       break;
   }
