@@ -14,19 +14,19 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const testMethodPackage = protoDescriptor.testmethod;
 
-var startTime = undefined;
+let configurationIndex = 0;
 
-var tfeData = {};
+let tfeData = {};
 
-var datalogData = [];
-var datalogConfig = {
+let datalogData = [];
+let datalogConfig = {
   recordsPerPage: 10,
   currentPageNumber: 1,
   maxPageNumber: 1,
   refreshRate: 100,
 };
 
-var bitMapToolGraphData = {
+let bitMapToolGraphData = {
   mainGraphRowPoints: [],
   mainGraphColumnPoints: [],
   mainGraphDataPoints: [],
@@ -47,24 +47,7 @@ var bitMapToolGraphData = {
   exportGraphRowPoints: [],
   exportGraphColumnPoints: [],
   exportGraphDataPoints: [],
-  exportGraphData: {
-    source: {
-      x: 0,
-      y: 0,
-    },
-    target: [
-      {
-        x: 100,
-        y: 100,
-      },
-      {
-        x: 199,
-        y: 198,
-      },
-    ],
-    width: 100,
-    height: 100,
-  },
+  exportGraphData: [],
   updateMainGraphData: (mainGraphData) => {
     for (let rowNumber = 0; rowNumber < bitMapToolGraphData.mainGraphRowCount; rowNumber++) {
       for (let columnNumber = 0; columnNumber < bitMapToolGraphData.mainGraphColumnCount; columnNumber++) {
@@ -73,11 +56,11 @@ var bitMapToolGraphData = {
     }
   },
   updateCursorGraphData: (cursorGraphData) => {
-    var cursorGraphDataLength = cursorGraphData.length;
-    var rowReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphRowCount / bitMapToolGraphData.cursorGraphRowScale);
-    var columnReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphColumnCount / bitMapToolGraphData.cursorGraphColumnScale);
+    let cursorGraphDataLength = cursorGraphData.length;
+    let rowReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphRowCount / bitMapToolGraphData.cursorGraphRowScale);
+    let columnReferenceOfSample = Math.ceil(bitMapToolGraphData.mainGraphColumnCount / bitMapToolGraphData.cursorGraphColumnScale);
     for (let rowNumber = 0; rowNumber < cursorGraphDataLength; rowNumber++) {
-      var cursorGraphDataRowLength = cursorGraphData[rowNumber].length;
+      let cursorGraphDataRowLength = cursorGraphData[rowNumber].length;
       for (let columnNumber = 0; columnNumber < cursorGraphDataRowLength; columnNumber++) {
         bitMapToolGraphData.cursorGraphDataPoints[bitMapToolGraphData.cursorGraphRowReference * rowReferenceOfSample + rowNumber][bitMapToolGraphData.cursorGraphColumnReference * columnReferenceOfSample + columnNumber] = cursorGraphData[rowNumber][columnNumber];
       }
@@ -90,49 +73,94 @@ var bitMapToolGraphData = {
     }
   },
   updateExportGraphData: () => {
-    let data = bitMapToolGraphData.exportGraphData;
+    let dataRowSize = 0;
+    let dataColumnSize = 0;
     let rowPoints = [];
     let columnPoints = [];
     let dataPoints = [];
+    let exportGraphData = bitMapToolGraphData.exportGraphData;
+    let mainGraphDataPoints = bitMapToolGraphData.mainGraphDataPoints;
+    exportGraphData.forEach((data) => {
+      if (data.width > dataColumnSize) {
+        dataColumnSize = data.width;
+      }
+      if (data.height > dataRowSize) {
+        dataRowSize = data.height;
+      }
+    });
 
-    let startRow = data.source.x;
-    let startColumn = data.source.y;
-    let stopRow = startRow + data.height;
-    let stopColumn = startColumn + data.width;
-
-    for (let rowNumber = startRow; rowNumber < stopRow; rowNumber++) {
+    for (let rowNumber = 0; rowNumber < dataRowSize; rowNumber++) {
       rowPoints.push(rowNumber);
     }
-    for (let columnNumber = startColumn; columnNumber < stopColumn; columnNumber++) {
+    for (let columnNumber = 0; columnNumber < dataColumnSize; columnNumber++) {
       columnPoints.push(columnNumber);
     }
 
-    for (let rowNumber = startRow; rowNumber < stopRow; rowNumber++) {
-      let dataPoint = [];
-      for (let columnNumber = startColumn; columnNumber < stopColumn; columnNumber++) {
-        let sourceValue = null;
-        if (bitMapToolGraphData.mainGraphDataPoints[rowNumber] != null && bitMapToolGraphData.mainGraphDataPoints[rowNumber][columnNumber] != null) {
-          sourceValue = bitMapToolGraphData.mainGraphDataPoints[rowNumber][columnNumber];
-          data.target.forEach((target) => {
-            if (bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber] != null && bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber][target.y + columnNumber] != null) {
-              let targetValue = bitMapToolGraphData.mainGraphDataPoints[target.x + rowNumber][target.y + columnNumber];
-              if (sourceValue === 1 && targetValue === 0) {
-                sourceValue = 0.5;
-              }
-              if (sourceValue === 0 && targetValue === 1) {
-                sourceValue = 0.5;
+    try {
+      for (let rowNumber = 0; rowNumber < dataRowSize; rowNumber++) {
+        let dataPoint = [];
+        for (let columnNumber = 0; columnNumber < dataColumnSize; columnNumber++) {
+          let result = undefined;
+          exportGraphData.forEach((data) => {
+            if (rowNumber < data.height && columnNumber < data.width) {
+              if (mainGraphDataPoints[data.y + rowNumber] != null && mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] != null) {
+                if (result === undefined) {
+                  result = mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] === 1 ? true : false;
+                } else {
+                  if (data.Operator === "And") {
+                    result = result && mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] === 1 ? true : false;
+                  } else {
+                    result = result || mainGraphDataPoints[data.y + rowNumber][data.x + columnNumber] === 1 ? true : false;
+                  }
+                }
               }
             }
           });
+          dataPoint.push(result ? 1 : 0);
         }
-        dataPoint.push(sourceValue);
+        dataPoints.push(dataPoint);
       }
-      dataPoints.push(dataPoint);
+    } catch (e) {
+      debugger;
     }
 
     bitMapToolGraphData.exportGraphRowPoints = rowPoints;
     bitMapToolGraphData.exportGraphColumnPoints = columnPoints;
     bitMapToolGraphData.exportGraphDataPoints = dataPoints;
+  },
+  addConfiguration: (xRange, yRange) => {
+    bitMapToolGraphData.exportGraphData.push({
+      x: Math.ceil(xRange[0]),
+      y: Math.ceil(yRange[0]),
+      width: Math.ceil(xRange[1] - xRange[0]),
+      height: Math.ceil(yRange[1] - yRange[0]),
+      Operator: "And",
+      index: configurationIndex++,
+    });
+  },
+  updateXValue: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.x = parseInt(value);
+  },
+  updateYValue: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.y = parseInt(value);
+  },
+  updateWidth: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.width = parseInt(value);
+  },
+  updateHeight: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.height = parseInt(value);
+  },
+  updateOperation: (value, index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    configuration.Operator = value;
+  },
+  deleteConfiguration: (index) => {
+    let configuration = bitMapToolGraphData.exportGraphData.find((x) => x.index === index);
+    bitMapToolGraphData.exportGraphData.splice(bitMapToolGraphData.exportGraphData.indexOf(configuration), 1);
   },
 };
 
@@ -159,7 +187,74 @@ function initializeBitMapToolGraph() {
 
 initializeBitMapToolGraph();
 
-var server1 = {
+
+let digitalWaveformGraphData = {
+  graphData: [],
+  scrollCounter: 0,
+  channels: [],
+  channelsPerView: 10,
+  cursors: [],
+  cursorMode: "Disabled",
+  annotations: {
+    axisValAnnotations: [],
+    tracesAnnotations: [],
+    cursorAnnotations: []
+  },
+  updateCursors: (data) => {
+    digitalWaveformGraphData.cursors = data;
+  },
+  updateCursorMode: (data) => {
+    digitalWaveformGraphData.cursorMode = data;
+  },
+  updateAnnotations: (data) => {
+    digitalWaveformGraphData.annotations = data;
+  },
+  updateGraphData: (data) => {
+    digitalWaveformGraphData.graphData = data;
+  },
+  getActiveChannels: () => {
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive);
+  },
+  getActiveChannelsBasedOnScrollCounter: () => {
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive).slice(digitalWaveformGraphData.scrollCounter, digitalWaveformGraphData.scrollCounter + digitalWaveformGraphData.channelsPerView);
+  },
+  appendGraphData: (data) => {
+    let i = 0;
+    digitalWaveformGraphData.getActiveChannelsBasedOnScrollCounter().forEach((channel) => {
+      digitalWaveformGraphData.graphData[i++] += data[channel.index];
+    });
+  },
+
+  updateGraphData: (graphData) => {
+    digitalWaveformGraphData.graphData = graphData;
+  },
+  resetGraphData: () => {
+    digitalWaveformGraphData.graphData = [];
+    for (let i = 0; i < digitalWaveformGraphData.channelsPerView; i++) {
+      digitalWaveformGraphData.graphData[i] = "";
+    }
+  },
+};
+
+function initializeDigitalWaveformGraph() {
+  for (let i = 0; i < 512; i++) {
+    digitalWaveformGraphData.channels[i] = {
+      name: `GPIO ${i}`,
+      isActive: false,
+      index: i,
+    };
+  }
+
+  digitalWaveformGraphData.resetGraphData();
+
+  for (let i = 0; i < 20; i++) {
+    digitalWaveformGraphData.channels[i].isActive = true;
+  }
+}
+
+initializeDigitalWaveformGraph();
+
+let server1 = {
   name: "Server 1",
   debugConfiguration: {
     local: {
@@ -190,12 +285,13 @@ var server1 = {
     resumeSubscription: undefined,
     datalogSubscription: undefined,
     bitmaptoolSubscription: undefined,
+    digitalWaveformSubscription: undefined,
   },
   sites: [],
   isActive: true,
 };
 
-var server2 = {
+let server2 = {
   name: "Server 2",
   debugConfiguration: {
     local: {
@@ -230,7 +326,7 @@ var server2 = {
   isActive: false,
 };
 
-var servers = [server1, server2];
+let servers = [server1, server2];
 
 exports.getTFEData = () => tfeData;
 exports.getDatalogData = () => datalogData;
@@ -239,3 +335,4 @@ exports.getDatalogConfig = () => datalogConfig;
 exports.setTFEData = (newTFEData) => (tfeData = newTFEData);
 exports.getServers = () => servers;
 exports.getBitMapToolGraphData = () => bitMapToolGraphData;
+exports.getDigitalWaveformGraphData = () => digitalWaveformGraphData;

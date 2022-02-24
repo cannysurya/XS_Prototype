@@ -2,8 +2,15 @@
 
 const fs = require("fs");
 const vscode = require("vscode");
+const nodeHtmlToImage = require("node-html-to-image");
+const { getServers, getDigitalWaveformGraphData } = require("./GlobalState");
+const graphDirectory = __dirname + "/digitalgraphdata/";
+
+const noOfChannels = 512;
 
 var selfWebView = undefined;
+
+clearGraphDirectory();
 
 var __awaiter =
   (this && this.__awaiter) ||
@@ -31,9 +38,7 @@ var __awaiter =
         }
       }
       function step(result) {
-        result.done
-          ? resolve(result.value)
-          : adopt(result.value).then(fulfilled, rejected);
+        result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
       }
       step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
@@ -72,18 +77,7 @@ var __generator =
       if (f) throw new TypeError("Generator is already executing.");
       while (_)
         try {
-          if (
-            ((f = 1),
-            y &&
-              (t =
-                op[0] & 2
-                  ? y["return"]
-                  : op[0]
-                  ? y["throw"] || ((t = y["return"]) && t.call(y), 0)
-                  : y.next) &&
-              !(t = t.call(y, op[1])).done)
-          )
-            return t;
+          if (((f = 1), y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done)) return t;
           if (((y = 0), t)) op = [op[0] & 2, t.value];
           switch (op[0]) {
             case 0:
@@ -103,10 +97,7 @@ var __generator =
               _.trys.pop();
               continue;
             default:
-              if (
-                !((t = _.trys), (t = t.length > 0 && t[t.length - 1])) &&
-                (op[0] === 6 || op[0] === 2)
-              ) {
+              if (!((t = _.trys), (t = t.length > 0 && t[t.length - 1])) && (op[0] === 6 || op[0] === 2)) {
                 _ = 0;
                 continue;
               }
@@ -160,9 +151,7 @@ var DigitalScopePanel = /** @class */ (function () {
   }
 
   DigitalScopePanel.createOrShow = function (extensionUri) {
-    var column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    var column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined;
     // If we already have a panel, show it.
     if (DigitalScopePanel.currentPanel) {
       DigitalScopePanel.currentPanel._panel.reveal(column);
@@ -171,28 +160,18 @@ var DigitalScopePanel = /** @class */ (function () {
     }
 
     // Otherwise, create a new panel.
-    var panel = vscode.window.createWebviewPanel(
-      DigitalScopePanel.viewType,
-      "Digital Scope Tool",
-      column || vscode.ViewColumn.One,
-      {
-        // Enable javascript in the webview
-        enableScripts: true,
-        // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [
-          vscode.Uri.joinPath(extensionUri, "media"),
-          vscode.Uri.joinPath(extensionUri, "out/compiled"),
-        ],
-      }
-    );
+    var panel = vscode.window.createWebviewPanel(DigitalScopePanel.viewType, "Digital Scope Tool", column || vscode.ViewColumn.One, {
+      // Enable javascript in the webview
+      enableScripts: true,
+      // And restrict the webview to only loading content from our extension's `media` directory.
+      localResourceRoots: [vscode.Uri.joinPath(extensionUri, "media"), vscode.Uri.joinPath(extensionUri, "out/compiled")],
+    });
     DigitalScopePanel.currentPanel = new DigitalScopePanel(panel, extensionUri);
   };
 
   DigitalScopePanel.kill = function () {
     var _a;
-    (_a = DigitalScopePanel.currentPanel) === null || _a === void 0
-      ? void 0
-      : _a.dispose();
+    (_a = DigitalScopePanel.currentPanel) === null || _a === void 0 ? void 0 : _a.dispose();
     DigitalScopePanel.currentPanel = undefined;
   };
 
@@ -224,6 +203,34 @@ var DigitalScopePanel = /** @class */ (function () {
           return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
               switch (data.command) {
+                case "syncData":
+                  let digitalWaveformGraphData = getDigitalWaveformGraphData();
+                  selfWebView.postMessage({
+                    command: "syncData",
+                    dataPoints: digitalWaveformGraphData.graphData,
+                    scrollCounter: digitalWaveformGraphData.scrollCounter,
+                    maxScrollCounter: digitalWaveformGraphData.getActiveChannels().length - digitalWaveformGraphData.channelsPerView,
+                    cursorMode: digitalWaveformGraphData.cursorMode,
+                    annotations: digitalWaveformGraphData.annotations,
+                    cursors: digitalWaveformGraphData.cursors
+                  });
+                  break;
+                case "execute":
+                  clearGraphDirectory();
+                  execute();
+                  break;
+                case "updateScrollCounter":
+                  fetchData(data.value);
+                  break;
+                case "cursorModeChanged":
+                  updateCursorMode(data.value);
+                 break;
+                case "annotationsUpdated":
+                  updateAnnotations(data.value);
+                 break;
+                case "cursorsUpdated":
+                  updateCursors(data.value);
+                 break;
               }
               return [2 /*return*/];
             });
@@ -235,31 +242,11 @@ var DigitalScopePanel = /** @class */ (function () {
   };
 
   DigitalScopePanel.prototype._getHtmlForWebview = function (webview) {
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "digitalscope",
-        "index.js"
-      )
-    );
-    const resetUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "reset.css")
-    );
-    const vscodeUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css")
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(
-        this._extensionUri,
-        "media",
-        "digitalscope",
-        "index.css"
-      )
-    );
-    const plotlyUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "media", "plotly", "plotly.js")
-    );
+    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "digitalscope", "index.js"));
+    const resetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "reset.css"));
+    const vscodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "vscode.css"));
+    const styleUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "digitalscope", "index.css"));
+    const plotlyUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, "media", "plotly", "plotly.js"));
     return `
             <!DOCTYPE html>
                 <html lang="en">
@@ -272,28 +259,29 @@ var DigitalScopePanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-                    <div class="digitalScopeControls">
-                       <label for="cursorType">Cursor</label>
+                  <div class="main-container" id="maincontainer">
+                    <div class="function-buttons">
+                      <button onclick="execute()" class="button-1">Fetch Graph Data</button>
+                      <button onclick="scrollDown()" class="button-1">Scroll Down</button>
+                      <button onclick="scrollUp()" class="button-1">Scroll Up</button>
                       <select name="cursorType" id="cursorType">
-                        <option value="Disabled" selected="selected">Disabled</option>
-                        <option value="Vertical">Vertical</option>
-                        <option value="Horizontal">Horizontal</option>
-                      </select>
+                            <option value="Disabled" selected="selected">Disabled</option>
+                            <option value="Vertical">Vertical</option>
+                            <option value="Horizontal">Horizontal</option>
+                          </select>
                     </div>
-                    <div class="scopeContainer">
-                      <div id="pinList"></div>
-                      <div id="plot"></div>
-                      <div id="scroll-cont">
-                         <div id="inner-scroll"></div>
+                    <div class="graph-container">
+                      <div id="graph"></div>
+                      <div class="graph-controls">
+                        <div class="channel-container"></div>
+                        <div class="cursor-container">
+                          
+                        </div>
+                        <div class="scale-container"></div>
+                        
                       </div>
                     </div>
-                    <div id="xaxisScaling">
-                      <p>X-Axis Scale: &nbsp</p>
-                      <label for="min">Min</label>
-                      <input class="inputControls" type="number" id="min" min="0" value="0" />
-                      <label for="max">Max</label>
-                      <input class="inputControls" type="number" id="max" min="0" value="100" />
-                    </div>
+                  </div>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
@@ -304,4 +292,124 @@ var DigitalScopePanel = /** @class */ (function () {
   return DigitalScopePanel;
 })();
 
+(function SubscribeDigitalWaveformGraph() {
+  getServers()
+    .filter((x) => x.isActive)
+    .forEach((server) => {
+      server.subscription.digitalWaveformSubscription = server.service.pubsubService.SubscribeDigitalWaveformTopic({
+        ClientName: "Digital Waveform Client",
+      });
+      server.subscription.digitalWaveformSubscription.on("data", (data) => {
+        console.timeEnd("Time taken to receive data");
+        console.log(data.Data.length);
+        console.time("Time taken to receive data");
+        let dataBasedOnChannels = data.Data.split("\r\n");
+        appendDataToFile(dataBasedOnChannels);
+        appendGraphData(dataBasedOnChannels);
+        updateGraph();
+      });
+    });
+})();
+
+async function fetchData(value) {
+  let digitalWaveformGraphData = getDigitalWaveformGraphData();
+  digitalWaveformGraphData.scrollCounter = value;
+  let activeChannels = digitalWaveformGraphData.getActiveChannelsBasedOnScrollCounter();
+  let graphData = await fetchActiveChannelsInfo(activeChannels);
+  updateGraphData(graphData);
+}
+
+function updateCursorMode(data) {
+  getDigitalWaveformGraphData().cursorMode = data;
+  console.log(getDigitalWaveformGraphData());
+}
+function updateCursors(data) {
+  getDigitalWaveformGraphData().cursors = data;
+}
+function updateAnnotations(data) {
+  getDigitalWaveformGraphData().annotations = data;
+}
+
+function updateGraph() {
+  var digitalWaveformGraphData = getDigitalWaveformGraphData();
+  selfWebView.postMessage({ command: "updateGraph", dataPoints: digitalWaveformGraphData.graphData, maxScrollCounter: digitalWaveformGraphData.getActiveChannels().length - digitalWaveformGraphData.channelsPerView });
+}
+
+function appendGraphData(data) {
+  getDigitalWaveformGraphData().appendGraphData(data);
+  updateGraph();
+}
+
+function updateGraphData(data) {
+  getDigitalWaveformGraphData().updateGraphData(data);
+  updateGraph();
+}
+
+function resetGraphData() {
+  getDigitalWaveformGraphData().resetGraphData();
+}
+
+function appendDataToFile(data) {
+  for (let i = 0; i < noOfChannels; i++) {
+    fs.appendFile(
+      `${graphDirectory}${i}.txt`,
+      data[i],
+      {
+        flags: "a",
+      },
+      (err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+      }
+    );
+  }
+}
+
+function execute() {
+  resetGraphData();
+  getServers()
+    .filter((x) => x.isActive)
+    .forEach((server) => {
+      console.time("Time taken to receive data");
+      server.service.testMethodService.ExecuteTestMethodForDigitalWaveformGraph({}, (err) => {
+        console.log("Receiving gRPC Response from ExecuteTestMethodForDigitalWaveformGraph");
+        if (err) {
+          console.log(err);
+        } else {
+          vscode.window.showInformationMessage("Test Method Executed Successfully...");
+        }
+      });
+    });
+}
+
+function clearGraphDirectory() {
+  if (fs.existsSync(graphDirectory)) {
+    fs.rmdirSync(graphDirectory, { recursive: true });
+  }
+  fs.mkdirSync(graphDirectory);
+}
+
+function fetchActiveChannelsInfo(activeChannels) {
+  return new Promise((resolve) => {
+    let graphData = [];
+    let counter = 0;
+    activeChannels.forEach(async (channel, index) => {
+      let actualFileName = `${graphDirectory}${channel.index}.txt`;
+      fs.readFile(actualFileName, "utf8", (err, data) => {
+        counter++;
+        if (err) {
+          console.log(err);
+          graphData[index] = "";
+        } else {
+          graphData[index] = data;
+        }
+        if (counter === activeChannels.length) {
+          return resolve(graphData);
+        }
+      });
+    });
+  });
+}
 exports.DigitalScopePanel = DigitalScopePanel;
