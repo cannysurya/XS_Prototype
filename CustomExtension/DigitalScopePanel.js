@@ -212,7 +212,8 @@ var DigitalScopePanel = /** @class */ (function () {
                     maxScrollCounter: digitalWaveformGraphData.getActiveChannels().length - digitalWaveformGraphData.channelsPerView,
                     cursorMode: digitalWaveformGraphData.cursorMode,
                     annotations: digitalWaveformGraphData.annotations,
-                    cursors: digitalWaveformGraphData.cursors
+                    cursors: digitalWaveformGraphData.cursors,
+                    cursorTracker: digitalWaveformGraphData.cursorTracker
                   });
                   break;
                 case "execute":
@@ -230,6 +231,9 @@ var DigitalScopePanel = /** @class */ (function () {
                  break;
                 case "cursorsUpdated":
                   updateCursors(data.value);
+                 break;
+                case "updateCursorTracker":
+                  updateCursorTracker(data.value);
                  break;
               }
               return [2 /*return*/];
@@ -328,6 +332,10 @@ function updateCursors(data) {
 }
 function updateAnnotations(data) {
   getDigitalWaveformGraphData().annotations = data;
+}
+
+function updateCursorTracker(data) {
+  getDigitalWaveformGraphData().cursorTracker = data;
 }
 
 function updateGraph() {

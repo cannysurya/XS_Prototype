@@ -194,6 +194,10 @@ let digitalWaveformGraphData = {
   channels: [],
   channelsPerView: 10,
   cursors: [],
+  cursorTracker: { // changes 4
+    globalX: [],
+    globalY: [],
+  },
   cursorMode: "Disabled",
   annotations: {
     axisValAnnotations: [],

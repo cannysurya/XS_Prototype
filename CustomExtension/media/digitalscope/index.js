@@ -14,10 +14,12 @@ var axisValAnnotations = [];
 var tracesAnnotations = [];
 var cursorAnnotations = [];
 var annotations;
-
+var cursorTracker;
 var cursorClicked;
 var cursorMovementDecision;
 var attachListenersFirstTime = true;
+var xAxisCursorValue;
+
 let layout = {
   autosize: true,
   paper_bgcolor: "rgba(0,0,0,0)",
@@ -216,6 +218,7 @@ window.addEventListener("message", (event) => {
       annotations = event.data.annotations;
       cursorMode = event.data.cursorMode;
       cursors = event.data.cursors;
+      cursorTracker = event.data.cursorTracker; //changes 4
       updateLocals();
       plotGraph();
       break;
@@ -230,6 +233,7 @@ vscode.postMessage({
 
 cursorSelection.onchange = function () {
   cursorMode = this.value == "Horizontal" ? this.value : this.value == "Vertical" ? this.value : "Disabled";
+  layout.dragmode = (cursorMode == "Disabled") ? true : false;
   vscode.postMessage({
     command: "cursorModeChanged",
     value: cursorMode,
@@ -245,22 +249,30 @@ function updateLocals(){
   tracesAnnotations = annotations.tracesAnnotations;
   cursorAnnotations = annotations.cursorAnnotations;
   layout.annotations = axisValAnnotations.concat(tracesAnnotations, cursorAnnotations);
+  globalX = cursorTracker.globalX;  //changes 4
+  globalY = cursorTracker.globalY;  //changes 4
 }
 
 function attachGraphListeners() {
+  let yClicked;
+  let xClicked;
   plotHandle.addEventListener("mousedown", function (evt) {
     var bb = evt.target.getBoundingClientRect();
     var x = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed();
     var y = plotHandle._fullLayout.yaxis.p2d(evt.clientY - bb.top).toFixed(2);
     if (cursorMode == "Vertical") {
       for (let i = 0; i < cursors.length; i++) {
-        if (cursors[i].x0 == x || (cursors[i].x0 <= x + cursorMovementDecision && cursors[i].x0 >= x - cursorMovementDecision)) {
+        if (cursors[i].x0 == x || (cursors[i].x0 <= x && cursors[i].x0 >= x)) {   //changes 3 cursorMovementDecision removed
           if (evt.button === 2) {
             cursors.splice(i, 1);
-            globalX.splice(i, 1);
+            globalX.filter(function(el){       //changes 2
+              return el != x;
+            });
+            //globalX.splice(i, 1);
             cursorAnnotations.splice(i, 1);
           } else {
             cursorClicked = i;
+            xClicked = x;       //changes 2
             cursors[i].opacity = 0.3;
             cursorAnnotations[i].opacity = 0.3;
           }
@@ -275,19 +287,25 @@ function attachGraphListeners() {
         if (cursors[i].y0 == y) {
           if (evt.button === 2) {
             cursors.splice(i, 1);
-            globalY.splice(i, 1);
+            globalY.filter(function(el){       //changes 2
+              return el != y;
+            });
+           // globalY.splice(i, 1);
             cursorAnnotations.splice(i, 1);
           } else {
             cursorClicked = i;
+            yClicked = y;       //changes 2
             cursors[i].opacity = 0.3;
             cursorAnnotations[i].opacity = 0.3;
           }
           layout.shapes = cursors;
           updateAnnotations();
           Plotly.relayout(plotHandle, layout);
+          
         }
       }
     }
+    updateCursorTracker(); //changes 4
   });
 
   plotHandle.addEventListener("click", function (evt) {
@@ -295,14 +313,22 @@ function attachGraphListeners() {
       if (cursorClicked < cursors.length) {
         cursors.splice(cursorClicked, 1);
         if(cursorMode == 'Vertical'){
-          globalX.splice(cursorClicked, 1);
+          globalX.filter(function(el){      //changes 2
+            return el != xClicked;
+          });
+         // globalX.splice(cursorClicked, 1);
         }
         else if(cursorMode == 'Horizontal'){
-          globalY.splice(cursorClicked, 1);
+          globalY.filter(function(el){     //changes 2
+            return el != yClicked;
+          });
+        //  globalY.splice(cursorClicked, 1);
         }
         
         cursorAnnotations.splice(cursorClicked, 1);
         cursorClicked = undefined;
+        xClicked = undefined;             //changes 2
+        yClicked = undefined;             //changes 2
       }
       var bb = evt.target.getBoundingClientRect();
       var xCoordinate = plotHandle._fullLayout.xaxis.p2d(evt.clientX - bb.left).toFixed();
@@ -311,9 +337,20 @@ function attachGraphListeners() {
         globalX[globalX.length] = xCoordinate;
       } else if (cursorMode == "Horizontal" && !globalY.includes(yCoordinate)) {
         globalY[globalY.length] = yCoordinate;
+        let factoredValue = (yCoordinate*10)%1;
+        xAxisCursorValue = (factoredValue >= 0.2 && factoredValue <= 0.8)? ((factoredValue-0.2)*2)*3.3 : 0.0; // Changes 1
       }
+      updateCursorTracker(); //changes 4
       drawYellowLine();
     }
+  });
+}
+
+function updateCursorTracker(){ //changes 4
+  cursorTracker = {globalX, globalY};
+  vscode.postMessage({
+    command: "updateCursorTracker",
+    value: cursorTracker
   });
 }
 
@@ -338,7 +375,7 @@ function drawYellowLine() {
       y: globalY[globalY.length - 1],
       xref: "paper",
       x: 0,
-      text: globalY[globalY.length - 1],
+      text: Math.round(xAxisCursorValue*10)/10, // Changes 1
       showarrow: false,
       font: {
         size: 12,
