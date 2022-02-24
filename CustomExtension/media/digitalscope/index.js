@@ -14,18 +14,16 @@ let layout = {
     b: 40,
   },
   xaxis: {
-    showgrid: false,
-    zeroline: false,
-    visible: true,
-    ticks: "",
-    ticksuffix: " ",
+    title: "Time (microsecond)",
+    type: "linear",
+    domain: [0, 1],
+    ticksuffix: "us",
+    gridcolor: "rgba(0,0,0,0)",
   },
   yaxis: {
-    showgrid: false,
-    zeroline: false,
-    visible: true,
-    ticks: "",
-    ticksuffix: " ",
+    title: "Voltage (v)",
+    showticklabels: true,
+    gridcolor: "rgba(0,0,0,0)",
   },
 };
 let configuration = {
@@ -75,6 +73,15 @@ function generateTraces(dataPoints) {
       x: [...Array(dataPoints[i].length).keys()],
       y: yPoints,
       type: "scatter",
+      mode: "lines",
+      marker: {
+        size: 5,
+      },
+      hovertemplate: "<b>Voltage(V)</b>: %{%{y}+2}V" + "<br><b>Time(us)</b>: %{x}<br>",
+      type: "scatter",
+      line: {
+        color: "green",
+      },
     });
     minValue = maxValue;
     maxValue = maxValue + factor;
