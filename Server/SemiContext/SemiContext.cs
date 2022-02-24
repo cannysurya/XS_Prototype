@@ -68,7 +68,7 @@ namespace SemiContextNS
       //Stopwatch stopwatch = Stopwatch.StartNew();
       var digitalWaveformInfo = new DigitalWaveformInfo();
       var stringBuilders = GetNewStringBuilders(channels);
-      var samplesLimit = 100;
+      var samplesLimit = 400;
       var hasData = false;
       
       for (int cycle = 0; cycle < cycles; cycle++)

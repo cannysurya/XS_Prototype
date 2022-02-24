@@ -3,9 +3,14 @@
 const fs = require("fs");
 const vscode = require("vscode");
 const nodeHtmlToImage = require("node-html-to-image");
-const { getServers } = require("./GlobalState");
+const { getServers, getDigitalWaveformGraphData } = require("./GlobalState");
+const graphDirectory = __dirname + "/digitalgraphdata/";
+
+const noOfChannels = 512;
 
 var selfWebView = undefined;
+
+clearGraphDirectory();
 
 var __awaiter =
   (this && this.__awaiter) ||
@@ -199,6 +204,7 @@ var DigitalScopePanel = /** @class */ (function () {
             return __generator(this, function (_a) {
               switch (data.command) {
                 case "execute":
+                  clearGraphDirectory();
                   execute();
                   break;
               }
@@ -229,31 +235,14 @@ var DigitalScopePanel = /** @class */ (function () {
                     <script src="${plotlyUri}"></script>
                 </head>
                 <body>
-                  <button onclick="execute()" class="button-1">Fetch Graph Data</button>
-                    <div class="digitalScopeControls">
-                       <label for="cursorType">Cursor</label>
-                      <select name="cursorType" id="cursorType">
-                        <option value="Disabled" selected="selected">Disabled</option>
-                        <option value="Vertical">Vertical</option>
-                        <option value="Horizontal">Horizontal</option>
-                      </select>
+                  <div class="main-container" id="maincontainer">
+                    <div class="function-buttons">
+                      <button onclick="execute()" class="button-1">Fetch Graph Data</button>
                     </div>
-                    <div class="scopeContainer">
-                      <div id="pinList"></div>
-                      <div id="plot"></div>
-                      <div id="graphViewConfig">
-                        <input type="number" id="graphs" min ="0" value="3">
-                        <button class="button-1" id="next">Next</button>
-                        <button class="button-1" id="previous">Previous</button>
-                      </div>
+                    <div class="graph-container">
+                      <div id="graph"></div>
                     </div>
-                    <div id="xaxisScaling">
-                      <p>X-Axis Scale: &nbsp</p>
-                      <label for="min">Min</label>
-                      <input class="inputControls" type="number" id="min" min="0" value="0" />
-                      <label for="max">Max</label>
-                      <input class="inputControls" type="number" id="max" min="0" value="100" />
-                    </div>
+                  </div>
                 </body>
                 <script src="${scriptUri}"></script>
                 </html>
@@ -275,11 +264,46 @@ var DigitalScopePanel = /** @class */ (function () {
         console.timeEnd("Time taken to receive data");
         console.log(data.Data.length);
         console.time("Time taken to receive data");
+        let dataBasedOnChannels = data.Data.split("\r\n");
+        appendDataToFile(dataBasedOnChannels);
+        appendGraphData(dataBasedOnChannels);
+        updateGraph();
       });
     });
 })();
 
+function updateGraph() {
+  selfWebView.postMessage({ command: "updateGraph", dataPoints: getDigitalWaveformGraphData().graphDataPoints });
+}
+
+function appendGraphData(data) {
+  getDigitalWaveformGraphData().appendGraphData(data);
+}
+
+function resetGraphData() {
+  getDigitalWaveformGraphData().resetGraphData();
+}
+
+function appendDataToFile(data) {
+  for (let i = 0; i < noOfChannels; i++) {
+    fs.appendFile(
+      `${graphDirectory}${i}.txt`,
+      data[i],
+      {
+        flags: "a",
+      },
+      (err) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+      }
+    );
+  }
+}
+
 function execute() {
+  resetGraphData();
   getServers()
     .filter((x) => x.isActive)
     .forEach((server) => {
@@ -293,6 +317,13 @@ function execute() {
         }
       });
     });
+}
+
+function clearGraphDirectory() {
+  if (fs.existsSync(graphDirectory)) {
+    fs.rmdirSync(graphDirectory, { recursive: true });
+  }
+  fs.mkdirSync(graphDirectory);
 }
 
 exports.DigitalScopePanel = DigitalScopePanel;

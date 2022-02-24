@@ -14,7 +14,6 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const testMethodPackage = protoDescriptor.testmethod;
 
-let startTime = undefined;
 let configurationIndex = 0;
 
 let tfeData = {};
@@ -188,6 +187,49 @@ function initializeBitMapToolGraph() {
 
 initializeBitMapToolGraph();
 
+let digitalWaveformGraphData = {
+  graphDataPoints: [],
+  activeChannelRange: [0, 10],
+  channels: [],
+  channelsPerView: 10,
+  updateGraphData: (data) => {
+    digitalWaveformGraphData.graphDataPoints = data;
+  },
+  getActiveChannels: () => {
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive);
+  },
+  appendGraphData: (data) => {
+    let i = 0;
+    digitalWaveformGraphData.getActiveChannels().forEach((channel) => {
+      digitalWaveformGraphData.graphDataPoints[i++] += data[channel.index];
+    });
+  },
+  resetGraphData: () => {
+    digitalWaveformGraphData.graphDataPoints = [];
+    for (let i = 0; i < digitalWaveformGraphData.channelsPerView; i++) {
+      digitalWaveformGraphData.graphDataPoints[i] = "";
+    }
+  },
+};
+
+function initializeDigitalWaveformGraph() {
+  for (let i = 0; i < 512; i++) {
+    digitalWaveformGraphData.channels[i] = {
+      name: `GPIO ${i}`,
+      isActive: false,
+      index: i,
+    };
+  }
+
+  digitalWaveformGraphData.resetGraphData();
+
+  for (let i = 0; i < 10; i++) {
+    digitalWaveformGraphData.channels[i].isActive = true;
+  }
+}
+
+initializeDigitalWaveformGraph();
+
 let server1 = {
   name: "Server 1",
   debugConfiguration: {
@@ -269,3 +311,4 @@ exports.getDatalogConfig = () => datalogConfig;
 exports.setTFEData = (newTFEData) => (tfeData = newTFEData);
 exports.getServers = () => servers;
 exports.getBitMapToolGraphData = () => bitMapToolGraphData;
+exports.getDigitalWaveformGraphData = () => digitalWaveformGraphData;
