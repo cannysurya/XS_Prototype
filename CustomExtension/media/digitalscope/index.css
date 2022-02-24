@@ -3,8 +3,178 @@ body {
   display: flex;
   flex-direction: column;
   font-family: sans-serif !important;
-  height: 100%;
+  height: calc(100% - 50px);
   justify-content: center;
   margin: 25px;
+  position: relative;
+  width: calc(100% - 50px);
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.button-1 {
+  margin: 15px;
+  outline: none !important;
+  padding: 5px 15px;
+  transition: 0.1s;
+  width: 150px;
+}
+
+.button-1:active {
+  transform: scale(0.95);
+}
+
+.button-2 {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--vscode-button-background);
+  color: var(--vscode-button-background);
+  display: flex;
+  font-weight: bold;
+  height: 25px;
+  justify-content: center;
+  margin: 15px;
+  outline: none !important;
+  padding: 5px 15px;
+  transition: 0.1s;
+  width: 20px;
+}
+
+.button-2:hover {
+  background: transparent;
+  border: 1px solid var(--vscode-button-background);
+}
+
+.button-2:active {
+  transform: scale(0.95);
+}
+
+.channel-container {
+  background: green;
+  height: 30%;
+}
+
+.control-container {
+  align-items: center;
+  display: flex;
+  width: 150px;
+}
+
+.cursor-container {
+  background: orange;
+  height: 30%;
+}
+
+.function-buttons {
+  display: flex;
+  justify-content: flex-start;
+  width: 500px;
+}
+
+.graph-container {
+  display: flex;
+  height: auto;
+  overflow: auto;
   width: 100%;
+}
+
+.graph-controls {
+  background: red;
+  margin-left: 10px;
+  width: 400px;
+}
+
+.header {
+  display: flex;
+  height: 50px;
+  justify-content: space-between;
+  padding: 0px 59px;
+  width: 100%;
+}
+
+.header2 {
+  display: flex;
+  height: 20px;
+  justify-content: space-between;
+  padding-left: 11px;
+  width: 100%;
+}
+
+.hide {
+  display: none;
+}
+
+.main-container {
+  height: 100%;
+  width: 100%;
+}
+
+.image-container {
+  height: 838px;
+  left: 0;
+  overflow: auto;
+  padding: 10px 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.image-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.label {
+  align-items: center;
+  display: flex;
+}
+
+.pad-6-4 {
+  padding: 6px 4px;
+}
+
+.scale-container {
+  background: yellow;
+  height: 40%;
+}
+
+.visibility-hide {
+  visibility: hidden;
+}
+
+#main-graph {
+  height: 600px;
+  width: 800px;
+}
+
+#download-graph {
+  display: none;
+  height: 2160px;
+  width: 3840px;
+}
+
+#imageelement {
+  height: 768px;
+  width: 1024px;
+}
+
+input {
+  border: 1px solid var(--vscode-editorWidget-border) !important;
+  height: 20px;
+  width: 70px !important;
+  position: relative;
+  top: 0px;
+  left: 5px;
+}
+
+select {
+  border: 1px solid var(--vscode-editorWidget-border) !important;
+  color: var(--vscode-input-foreground);
+  height: 20px;
+  width: 70px !important;
+  position: relative;
+  top: 0px;
+  left: 5px;
 }

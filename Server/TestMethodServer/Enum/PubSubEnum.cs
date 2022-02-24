@@ -11,6 +11,7 @@ namespace TestMethodServer.Enum
   {
     ResumeTopic,
     DataLogTopic,
-    BitmapToolTopic
+    BitmapToolTopic,
+    DigitalWaveformTopic
   }
 }

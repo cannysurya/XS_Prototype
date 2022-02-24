@@ -4,7 +4,7 @@ const vscode = require("vscode");
 const { getServers, getDatalogData, getDatalogConfig, setDatalogData, endTimer } = require("./GlobalState");
 const fs = require("fs");
 var lineReader = require("reverse-line-reader");
-const alert = require("alert");
+// const alert = require("alert");
 
 const logFileDirectory = __dirname + "/logs/";
 const logFilePath = logFileDirectory + "logs.txt";

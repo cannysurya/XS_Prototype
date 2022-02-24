@@ -63,8 +63,77 @@ namespace SemiContextNS
       });
     }
 
+    public void GenerateDigitalWaveformPattern(int cycles, int channels)
+    {
+      //Stopwatch stopwatch = Stopwatch.StartNew();
+      var digitalWaveformInfo = new DigitalWaveformInfo();
+      var stringBuilders = GetNewStringBuilders(channels);
+      var samplesLimit = 400;
+      var hasData = false;
+      
+      for (int cycle = 0; cycle < cycles; cycle++)
+      {
+        for (int channel = 0; channel < channels; channel++)
+        {
+          hasData = true;
+          stringBuilders[channel].Append(GetCycleData());
+        }
+        if ((cycle + 1) % samplesLimit == 0)
+        {
+          SendDigitalWaveformResponse(channels, stringBuilders, digitalWaveformInfo);
+          digitalWaveformInfo = new DigitalWaveformInfo();
+          stringBuilders = GetNewStringBuilders(channels);
+          hasData = false;
+        }
+      }
+      if (hasData)
+      {
+        SendDigitalWaveformResponse(channels, stringBuilders, digitalWaveformInfo);
+      }
+      //stopwatch.Stop();
+      //Console.WriteLine(stopwatch.Elapsed.TotalMilliseconds);
+    }
+
+    private void SendDigitalWaveformResponse(int channels, StringBuilder[] stringBuilders, DigitalWaveformInfo digitalWaveformInfo)
+    {
+      StringBuilder result = new StringBuilder();
+      for (int channel = 0; channel < channels; channel++)
+      {
+        result.Append(stringBuilders[channel].ToString());
+        result.Append("\r\n");
+      }
+      digitalWaveformInfo.Data = result.ToString();
+      messenger.Send(digitalWaveformInfo);
+    }
+
+    private StringBuilder[] GetNewStringBuilders(int channels)
+    {
+      var stringBuilders = new StringBuilder[channels];
+      for (int channel = 0; channel < channels; channel++)
+      {
+        stringBuilders[channel] = new StringBuilder();
+      }
+      return stringBuilders;
+    }
+
+    private string GetCycleData()
+    {
+      StringBuilder data = new StringBuilder();
+      Random rand = new Random();
+      for (var i = 0; i < 2; i++)
+      {
+        var value = rand.Next(0, 2);
+        for (var sample = 0; sample < 64; sample++)
+        {
+          data.Append(value);
+        }
+      }
+      return data.ToString();
+    }
+
     public void GenerateCheckerBoardPattern()
     {
+      //Stopwatch stopwatch = Stopwatch.StartNew();
       var rowSize = 2160;
       var columnSize = 3840;
 
@@ -93,6 +162,8 @@ namespace SemiContextNS
       }
       bitmapInfo.Data = stringBuilder.ToString();
       messenger.Send(bitmapInfo);
+      //stopwatch.Stop();
+      //Console.WriteLine(stopwatch.Elapsed.TotalMilliseconds);
     }
 
     public void GenerateInverseCheckerBoardPattern()

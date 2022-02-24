@@ -51,6 +51,7 @@ function activate(context) {
       DataLogPanel.createOrShow(context.extensionUri);
       TFEPanel.createOrShow(context.extensionUri);
       BitMapToolPanel.createOrShow(context.extensionUri);
+      DigitalScopePanel.createOrShow(context.extensionUri);
       setTimeout(function () {
         TFEPanel.loadData();
       }, 1000);

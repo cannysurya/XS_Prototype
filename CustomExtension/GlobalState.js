@@ -14,7 +14,6 @@ const packageDefinition = protoLoader.loadSync(PROTO_PATH, {
 const protoDescriptor = grpc.loadPackageDefinition(packageDefinition);
 const testMethodPackage = protoDescriptor.testmethod;
 
-let startTime = undefined;
 let configurationIndex = 0;
 
 let tfeData = {};
@@ -188,6 +187,56 @@ function initializeBitMapToolGraph() {
 
 initializeBitMapToolGraph();
 
+let digitalWaveformGraphData = {
+  graphData: [],
+  scrollCounter: 0,
+  channels: [],
+  channelsPerView: 10,
+  updateGraphData: (data) => {
+    digitalWaveformGraphData.graphData = data;
+  },
+  getActiveChannels: () => {
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive);
+  },
+  getActiveChannelsBasedOnScrollCounter: () => {
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive).slice(digitalWaveformGraphData.scrollCounter, digitalWaveformGraphData.scrollCounter + digitalWaveformGraphData.channelsPerView);
+  },
+  appendGraphData: (data) => {
+    let i = 0;
+    digitalWaveformGraphData.getActiveChannelsBasedOnScrollCounter().forEach((channel) => {
+      digitalWaveformGraphData.graphData[i++] += data[channel.index];
+    });
+  },
+
+  updateGraphData: (graphData) => {
+    digitalWaveformGraphData.graphData = graphData;
+  },
+  resetGraphData: () => {
+    digitalWaveformGraphData.graphData = [];
+    for (let i = 0; i < digitalWaveformGraphData.channelsPerView; i++) {
+      digitalWaveformGraphData.graphData[i] = "";
+    }
+  },
+};
+
+function initializeDigitalWaveformGraph() {
+  for (let i = 0; i < 512; i++) {
+    digitalWaveformGraphData.channels[i] = {
+      name: `GPIO ${i}`,
+      isActive: false,
+      index: i,
+    };
+  }
+
+  digitalWaveformGraphData.resetGraphData();
+
+  for (let i = 0; i < 20; i++) {
+    digitalWaveformGraphData.channels[i].isActive = true;
+  }
+}
+
+initializeDigitalWaveformGraph();
+
 let server1 = {
   name: "Server 1",
   debugConfiguration: {
@@ -219,6 +268,7 @@ let server1 = {
     resumeSubscription: undefined,
     datalogSubscription: undefined,
     bitmaptoolSubscription: undefined,
+    digitalWaveformSubscription: undefined,
   },
   sites: [],
   isActive: true,
@@ -268,3 +318,4 @@ exports.getDatalogConfig = () => datalogConfig;
 exports.setTFEData = (newTFEData) => (tfeData = newTFEData);
 exports.getServers = () => servers;
 exports.getBitMapToolGraphData = () => bitMapToolGraphData;
+exports.getDigitalWaveformGraphData = () => digitalWaveformGraphData;

@@ -18,6 +18,7 @@ namespace TestMethodServer.Services
 		private static readonly BufferBlock<ResumeInfo> _resumeTopic = new BufferBlock<ResumeInfo>();
 		private static readonly BufferBlock<DataLogInfo> _datalogTopic = new BufferBlock<DataLogInfo>();
 		private static readonly BufferBlock<BitMapInfo> _bitMapToolTopic = new BufferBlock<BitMapInfo>();
+		private static readonly BufferBlock<DigitalWaveformInfo> _digitalWaveformTopic = new BufferBlock<DigitalWaveformInfo>();
 
 		public override async Task SubscribeBitmapToolTopic(SubRequest request, IServerStreamWriter<BitMapInfo> responseStream, ServerCallContext context)
 		{
@@ -42,6 +43,31 @@ namespace TestMethodServer.Services
         }
       }
 		}
+
+		public override async Task SubscribeDigitalWaveformTopic(SubRequest request, IServerStreamWriter<DigitalWaveformInfo> responseStream, ServerCallContext context)
+		{
+			if (!_clientCollection.ContainsKey(PubSubTopic.DigitalWaveformTopic))
+			{
+				_clientCollection.TryAdd(PubSubTopic.DigitalWaveformTopic, new Dictionary<string, object>());
+			}
+			if (_clientCollection[PubSubTopic.DigitalWaveformTopic].ContainsKey(request.ClientName))
+			{
+				_clientCollection[PubSubTopic.DigitalWaveformTopic].Remove(request.ClientName);
+			}
+			_clientCollection[PubSubTopic.DigitalWaveformTopic].Add(request.ClientName, responseStream);
+
+			Console.WriteLine($"Subscribed {request.ClientName} to Digital Waveform Topic");
+			while (_clientCollection.ContainsKey(PubSubTopic.DigitalWaveformTopic))
+			{
+				var digitalWaveformInfo = await _digitalWaveformTopic.ReceiveAsync();
+
+				foreach (var client in _clientCollection[PubSubTopic.DigitalWaveformTopic])
+				{
+					await ((IServerStreamWriter<DigitalWaveformInfo>)client.Value).WriteAsync(digitalWaveformInfo);
+				}
+			}
+		}
+
 		public override async Task SubscribeResumeTopic(SubRequest request, IServerStreamWriter<ResumeInfo> responseStream, ServerCallContext context)
 		{
 			if (!_clientCollection.ContainsKey(PubSubTopic.ResumeTopic))
@@ -108,6 +134,11 @@ namespace TestMethodServer.Services
 			{
 				BitMapInfo bitMapInfo = PublishData as BitMapInfo;
 				_bitMapToolTopic.Post(bitMapInfo);
+			}
+			else if (type == typeof(DigitalWaveformInfo))
+			{
+				DigitalWaveformInfo digitalWaveformInfo = PublishData as DigitalWaveformInfo;
+				_digitalWaveformTopic.Post(digitalWaveformInfo);
 			}
 		}
 	}
