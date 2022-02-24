@@ -1,5 +1,8 @@
 const vscode = acquireVsCodeApi();
 
+let scrollCounter = 0;
+let minScrollCounter = 0;
+let maxScrollCounter = 0;
 let data = [];
 let layout = {
   autosize: true,
@@ -60,6 +63,7 @@ function execute() {
 }
 
 function generateTraces(dataPoints) {
+  dataPoints.reverse();
   data = [];
   let factor = 1 / dataPoints.length;
   let minValue = 0;
@@ -92,14 +96,50 @@ function plotGraph() {
   Plotly.newPlot("graph", data, layout, configuration);
 }
 
+function scrollUp() {
+  let value = scrollCounter > minScrollCounter ? scrollCounter - 1 : minScrollCounter;
+  if (value !== scrollCounter) {
+    scrollCounter = value;
+    vscode.postMessage({
+      command: "updateScrollCounter",
+      value: scrollCounter,
+    });
+  }
+}
+
+function scrollDown() {
+  let value = scrollCounter < maxScrollCounter ? scrollCounter + 1 : maxScrollCounter;
+  if (value !== scrollCounter) {
+    scrollCounter = value;
+    vscode.postMessage({
+      command: "updateScrollCounter",
+      value: scrollCounter,
+    });
+  }
+}
+
+function setMaxScrollCounter(activeChannelCount) {
+  maxScrollCounter = activeChannelCount;
+  if (maxScrollCounter < scrollCounter) {
+    scrollCounter = maxScrollCounter;
+    vscode.postMessage({
+      command: "updateScrollCounter",
+      value: scrollCounter,
+    });
+  }
+}
+
 window.addEventListener("message", (event) => {
   switch (event.data.command) {
     case "updateGraph":
       generateTraces(event.data.dataPoints);
+      setMaxScrollCounter(event.data.maxScrollCounter);
       plotGraph();
       break;
     case "syncData":
       generateTraces(event.data.dataPoints);
+      setMaxScrollCounter(event.data.maxScrollCounter);
+      scrollCounter = event.data.scrollCounter;
       plotGraph();
       break;
   }

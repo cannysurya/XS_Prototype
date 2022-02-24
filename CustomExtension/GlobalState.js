@@ -188,29 +188,33 @@ function initializeBitMapToolGraph() {
 initializeBitMapToolGraph();
 
 let digitalWaveformGraphData = {
-  graphDataPoints: [],
+  graphData: [],
   scrollCounter: 0,
   channels: [],
   channelsPerView: 10,
   updateGraphData: (data) => {
-    digitalWaveformGraphData.graphDataPoints = data;
+    digitalWaveformGraphData.graphData = data;
   },
   getActiveChannels: () => {
     return digitalWaveformGraphData.channels.filter((x) => x.isActive);
   },
   getActiveChannelsBasedOnScrollCounter: () => {
-    return digitalWaveformGraphData.channels.filter((x) => x.isActive).slice(digitalWaveformGraphData.scrollCounter, digitalWaveformGraphData.scrollCounter + 10);
+    return digitalWaveformGraphData.channels.filter((x) => x.isActive).slice(digitalWaveformGraphData.scrollCounter, digitalWaveformGraphData.scrollCounter + digitalWaveformGraphData.channelsPerView);
   },
   appendGraphData: (data) => {
     let i = 0;
-    digitalWaveformGraphData.getActiveChannels().forEach((channel) => {
-      digitalWaveformGraphData.graphDataPoints[i++] += data[channel.index];
+    digitalWaveformGraphData.getActiveChannelsBasedOnScrollCounter().forEach((channel) => {
+      digitalWaveformGraphData.graphData[i++] += data[channel.index];
     });
   },
+
+  updateGraphData: (graphData) => {
+    digitalWaveformGraphData.graphData = graphData;
+  },
   resetGraphData: () => {
-    digitalWaveformGraphData.graphDataPoints = [];
+    digitalWaveformGraphData.graphData = [];
     for (let i = 0; i < digitalWaveformGraphData.channelsPerView; i++) {
-      digitalWaveformGraphData.graphDataPoints[i] = "";
+      digitalWaveformGraphData.graphData[i] = "";
     }
   },
 };
@@ -226,7 +230,7 @@ function initializeDigitalWaveformGraph() {
 
   digitalWaveformGraphData.resetGraphData();
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 20; i++) {
     digitalWaveformGraphData.channels[i].isActive = true;
   }
 }

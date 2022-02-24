@@ -207,7 +207,9 @@ var DigitalScopePanel = /** @class */ (function () {
                   let digitalWaveformGraphData = getDigitalWaveformGraphData();
                   selfWebView.postMessage({
                     command: "syncData",
-                    dataPoints: digitalWaveformGraphData.graphDataPoints,
+                    dataPoints: digitalWaveformGraphData.graphData,
+                    scrollCounter: digitalWaveformGraphData.scrollCounter,
+                    maxScrollCounter: digitalWaveformGraphData.getActiveChannels().length - digitalWaveformGraphData.channelsPerView,
                   });
                   break;
                 case "execute":
@@ -215,7 +217,7 @@ var DigitalScopePanel = /** @class */ (function () {
                   execute();
                   break;
                 case "updateScrollCounter":
-                  fetchNewData(data.value);
+                  fetchData(data.value);
                   break;
               }
               return [2 /*return*/];
@@ -248,6 +250,8 @@ var DigitalScopePanel = /** @class */ (function () {
                   <div class="main-container" id="maincontainer">
                     <div class="function-buttons">
                       <button onclick="execute()" class="button-1">Fetch Graph Data</button>
+                      <button onclick="scrollDown()" class="button-1">Scroll Down</button>
+                      <button onclick="scrollUp()" class="button-1">Scroll Up</button>
                     </div>
                     <div class="graph-container">
                       <div id="graph"></div>
@@ -282,19 +286,27 @@ var DigitalScopePanel = /** @class */ (function () {
     });
 })();
 
-function fetchNewData(value) {
+async function fetchData(value) {
   let digitalWaveformGraphData = getDigitalWaveformGraphData();
   digitalWaveformGraphData.scrollCounter = value;
   let activeChannels = digitalWaveformGraphData.getActiveChannelsBasedOnScrollCounter();
-  fetchActiveChannelsInfo(activeChannels);
+  let graphData = await fetchActiveChannelsInfo(activeChannels);
+  updateGraphData(graphData);
 }
 
 function updateGraph() {
-  selfWebView.postMessage({ command: "updateGraph", dataPoints: getDigitalWaveformGraphData().graphDataPoints });
+  var digitalWaveformGraphData = getDigitalWaveformGraphData();
+  selfWebView.postMessage({ command: "updateGraph", dataPoints: digitalWaveformGraphData.graphData, maxScrollCounter: digitalWaveformGraphData.getActiveChannels().length - digitalWaveformGraphData.channelsPerView });
 }
 
 function appendGraphData(data) {
   getDigitalWaveformGraphData().appendGraphData(data);
+  updateGraph();
+}
+
+function updateGraphData(data) {
+  getDigitalWaveformGraphData().updateGraphData(data);
+  updateGraph();
 }
 
 function resetGraphData() {
@@ -343,5 +355,25 @@ function clearGraphDirectory() {
   fs.mkdirSync(graphDirectory);
 }
 
-function fetchActiveChannelsInfo(activeChannels) {}
+function fetchActiveChannelsInfo(activeChannels) {
+  return new Promise((resolve) => {
+    let graphData = [];
+    let counter = 0;
+    activeChannels.forEach(async (channel, index) => {
+      let actualFileName = `${graphDirectory}${channel.index}.txt`;
+      fs.readFile(actualFileName, "utf8", (err, data) => {
+        counter++;
+        if (err) {
+          console.log(err);
+          graphData[index] = "";
+        } else {
+          graphData[index] = data;
+        }
+        if (counter === activeChannels.length) {
+          return resolve(graphData);
+        }
+      });
+    });
+  });
+}
 exports.DigitalScopePanel = DigitalScopePanel;
